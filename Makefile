@@ -5,13 +5,15 @@ OUT_DIR    = $(BASE_DIR)/out
 CONFIG_DIR = $(BASE_DIR)/config
 
 
+include $(BASE_DIR)/.config
 include $(BUILD_DIR)/compiler.mk
+include $(BUILD_DIR)/global.def
 
 define QEMU_RUN
 	qemu-system-aarch64 -machine virt -smp 4 -m 512M -cpu cortex-a53 -nographic -kernel $(1)
 endef
 
-.PHONY: all menuconfig run dbg help
+.PHONY: all menuconfig run dbg clean help
 
 all:
 	@echo "build all success"
@@ -24,6 +26,9 @@ dbg:
 
 menuconfig:
 	@python  $(CONFIG_DIR)/usr_config.py
+
+clean:
+	rm -rf $(OUT_DIR)
 
 help:
 	@echo "make all:	make CROSS_COMPILE=aarch64-none-elf/bin/aarch64-none-elf- -j"

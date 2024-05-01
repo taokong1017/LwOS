@@ -11,7 +11,7 @@ def mconf_set_env(style, conf, header):
 	os.environ["KCONFIG_CONFIG"] = conf
 	os.environ["KCONFIG_CONFIG_HEADER"] = header
 	os.environ["KCONFIG_AUTOHEADER"] = os.path.join("menuconfig.h")
-	os.environ["CONFIG_"] = "CONFIG_"
+	os.environ["CONFIG_"] = ""
 
 def mconfig(argv):
 	display_style = "default selection=fg:white,bg:blue"

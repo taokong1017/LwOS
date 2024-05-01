@@ -21,3 +21,19 @@ config CONFIG_COMPILER_OPTIMIZE_SIZE
 endchoice
 
 endmenu
+
+menu "Arch"
+
+endmenu
+
+menu "Kernel"
+
+endmenu
+
+menu "Components"
+
+endmenu
+
+menu "Samples"
+
+endmenu
