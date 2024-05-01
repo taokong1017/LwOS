@@ -1,0 +1,23 @@
+#
+# For a description of the syntax of this configuration file,
+# see Kconfig-language.txt
+#
+mainmenu "LwOS Configuration"
+
+menu "Compiler"
+
+choice
+    prompt "Optimize Option"
+    default CONFIG_COMPILER_OPTIMIZE_SPEED
+    help
+      This Option will enable compiler Optimize options.
+
+config CONFIG_COMPILER_OPTIMIZE_NONE
+    bool "Optimize None"
+config CONFIG_COMPILER_OPTIMIZE_SPEED
+    bool "Optimize Speed"
+config CONFIG_COMPILER_OPTIMIZE_SIZE
+    bool "Optimize Size"
+endchoice
+
+endmenu
