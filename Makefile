@@ -4,6 +4,8 @@ CONFIG_DIR = $(BASE_DIR)/config
 SUB_DIRS   =
 LINKER     = $(BASE_DIR)/sample/linker/lwos.lds
 
+config    := 
+
 ifeq ($(V),1)
 	export quiet =
 	export Q =
@@ -46,7 +48,7 @@ define MAKE_CLEAN_CMD
 	done
 endef
 
-.PHONY: all menuconfig run dbg clean help obj $(LINKER)
+.PHONY: all menuconfig run dbg clean help obj defconfig $(LINKER)
 
 all: obj $(LINKER)
 	$(Q)$(LD) $(LDFLAGS) -T $(LINKER) -e 0x4000000 -o $(TARGET) $(strip $(call ALL_OBJS, $(srctree)))
@@ -69,12 +71,17 @@ dbg:
 menuconfig:
 	$(Q)python  $(CONFIG_DIR)/usr_config.py
 
+defconfig:
+	$(Q)python  $(CONFIG_DIR)/usr_config.py defconfig $(CONFIG_DIR)/$(config)
+
 clean:
 	$(Q)$(RM) -rf $(TARGET)
 	$(Q)$(RM) -rf $(BASE_DIR)/sample/linker/lwos.lds $(BASE_DIR)/sample/linker/.lwos.lds*
 	$(Q)$(call MAKE_CLEAN_CMD, $(SUB_DIRS))
 
 help:
-	@echo "make all:	make CROSS_COMPILE=aarch64-none-elf/bin/aarch64-none-elf- -j"
-	@echo "make clean:	make CROSS_COMPILE=aarch64-none-elf/bin/aarch64-none-elf- clean"
-	@echo "make run:	make CROSS_COMPILE=aarch64-none-elf/bin/aarch64-none-elf- run"
+	@echo "make config:		make CROSS_COMPILE=~/aarch64-none-linux-gnu/bin/aarch64-none-linux-gnu- menuconfig"
+	@echo "make defconfig:		make CROSS_COMPILE=~/aarch64-none-linux-gnu/bin/aarch64-none-linux-gnu- config=aarch64_defconfig defconfig"
+	@echo "make all:		make CROSS_COMPILE=~/aarch64-none-elf/bin/aarch64-none-elf- -j"
+	@echo "make clean:		make CROSS_COMPILE=~/aarch64-none-elf/bin/aarch64-none-elf- clean"
+	@echo "make run:		make CROSS_COMPILE=~/aarch64-none-elf/bin/aarch64-none-elf- run"

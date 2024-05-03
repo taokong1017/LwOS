@@ -20,7 +20,11 @@ def mconfig(argv):
 	mconf_set_env(display_style, target_conf, header)
 	kconfig = os.path.join("config", "config.in")
 	kconf = Kconfig(filename=kconfig)
-	menuconfig(kconf) 
+	if len(argv) == 3 and argv[1] == 'defconfig':
+		kconf.load_allconfig(argv[2])
+		print(kconf.write_config()) 	# defconfig
+	else:
+		menuconfig(kconf)
 	kconf.write_autoconf()
 
 if __name__ == "__main__":
