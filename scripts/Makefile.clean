@@ -44,7 +44,8 @@ __clean-files	:= $(extra-y) $(EXTRA_TARGETS) $(always) \
 		   $(targets) $(clean-files)             \
 		   $(host-progs)                         \
 		   $(hostprogs-y) $(hostprogs-m) $(hostprogs-) \
-		   $(if $(obj-y), $(obj-y) .$(obj-y).*)
+		   $(if $(obj-y), $(foreach obj, $(obj-y), 	   \
+		   $(obj) .$(obj).d .$(obj).cmd .$(obj).tmp))
 
 # as clean-files is given relative to the current directory, this adds
 # a $(obj) prefix, except for absolute paths
