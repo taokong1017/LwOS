@@ -3,8 +3,7 @@ BASE_DIR   = $(CURDIR)
 CONFIG_DIR = $(BASE_DIR)/config
 SUB_DIRS   =
 LINKER     = $(BASE_DIR)/sample/linker/lwos.lds
-
-config    := 
+CONFIG     :=
 
 ifeq ($(V),1)
 	export quiet =
@@ -29,8 +28,8 @@ include scripts/Makefile.compiler
 include scripts/Makefile.define
 include scripts/Kbuild.include
 include scripts/Makefile.lib
-build := -f scripts/Makefile.build obj
-clean := -f scripts/Makefile.clean obj
+BUILD := -f scripts/Makefile.build obj
+CLEAN := -f scripts/Makefile.clean obj
 
 define MAKE_LDS
 	$(CPP) $(cpp_flags) -D__ASSEMBLY__  $(2) |grep -v "^#" > $(1)
@@ -38,13 +37,13 @@ endef
 
 define MAKE_CMD
 	$(Q)for dir in $(1); do\
-		$(MAKE) $(build)=$$dir; \
+		$(MAKE) $(BUILD)=$$dir; \
 	done
 endef
 
 define MAKE_CLEAN_CMD
 	$(Q)for dir in $(1); do\
-		$(MAKE) $(clean)=$$dir; \
+		$(MAKE) $(CLEAN)=$$dir; \
 	done
 endef
 
@@ -72,7 +71,11 @@ menuconfig:
 	$(Q)python  $(CONFIG_DIR)/usr_config.py
 
 defconfig:
-	$(Q)python  $(CONFIG_DIR)/usr_config.py defconfig $(CONFIG_DIR)/$(config)
+	$(Q)if [ -e $(CONFIG_DIR)/$(CONFIG) ]; then \
+		python $(CONFIG_DIR)/usr_config.py defconfig $(CONFIG_DIR)/$(CONFIG); \
+	else	\
+		echo "*** $(CONFIG_DIR)/$(CONFIG) does not exist ***"; \
+	fi
 
 clean:
 	$(Q)$(RM) -rf $(TARGET)
@@ -81,7 +84,7 @@ clean:
 
 help:
 	@echo "make config:		make CROSS_COMPILE=~/aarch64-none-linux-gnu/bin/aarch64-none-linux-gnu- menuconfig"
-	@echo "make defconfig:		make CROSS_COMPILE=~/aarch64-none-linux-gnu/bin/aarch64-none-linux-gnu- config=aarch64_defconfig defconfig"
+	@echo "make defconfig:		make CROSS_COMPILE=~/aarch64-none-linux-gnu/bin/aarch64-none-linux-gnu- CONFIG=aarch64_defconfig defconfig"
 	@echo "make all:		make CROSS_COMPILE=~/aarch64-none-elf/bin/aarch64-none-elf- -j"
 	@echo "make clean:		make CROSS_COMPILE=~/aarch64-none-elf/bin/aarch64-none-elf- clean"
 	@echo "make run:		make CROSS_COMPILE=~/aarch64-none-elf/bin/aarch64-none-elf- run"
