@@ -24,6 +24,8 @@ def mconfig(argv):
 		kconf.load_allconfig(argv[2])
 		print(kconf.write_config()) 	# defconfig
 	else:
+		if os.path.exists(target_conf):
+			kconf.load_config(target_conf)
 		menuconfig(kconf)
 	kconf.write_autoconf()
 
