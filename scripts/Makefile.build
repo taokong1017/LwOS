@@ -193,7 +193,6 @@ define rule_cc_o_c
 endef
 
 # Built-in and composite module parts
-
 %.o: %.c FORCE
 	$(call cmd,force_checksrc)
 	$(call if_changed,cc_o_c)

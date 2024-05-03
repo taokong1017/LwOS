@@ -1,4 +1,3 @@
-CFLAGS :=
 ifeq ($(CONFIG_COMPILER_OPTIMIZE_NONE), y)
 	CFLAGS += -O0
 endif
@@ -13,6 +12,8 @@ endif
 
 CFLAGS += -g -Wall -Werror -fno-builtin -nostdinc -nostdlib -pipe
 
-AFLAGS := $(CFLAGS) -D__ASSEMBLY__
+CPPFLAGS += $(CFLAGS)
 
-LDFLAGS := -static
+AFLAGS  += $(CFLAGS) -D__ASSEMBLY__
+
+LDFLAGS = -static

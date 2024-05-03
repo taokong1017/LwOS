@@ -1,4 +1,5 @@
 CC       = $(CROSS_COMPILE)gcc
+CPP      = $(CROSS_COMPILE)cpp
 GPP      = $(CROSS_COMPILE)g++
 AS       = $(CROSS_COMPILE)as
 AR       = $(CROSS_COMPILE)ar
