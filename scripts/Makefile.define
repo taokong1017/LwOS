@@ -1,3 +1,4 @@
+CFLAGS :=
 ifeq ($(CONFIG_COMPILER_OPTIMIZE_NONE), y)
 	CFLAGS += -O0
 endif
@@ -10,10 +11,7 @@ ifeq ($(CONFIG_COMPILER_OPTIMIZE_SIZE), y)
 	CFLAGS += -Os
 endif
 
-CFLAGS += -g -Wall -Werror -fno-builtin -nostdinc -nostdlib -pipe
-
-CPPFLAGS += $(CFLAGS)
-
-AFLAGS  += $(CFLAGS) -D__ASSEMBLY__
+CFLAGS += -g -Wall -Werror -fno-builtin -nostdinc -nostdlib -pipe \
+	-I$(srctree)/sample/include
 
 LDFLAGS = -static

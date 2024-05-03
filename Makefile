@@ -22,8 +22,6 @@ define ALL_OBJS
 	$(shell find $(1) -name "*.o")
 endef
 
-CFLAGS := -I$(BASE_DIR)/sample/include
-
 include scripts/Makefile.compiler
 include scripts/Makefile.define
 include scripts/Kbuild.include
