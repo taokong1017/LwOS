@@ -22,18 +22,4 @@ endchoice
 
 endmenu
 
-menu "Arch"
-
-endmenu
-
-menu "Kernel"
-
-endmenu
-
-menu "Components"
-
-endmenu
-
-menu "Samples"
-
-endmenu
+source "arch/Kconfig"

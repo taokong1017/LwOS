@@ -1,0 +1,13 @@
+menu "Arch"
+
+config CONFIG_ARM64
+    bool "ARM64"
+    default n
+    help
+      ARM64 (AArch64) architecture
+
+if CONFIG_ARM64 
+    source "arch/arm64/Kconfig"
+endif
+
+endmenu

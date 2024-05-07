@@ -1,0 +1,9 @@
+menu "ARM64 Options"
+
+config CONFIG_FPU_ENABLE
+    bool "Enable Floating Pointer Unit"
+    default n
+    help
+      This option will enable the floating procedure in system.
+
+endmenu

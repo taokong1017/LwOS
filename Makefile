@@ -1,7 +1,7 @@
 TARGET     = LwOS.elf
 BASE_DIR   = $(CURDIR)
 CONFIG_DIR = $(BASE_DIR)/config
-SUB_DIRS   =
+SUB_DIRS   = arch
 LINKER     = $(BASE_DIR)/sample/linker/lwos.lds
 CONFIG     :=
 
@@ -26,6 +26,7 @@ include scripts/Makefile.compiler
 include scripts/Makefile.define
 include scripts/Kbuild.include
 include scripts/Makefile.lib
+include .config
 BUILD := -f scripts/Makefile.build obj
 CLEAN := -f scripts/Makefile.clean obj
 
