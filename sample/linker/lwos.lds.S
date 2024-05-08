@@ -1,5 +1,3 @@
-#include "board_config.h"
-
 OUTPUT_FORMAT("elf64-littleaarch64")
 OUTPUT_ARCH(aarch64)
 

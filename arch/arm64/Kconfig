@@ -1,9 +1,11 @@
-menu "ARM64 Options"
-
 config CONFIG_FPU_ENABLE
-    bool "Enable Floating Pointer Unit"
-    default n
-    help
-      This option will enable the floating procedure in system.
+	bool "Enable Floating Pointer Unit"
+	default n
+		help
+			This option will enable the floating procedure in system.
 
-endmenu
+config CONFIG_PAGE_SIZE
+	int "MMU Page Size"
+	default 0x1000
+	help
+			This option is used in configuring the Memory Management Unit (MMU) page size.

@@ -1,13 +1,18 @@
 menu "Arch"
 
-config CONFIG_ARM64
-    bool "ARM64"
-    default n
-    help
-      ARM64 (AArch64) architecture
+choice ARCH_TYPE
+	prompt "Arch Option"
+	default CONFIG_ARM
+	help
+		This Option will enable compiler Optimize options.
 
-if CONFIG_ARM64 
-    source "arch/arm64/Kconfig"
+config CONFIG_ARM64
+	bool "ARM64"
+
+endchoice
+
+if CONFIG_ARM64
+	source "arch/arm64/Kconfig"
 endif
 
 endmenu
