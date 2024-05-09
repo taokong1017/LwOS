@@ -1,2 +1,5 @@
+obj-y := vector_table.o \
+	cpu_interrupts.o
+
 obj-$(CONFIG_FPU_ENABLE) += fpu.o
 

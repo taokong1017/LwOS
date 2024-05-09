@@ -1,6 +1,6 @@
 .text
 .globl arch_fpu_save
-.type arch_fpu_save, %function
+.type arch_fpu_save, function
 .section .txt, "ax"
 arch_fpu_save:
 	stp	q0,  q1,  [x0, #(16 *  0)]
@@ -29,7 +29,7 @@ arch_fpu_save:
 
 .text
 .globl arch_fpu_restore
-.type arch_fpu_restore, %function
+.type arch_fpu_restore, function
 .section .txt, "ax"
 arch_fpu_restore:
 	ldp	q0,  q1,  [x0, #(16 *  0)]
