@@ -22,11 +22,11 @@ define ALL_OBJS
 	$(shell find $(1) -name "*.o")
 endef
 
+include .config
 include scripts/Makefile.compiler
 include scripts/Makefile.define
 include scripts/Kbuild.include
 include scripts/Makefile.lib
-include .config
 BUILD := -f scripts/Makefile.build obj
 CLEAN := -f scripts/Makefile.clean obj
 
@@ -46,15 +46,23 @@ define MAKE_CLEAN_CMD
 	done
 endef
 
-.PHONY: all menuconfig run dbg clean help obj defconfig $(LINKER)
+.PHONY: all menuconfig run dbg clean help obj defconfig gen $(LINKER)
 
 all: obj $(LINKER)
-	$(Q)$(LD) $(LDFLAGS) -T $(LINKER) -e 0x4000000 -o $(TARGET) $(strip $(call ALL_OBJS, $(srctree)))
+	@$(Q)$(LD) $(LDFLAGS) -T $(LINKER) -e 0x4000000 -o $(TARGET) \
+		$(strip $(filter-out %/offsets.o, $(call ALL_OBJS, $(srctree))))
 	@echo "build all success"
 
-obj:
+obj: gen
 	$(Q)$(call MAKE_CMD, $(SUB_DIRS))
 	@echo "build obj success"
+
+gen:
+ifeq ($(CONFIG_ARM64), y)
+	$(Q)$(CC) $(CFLAGS) -c $(BASE_DIR)/arch/arm64/src/offsets.c -o $(BASE_DIR)/arch/arm64/src/offsets.o
+	$(Q)python3 scripts/gen_offset_header.py -i $(BASE_DIR)/arch/arm64/src/offsets.o -o \
+		$(BASE_DIR)/arch/arm64/include/offsets.h
+endif
 
 $(LINKER): %.lds: %.lds.S
 	$(Q)$(call MAKE_LDS, $@, $<);
