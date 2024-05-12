@@ -12,7 +12,8 @@ ifeq ($(CONFIG_COMPILER_OPTIMIZE_SIZE), y)
 endif
 
 CFLAGS += -g -Wall -Werror -fno-builtin -nostdinc -nostdlib -pipe \
-	-I$(srctree)/sample/include
+	-I$(srctree)/sample/include \
+	-I$(srctree)
 
 ifeq ($(CONFIG_ARM64), y)
 	CFLAGS +=-I$(srctree)/arch/arm64/include

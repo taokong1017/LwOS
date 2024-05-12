@@ -73,8 +73,8 @@
 	stp	x0,  x1,  [sp, #ARM_ARCH_REGS_GPR0]
 	add	x29, sp,  #ARM_ARCH_REGS_SIZE
 	stp	x30, x29, [sp, #ARM_ARCH_REGS_LR]
-	mrs	x22, elr_el2
-	mrs	x23, spsr_el2
+	mrs	x22, elr_el1
+	mrs	x23, spsr_el1
 	stp	x22, x23, [sp, #ARM_ARCH_REGS_PC]
 	/*
 	 * Registers that may be useful after this macro is invoked:
@@ -88,8 +88,8 @@
 /* Pop registers from stack */
 .macro	POP_GENERAL_REGS
 	ldp	x22, x23, [sp, #ARM_ARCH_REGS_PC]
-	msr	elr_el2,  x22
-	msr	spsr_el2, x23
+	msr	elr_el1,  x22
+	msr	spsr_el1, x23
 	ldp	x30, x28, [sp, #ARM_ARCH_REGS_LR]
 	mov	x29, sp
 	mov	sp,  x28

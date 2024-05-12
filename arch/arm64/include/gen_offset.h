@@ -19,10 +19,7 @@
 		",%c0"                              \
 		"\n\t.type\t" #name ",@object" :  : "n"(value))
 
-#define GEN_OFFSET_SYM(S, M) \
-	GEN_ABSOLUTE_SYM(__##S##_##M##_##OFFSET, offsetof(S, M))
-
 #define GEN_NAMED_OFFSET_SYM(S, M, N) \
-	GEN_ABSOLUTE_SYM(__##S##_##N##_##OFFSET, offsetof(S, M))
+	GEN_ABSOLUTE_SYM(N##_##OFFSET, offsetof(S, M))
 
 #endif
