@@ -43,4 +43,22 @@
 /* GPR related macros & defines */
 #define CPU_GPR_COUNT	30
 
+/* Interrupt or Exception related macros & defines */
+#define EXC_OS_SYNC_SP0		0
+#define EXC_OS_IRQ_SP0		1
+#define EXC_OS_FIQ_SP0		2
+#define EXC_OS_SERROR_SP0	3
+#define EXC_OS_SYNC_SPx		4
+#define EXC_OS_IRQ_SPx		5
+#define EXC_OS_FIQ_SPx		6
+#define EXC_OS_SERROR_SPx	7
+#define EXC_APP_SYNC_A64	8
+#define EXC_APP_IRQ_A64		9
+#define EXC_APP_FIQ_A64		10
+#define EXC_APP_SERROR_A64	11
+#define EXC_APP_SYNC_A32	12
+#define EXC_APP_IRQ_A32		13
+#define EXC_APP_FIQ_A32		14
+#define EXC_APP_SERROR_A32	15
+
 #endif

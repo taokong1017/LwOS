@@ -72,17 +72,10 @@
 	stp	x2,  x3,  [sp, #ARM_ARCH_REGS_GPR2]
 	stp	x0,  x1,  [sp, #ARM_ARCH_REGS_GPR0]
 	add	x29, sp,  #ARM_ARCH_REGS_SIZE
-	stp	x30, x29, [sp, #ARM_ARCH_REGS_LR]
+	stp	x30, x29, [sp, #ARM_ARCH_REGS_LR]    /* LR && SP */
 	mrs	x22, elr_el1
 	mrs	x23, spsr_el1
-	stp	x22, x23, [sp, #ARM_ARCH_REGS_PC]
-	/*
-	 * Registers that may be useful after this macro is invoked:
-	 *
-	 * x21 - aborted SP
-	 * x22 - aborted PC
-	 * x23 - aborted PSTATE
-	 */
+	stp	x22, x23, [sp, #ARM_ARCH_REGS_PC]    /* PC && PSTATE */
 .endm
 
 /* Pop registers from stack */
@@ -113,81 +106,97 @@
 
 EXCEPTION_HANDLER el1t_sync_handler
 	PUSH_GENERAL_REGS
+	mov	x1, EXC_OS_SYNC_SP0
 	CALL_EXCEPTION_CFUNC default_exception_handler
 	POP_GENERAL_REGS
 
 EXCEPTION_HANDLER el1t_irq_handler
 	PUSH_GENERAL_REGS
+	mov	x1, EXC_OS_IRQ_SP0
 	CALL_EXCEPTION_CFUNC default_exception_handler
 	POP_GENERAL_REGS
 
 EXCEPTION_HANDLER el1t_firq_handler
 	PUSH_GENERAL_REGS
+	mov	x1, EXC_OS_FIQ_SP0
 	CALL_EXCEPTION_CFUNC default_exception_handler
 	POP_GENERAL_REGS
 
 EXCEPTION_HANDLER el1t_serror_handler
 	PUSH_GENERAL_REGS
+	mov	x1, EXC_OS_SERROR_SP0
 	CALL_EXCEPTION_CFUNC default_exception_handler
 	POP_GENERAL_REGS
 
 EXCEPTION_HANDLER el1h_sync_handler
 	PUSH_GENERAL_REGS
+	mov	x1, EXC_OS_SYNC_SPx
 	CALL_EXCEPTION_CFUNC default_exception_handler
 	POP_GENERAL_REGS
 
 EXCEPTION_HANDLER el1h_irq_handler
 	PUSH_GENERAL_REGS
+	mov	x1, EXC_OS_IRQ_SPx
 	CALL_EXCEPTION_CFUNC default_exception_handler
 	POP_GENERAL_REGS
 
 EXCEPTION_HANDLER el1h_firq_handler
 	PUSH_GENERAL_REGS
+	mov	x1, EXC_OS_FIQ_SPx
 	CALL_EXCEPTION_CFUNC default_exception_handler
 	POP_GENERAL_REGS
 
 EXCEPTION_HANDLER el1h_serror_handler
 	PUSH_GENERAL_REGS
+	mov	x1, EXC_OS_SERROR_SPx
 	CALL_EXCEPTION_CFUNC default_exception_handler
 	POP_GENERAL_REGS
 
 EXCEPTION_HANDLER aarch64_el0_sync_handler
 	PUSH_GENERAL_REGS
+	mov	x1, EXC_APP_SYNC_A64
 	CALL_EXCEPTION_CFUNC default_exception_handler
 	POP_GENERAL_REGS
 
 EXCEPTION_HANDLER aarch64_el0_irq_handler
 	PUSH_GENERAL_REGS
+	mov	x1, EXC_APP_IRQ_A64
 	CALL_EXCEPTION_CFUNC default_exception_handler
 	POP_GENERAL_REGS
 
 EXCEPTION_HANDLER aarch64_el0_firq_handler
 	PUSH_GENERAL_REGS
+	mov	x1, EXC_APP_FIQ_A64
 	CALL_EXCEPTION_CFUNC default_exception_handler
 	POP_GENERAL_REGS
 
 EXCEPTION_HANDLER aarch64_el0_serror_handler
 	PUSH_GENERAL_REGS
+	mov	x1, EXC_APP_SERROR_A64
 	CALL_EXCEPTION_CFUNC default_exception_handler
 	POP_GENERAL_REGS
 
 EXCEPTION_HANDLER aarch32_el0_sync_handler
 	PUSH_GENERAL_REGS
+	mov	x1, EXC_APP_SYNC_A32
 	CALL_EXCEPTION_CFUNC default_exception_handler
 	POP_GENERAL_REGS
 
 EXCEPTION_HANDLER aarch32_el0_irq_handler
 	PUSH_GENERAL_REGS
+	mov	x1, EXC_APP_IRQ_A32
 	CALL_EXCEPTION_CFUNC default_exception_handler
 	POP_GENERAL_REGS
 
 EXCEPTION_HANDLER aarch32_el0_firq_handler
 	PUSH_GENERAL_REGS
+	mov	x1, EXC_APP_FIQ_A32
 	CALL_EXCEPTION_CFUNC default_exception_handler
 	POP_GENERAL_REGS
 
 EXCEPTION_HANDLER aarch32_el0_serror_handler
 	PUSH_GENERAL_REGS
+	mov	x1, EXC_APP_SERROR_A32
 	CALL_EXCEPTION_CFUNC default_exception_handler
 	POP_GENERAL_REGS
 
