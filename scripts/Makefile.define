@@ -13,6 +13,7 @@ endif
 
 CFLAGS += -g -Wall -Werror -fno-builtin -nostdinc -nostdlib -pipe \
 	-I$(srctree)/sample/include \
+	-I$(srctree)/kernel/include \
 	-I$(srctree)
 
 ifeq ($(CONFIG_ARM64), y)

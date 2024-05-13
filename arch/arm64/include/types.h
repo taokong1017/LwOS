@@ -9,5 +9,12 @@ typedef signed int int32_t;
 typedef unsigned int uint32_t;
 typedef signed long int int64_t;
 typedef unsigned long int uint64_t;
+typedef int8_t bool;
+typedef uint64_t phys_addr_t;
+typedef unsigned long size_t;
+
+#define true  1
+#define false 0
+#define NULL  0
 
 #endif

@@ -2,246 +2,185 @@
 #define __ARM64_PGTABLE_H__
 
 #include <pgtable-types.h>
+#include <pgtable-hwdef.h>
+#include <compiler.h>
 
-/*
- * 4KB  Granule translate pagetable：
- * +--------+--------+--------+--------+--------+--------+--------+--------+
- * |63    56|55    48|47    40|39    32|31    24|23    16|15     8|7      0|
- * +--------+--------+--------+--------+--------+--------+--------+--------+
- * |                 |         |         |         |         |
- * |                 |         |         |         |         v
- * |                 |         |         |         |   [11:0]  Page Shift
- * |                 |         |         |         +-> [20:12] L3 index
- * |                 |         |         +-----------> [29:21] L2 index
- * |                 |         +---------------------> [38:30] L1 index
- * |                 +-------------------------------> [47:39] L0 index
- * +-------------------------------------------------> [63] TTBR0/1
-*/
-#define PAGE_SHIFT 12
+static inline pte_t pgd_pte(pgd_t pgd) { return __pte(pgd_val(pgd)); }
 
-/*
- * Number of page-table levels required to address 'va_bits' wide
- * address, without section mapping. We resolve the top (va_bits - PAGE_SHIFT)
- * bits with (PAGE_SHIFT - 3) bits at each page table level. Hence:
- *
- *  levels = DIV_ROUND_UP((va_bits - PAGE_SHIFT), (PAGE_SHIFT - 3))
- *
- * where DIV_ROUND_UP(n, d) => (((n) + (d) - 1) / (d))
- *
- * We cannot include linux/kernel.h which defines DIV_ROUND_UP here
- * due to build issues. So we open code DIV_ROUND_UP here:
- *
- *	((((va_bits) - PAGE_SHIFT) + (PAGE_SHIFT - 3) - 1) / (PAGE_SHIFT - 3))
- *
- * which gets simplified as :
- */
-#define PGTABLE_LEVELS(va_bits) (((va_bits) - 4) / (PAGE_SHIFT - 3))
+static inline pte_t p4d_pte(p4d_t p4d) { return __pte(p4d_val(p4d)); }
 
-/*
- * Size mapped by an entry at level n ( -1 <= n <= 3)
- * We map (PAGE_SHIFT - 3) at all translation levels and PAGE_SHIFT bits
- * in the final page. The maximum number of translation levels supported by
- * the architecture is 5. Hence, starting at level n, we have further
- * ((4 - n) - 1) levels of translation excluding the offset within the page.
- * So, the total number of bits mapped by an entry at level n is :
- *
- *  ((4 - n) - 1) * (PAGE_SHIFT - 3) + PAGE_SHIFT
- *
- * Rearranging it a bit we get :
- *   (4 - n) * (PAGE_SHIFT - 3) + 3
- */
-#define PGTABLE_LEVEL_SHIFT(n)	((PAGE_SHIFT - 3) * (4 - (n)) + 3)
+static inline pte_t pud_pte(pud_t pud) { return __pte(pud_val(pud)); }
 
-#define PTRS_PER_PTE	(1 << (PAGE_SHIFT - 3))
+static inline pud_t pte_pud(pte_t pte) { return __pud(pte_val(pte)); }
 
-/*
- * PMD_SHIFT determines the size a level 2 page table entry can map.
- */
-#define PMD_SHIFT		PGTABLE_LEVEL_SHIFT(2)
-#define PMD_SIZE		(1UL << PMD_SHIFT)
-#define PMD_MASK		(~(PMD_SIZE-1))
-#define PTRS_PER_PMD	(1 << (PAGE_SHIFT - 3))
+static inline pmd_t pud_pmd(pud_t pud) { return __pmd(pud_val(pud)); }
 
-/*
- * PUD_SHIFT determines the size a level 1 page table entry can map.
- */
-#define PUD_SHIFT		PGTABLE_LEVEL_SHIFT(1)
-#define PUD_SIZE		(1UL << PUD_SHIFT)
-#define PUD_MASK		(~(PUD_SIZE-1))
-#define PTRS_PER_PUD	(1 << (PAGE_SHIFT - 3))
+static inline pte_t pmd_pte(pmd_t pmd) { return __pte(pmd_val(pmd)); }
 
-/*
- * PGDIR_SHIFT determines the size a top-level page table entry can map
- * (depending on the configuration, this level can be -1, 0, 1 or 2).
- */
-#define PGDIR_SHIFT		PGTABLE_LEVEL_SHIFT(0)
-#define PGDIR_SIZE		(1UL << PGDIR_SHIFT)
-#define PGDIR_MASK		(~(PGDIR_SIZE-1))
-#define PTRS_PER_PGD	(1 << (VA_BITS - PGDIR_SHIFT))
+static inline pmd_t pte_pmd(pte_t pte) { return __pmd(pte_val(pte)); }
 
-/*
- * Hardware page table definitions.
- *
- * Level 0 descriptor (PGD).
- */
-#define PGD_TYPE_TABLE		(((pgdval_t)(3)) << 0)
-#define PGD_TABLE_BIT		(((pgdval_t)(1)) << 1)
-#define PGD_TYPE_MASK		(((pgdval_t)(3)) << 0)
-#define PGD_TABLE_PXN		(((pgdval_t)(1)) << 59)
-#define PGD_TABLE_UXN		(((pgdval_t)(1)) << 60)
+static inline unsigned long pte_index(unsigned long address) {
+	return (address >> PAGE_SHIFT) & (PTRS_PER_PTE - 1);
+}
 
-/*
- * Level 1 descriptor (PUD).
- */
-#define PUD_TYPE_TABLE		(((pudval_t)(3)) << 0)
-#define PUD_TABLE_BIT		(((pudval_t)(1)) << 1)
-#define PUD_TYPE_MASK		(((pudval_t)(3)) << 0)
-#define PUD_TYPE_SECT		(((pudval_t)(1)) << 0)
-#define PUD_SECT_RDONLY		(((pudval_t)(1)) << 7)
-#define PUD_TABLE_PXN		(((pudval_t)(1)) << 59)
-#define PUD_TABLE_UXN		(((pudval_t)(1)) << 60)
+static inline unsigned long pmd_index(unsigned long address) {
+	return (address >> PMD_SHIFT) & (PTRS_PER_PMD - 1);
+}
 
-/*
- * Level 2 descriptor (PMD).
- */
-#define PMD_TYPE_MASK		(((pmdval_t)(3)) << 0)
-#define PMD_TYPE_TABLE		(((pmdval_t)(3)) << 0)
-#define PMD_TYPE_SECT		(((pmdval_t)(1)) << 0)
-#define PMD_TABLE_BIT		(((pmdval_t)(1)) << 1)
+static inline unsigned long pud_index(unsigned long address) {
+	return (address >> PUD_SHIFT) & (PTRS_PER_PUD - 1);
+}
 
-/*
- * Section
- */
-#define PMD_SECT_VALID		(((pmdval_t)(1)) << 0)
-#define PMD_SECT_USER		(((pmdval_t)(1)) << 6)	/* AP[1] */
-#define PMD_SECT_RDONLY		(((pmdval_t)(1)) << 7)	/* AP[2] */
-#define PMD_SECT_S			(((pmdval_t)(3)) << 8)
-#define PMD_SECT_AF			(((pmdval_t)(1)) << 10)
-#define PMD_SECT_NG			(((pmdval_t)(1)) << 11)
-#define PMD_SECT_CONT		(((pmdval_t)(1)) << 52)
-#define PMD_SECT_PXN		(((pmdval_t)(1)) << 53)
-#define PMD_SECT_UXN		(((pmdval_t)(1)) << 54)
-#define PMD_TABLE_PXN		(((pmdval_t)(1)) << 59)
-#define PMD_TABLE_UXN		(((pmdval_t)(1)) << 60)
+#define pgd_index(a) (((a) >> PGDIR_SHIFT) & (PTRS_PER_PGD - 1))
 
-/*
- * AttrIndx[2:0] encoding (mapping attributes defined in the MAIR* registers).
- */
-#define PMD_ATTRINDX(t)		(((pmdval_t)(t)) << 2)
-#define PMD_ATTRINDX_MASK	(((pmdval_t)(7)) << 2)
+static inline pte_t __ptep_get(pte_t *ptep) { return read_once(*ptep); }
 
-/*
- * Level 3 descriptor (PTE).
- */
-#define PTE_VALID		(((pteval_t)(1)) << 0)
-#define PTE_TYPE_MASK	(((pteval_t)(3)) << 0)
-#define PTE_TYPE_PAGE	(((pteval_t)(3)) << 0)
-#define PTE_TABLE_BIT	(((pteval_t)(1)) << 1)
-#define PTE_USER		(((pteval_t)(1)) << 6)	/* AP[1] */
-#define PTE_RDONLY		(((pteval_t)(1)) << 7)	/* AP[2] */
-#define PTE_SHARED		(((pteval_t)(3)) << 8)	/* SH[1:0], inner shareable */
-#define PTE_AF			(((pteval_t)(1)) << 10)	/* Access Flag */
-#define PTE_NG			(((pteval_t)(1)) << 11)	/* nG */
-#define PTE_GP			(((pteval_t)(1)) << 50)	/* BTI guarded */
-#define PTE_DBM			(((pteval_t)(1)) << 51)	/* Dirty Bit Management */
-#define PTE_CONT		(((pteval_t)(1)) << 52)	/* Contiguous range */
-#define PTE_PXN			(((pteval_t)(1)) << 53)	/* Privileged XN */
-#define PTE_UXN			(((pteval_t)(1)) << 54)	/* User XN */
+static inline void __set_pte(pte_t *ptep, pte_t pte) {
+	write_once(*ptep, pte);
 
-#define PTE_ADDR_LOW	((((pteval_t)(1) << (50 - PAGE_SHIFT)) - 1) << PAGE_SHIFT)
+	dsb(ishst);
+	isb();
+}
 
-/*
- * TCR flags.
- */
-#define TCR_T0SZ_OFFSET	0
-#define TCR_T1SZ_OFFSET	16
-#define TCR_T0SZ(x)		((64UL - (x)) << TCR_T0SZ_OFFSET)
-#define TCR_T1SZ(x)		((64UL - (x)) << TCR_T1SZ_OFFSET)
-#define TCR_TxSZ(x)		(TCR_T0SZ(x) | TCR_T1SZ(x))
-#define TCR_TxSZ_WIDTH	6
-#define TCR_T0SZ_MASK	(((1UL << TCR_TxSZ_WIDTH) - 1) << TCR_T0SZ_OFFSET)
-#define TCR_T1SZ_MASK	(((1UL << TCR_TxSZ_WIDTH) - 1) << TCR_T1SZ_OFFSET)
+#define pfn_to_page(pfn) ((void *)((pfn)*PAGE_SIZE))
 
-#define TCR_EPD0_SHIFT	7
-#define TCR_EPD0_MASK	(1UL << TCR_EPD0_SHIFT)
-#define TCR_IRGN0_SHIFT	8
-#define TCR_IRGN0_MASK	(3UL << TCR_IRGN0_SHIFT)
-#define TCR_IRGN0_NC	(0UL << TCR_IRGN0_SHIFT)
-#define TCR_IRGN0_WBWA	(1UL << TCR_IRGN0_SHIFT)
-#define TCR_IRGN0_WT	(2UL << TCR_IRGN0_SHIFT)
-#define TCR_IRGN0_WBnWA	(3UL << TCR_IRGN0_SHIFT)
+#define pte_hw_dirty(pte) (pte_write(pte) && !pte_rdonly(pte))
+#define pte_sw_dirty(pte) (!!(pte_val(pte) & PTE_DIRTY))
+#define pte_dirty(pte) (pte_sw_dirty(pte) || pte_hw_dirty(pte))
+#define pte_valid(pte) (!!(pte_val(pte) & PTE_VALID))
 
-#define TCR_EPD1_SHIFT	23
-#define TCR_EPD1_MASK	(1UL << TCR_EPD1_SHIFT)
-#define TCR_IRGN1_SHIFT	24
-#define TCR_IRGN1_MASK	(3UL << TCR_IRGN1_SHIFT)
-#define TCR_IRGN1_NC	(0UL << TCR_IRGN1_SHIFT)
-#define TCR_IRGN1_WBWA	(1UL << TCR_IRGN1_SHIFT)
-#define TCR_IRGN1_WT	(2UL << TCR_IRGN1_SHIFT)
-#define TCR_IRGN1_WBnWA	(3UL << TCR_IRGN1_SHIFT)
+#define __pte_to_phys(pte) (pte_val(pte) & PTE_ADDR_LOW)
+#define __phys_to_pte_val(phys) (phys)
+#define pte_pfn(pte) (__pte_to_phys(pte) >> PAGE_SHIFT)
+#define pfn_pte(pfn, prot)                                                     \
+	__pte(__phys_to_pte_val((phys_addr_t)(pfn) << PAGE_SHIFT) |                \
+		  pgprot_val(prot))
+#define pte_none(pte) (!pte_val(pte))
+#define __pte_clear(mm, addr, ptep) __set_pte(ptep, __pte(0))
+#define pte_page(pte) (pfn_to_page(pte_pfn(pte)))
 
-#define TCR_IRGN_NC		(TCR_IRGN0_NC | TCR_IRGN1_NC)
-#define TCR_IRGN_WBWA	(TCR_IRGN0_WBWA | TCR_IRGN1_WBWA)
-#define TCR_IRGN_WT		(TCR_IRGN0_WT | TCR_IRGN1_WT)
-#define TCR_IRGN_WBnWA	(TCR_IRGN0_WBnWA | TCR_IRGN1_WBnWA)
-#define TCR_IRGN_MASK	(TCR_IRGN0_MASK | TCR_IRGN1_MASK)
+#define __pmd_to_phys(pmd) __pte_to_phys(pmd_pte(pmd))
+#define __phys_to_pmd_val(phys) __phys_to_pte_val(phys)
 
-#define TCR_ORGN0_SHIFT	10
-#define TCR_ORGN0_MASK	(3UL << TCR_ORGN0_SHIFT)
-#define TCR_ORGN0_NC	(0UL << TCR_ORGN0_SHIFT)
-#define TCR_ORGN0_WBWA	(1UL << TCR_ORGN0_SHIFT)
-#define TCR_ORGN0_WT	(2UL << TCR_ORGN0_SHIFT)
-#define TCR_ORGN0_WBnWA	(3UL << TCR_ORGN0_SHIFT)
+#define __pud_to_phys(pud) __pte_to_phys(pud_pte(pud))
 
-#define TCR_ORGN1_SHIFT	26
-#define TCR_ORGN1_MASK	(3UL << TCR_ORGN1_SHIFT)
-#define TCR_ORGN1_NC	(0UL << TCR_ORGN1_SHIFT)
-#define TCR_ORGN1_WBWA	(1UL << TCR_ORGN1_SHIFT)
-#define TCR_ORGN1_WT	(2UL << TCR_ORGN1_SHIFT)
-#define TCR_ORGN1_WBnWA	(3UL << TCR_ORGN1_SHIFT)
+static inline phys_addr_t pud_page_paddr(pud_t pud) {
+	return __pud_to_phys(pud);
+}
 
-#define TCR_ORGN_NC		(TCR_ORGN0_NC | TCR_ORGN1_NC)
-#define TCR_ORGN_WBWA	(TCR_ORGN0_WBWA | TCR_ORGN1_WBWA)
-#define TCR_ORGN_WT		(TCR_ORGN0_WT | TCR_ORGN1_WT)
-#define TCR_ORGN_WBnWA	(TCR_ORGN0_WBnWA | TCR_ORGN1_WBnWA)
-#define TCR_ORGN_MASK	(TCR_ORGN0_MASK | TCR_ORGN1_MASK)
+static inline phys_addr_t pmd_page_paddr(pmd_t pmd) {
+	return __pmd_to_phys(pmd);
+}
 
-#define TCR_SH0_SHIFT	12
-#define TCR_SH0_MASK	(3UL << TCR_SH0_SHIFT)
-#define TCR_SH0_INNER	(3UL << TCR_SH0_SHIFT)
+#define pmd_valid(pmd) pte_valid(pmd_pte(pmd))
 
-#define TCR_SH1_SHIFT	28
-#define TCR_SH1_MASK	(3UL << TCR_SH1_SHIFT)
-#define TCR_SH1_INNER	(3UL << TCR_SH1_SHIFT)
-#define TCR_SHARED		(TCR_SH0_INNER | TCR_SH1_INNER)
+static inline void set_pmd(pmd_t *pmdp, pmd_t pmd) {
+	write_once(*pmdp, pmd);
 
-#define TCR_TG0_SHIFT	14
-#define TCR_TG0_MASK	(3UL << TCR_TG0_SHIFT)
-#define TCR_TG0_4K		(0UL << TCR_TG0_SHIFT)
-#define TCR_TG0_64K		(1UL << TCR_TG0_SHIFT)
-#define TCR_TG0_16K		(2UL << TCR_TG0_SHIFT)
+	if (pmd_valid(pmd)) {
+		dsb(ishst);
+		isb();
+	}
+}
 
-#define TCR_TG1_SHIFT	30
-#define TCR_TG1_MASK	(3UL << TCR_TG1_SHIFT)
-#define TCR_TG1_16K		(1UL << TCR_TG1_SHIFT)
-#define TCR_TG1_4K		(2UL << TCR_TG1_SHIFT)
-#define TCR_TG1_64K		(3UL << TCR_TG1_SHIFT)
+static inline void __pmd_populate(pmd_t *pmdp, phys_addr_t ptep,
+								  pmdval_t prot) {
+	set_pmd(pmdp, __pmd(__phys_to_pmd_val(ptep) | prot));
+}
 
-#define TCR_IPS_SHIFT	32
-#define TCR_IPS_MASK	(7UL << TCR_IPS_SHIFT)
-#define TCR_A1			(1UL << 22)
-#define TCR_ASID16		(1UL << 36)
-#define TCR_TBI0		(1UL << 37)
-#define TCR_TBI1		(1UL << 38)
-#define TCR_HA			(1UL << 39)
-#define TCR_HD			(1UL << 40)
-#define TCR_TBID1		(1UL << 52)
-#define TCR_NFD0		(1UL << 53)
-#define TCR_NFD1		(1UL << 54)
-#define TCR_E0PD0		(1UL << 55)
-#define TCR_E0PD1		(1UL << 56)
-#define TCR_TCMA0		(1UL << 57)
-#define TCR_TCMA1		(1UL << 58)
-#define TCR_DS			(1UL << 59)
+#define pmd_addr_end(addr, end)                                                \
+	({                                                                         \
+		unsigned long __boundary = ((addr) + PMD_SIZE) & PMD_MASK;             \
+		(__boundary - 1 < (end)-1) ? __boundary : (end);                       \
+	})
+#define pud_addr_end(addr, end)                                                \
+	({                                                                         \
+		unsigned long __boundary = ((addr) + PUD_SIZE) & PUD_MASK;             \
+		(__boundary - 1 < (end)-1) ? __boundary : (end);                       \
+	})
+#define p4d_addr_end(addr, end)                                                \
+	({                                                                         \
+		unsigned long __boundary = ((addr) + P4D_SIZE) & P4D_MASK;             \
+		(__boundary - 1 < (end)-1) ? __boundary : (end);                       \
+	})
+#define pmd_none(pmd) (!pmd_val(pmd))
+
+#define __pud_to_phys(pud) __pte_to_phys(pud_pte(pud))
+#define __phys_to_pud_val(phys) __phys_to_pte_val(phys)
+#define pud_none(pud) (!pud_val(pud))
+#define pud_valid(pud) pte_valid(pud_pte(pud))
+static inline void set_pud(pud_t *pudp, pud_t pud) {
+	write_once(*pudp, pud);
+
+	if (pud_valid(pud)) {
+		dsb(ishst);
+		isb();
+	}
+}
+
+static inline void __pud_populate(pud_t *pudp, phys_addr_t pmdp,
+								  pudval_t prot) {
+	set_pud(pudp, __pud(__phys_to_pud_val(pmdp) | prot));
+}
+
+#define pte_offset_phys(dir, addr)                                             \
+	(pmd_page_paddr(read_once(*(dir))) + pte_index(addr) * sizeof(pte_t))
+#define pmd_pfn(pmd) ((__pmd_to_phys(pmd) & PMD_MASK) >> PAGE_SHIFT)
+#define pfn_pmd(pfn, prot)                                                     \
+	__pmd(__phys_to_pmd_val((phys_addr_t)(pfn) << PAGE_SHIFT) |                \
+		  pgprot_val(prot))
+#define mk_pmd(page, prot) pfn_pmd(page_to_pfn(page), prot)
+
+#define pmd_offset_phys(dir, addr)                                             \
+	(pud_page_paddr(read_once(*(dir))) + pmd_index(addr) * sizeof(pmd_t))
+#define pud_pfn(pud) ((__pud_to_phys(pud) & PUD_MASK) >> PAGE_SHIFT)
+#define pfn_pud(pfn, prot)                                                     \
+	__pud(__phys_to_pud_val((phys_addr_t)(pfn) << PAGE_SHIFT) |                \
+		  pgprot_val(prot))
+#define p4d_none(p4d) (!p4d_val(p4d))
+
+#define pgd_none(pgd) (!pgd_val(pgd))
+#define __p4d_to_phys(p4d) __pte_to_phys(p4d_pte(p4d))
+#define __phys_to_p4d_val(phys) __phys_to_pte_val(phys)
+#define __pgd_to_phys(pgd) __pte_to_phys(pgd_pte(pgd))
+#define __phys_to_pgd_val(phys) __phys_to_pte_val(phys)
+static inline void set_p4d(p4d_t *p4dp, p4d_t p4d) {
+	write_once(*p4dp, p4d);
+	dsb(ishst);
+	isb();
+}
+static inline void __p4d_populate(p4d_t *p4dp, phys_addr_t pudp,
+								  p4dval_t prot) {
+	set_p4d(p4dp, __p4d(__phys_to_p4d_val(pudp) | prot));
+}
+
+static inline phys_addr_t p4d_page_paddr(p4d_t p4d) {
+	return __p4d_to_phys(p4d);
+}
+
+static inline phys_addr_t pud_offset_phys(p4d_t *p4dp, unsigned long addr) {
+	return p4d_page_paddr(read_once(*p4dp)) + pud_index(addr) * sizeof(pud_t);
+}
+
+#define p4d_index(addr) (((addr) >> P4D_SHIFT) & (PTRS_PER_P4D - 1))
+
+static inline void set_pgd(pgd_t *pgdp, pgd_t pgd) {
+	write_once(*pgdp, pgd);
+	dsb(ishst);
+	isb();
+}
+
+static inline phys_addr_t pgd_page_paddr(pgd_t pgd) {
+	return __pgd_to_phys(pgd);
+}
+
+static inline phys_addr_t p4d_offset_phys(pgd_t *pgdp, unsigned long addr) {
+	return pgd_page_paddr(read_once(*pgdp)) + p4d_index(addr) * sizeof(p4d_t);
+}
+
+static inline void __pgd_populate(pgd_t *pgdp, phys_addr_t p4dp,
+								  pgdval_t prot) {
+	set_pgd(pgdp, __pgd(__phys_to_pgd_val(p4dp) | prot));
+}
 
 #endif
