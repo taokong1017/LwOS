@@ -47,4 +47,9 @@ SECTIONS
 		. = ALIGN(4);
 		__data_end = .;		/* define a global symbol at data end */
 	}
+
+	. = ALIGN(0x1000);
+	init_pg_dir = .;
+	. += 0x1000;
+	init_pg_end = .;
 }

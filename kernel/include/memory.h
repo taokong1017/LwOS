@@ -19,4 +19,7 @@
 #define __phys_to_pfn(paddr) PHYS_PFN(paddr)
 #define __pfn_to_phys(pfn) PFN_PHYS(pfn)
 
+#define _PAGE_OFFSET(va) (-((1UL) << (va)))
+#define PAGE_OFFSET (_PAGE_OFFSET(VA_BITS))
+
 #endif

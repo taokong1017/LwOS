@@ -2,7 +2,8 @@ obj-y := vector.o \
 	exception.o \
 	switch.o \
 	operate_regs.o \
-	mmu.o
+	mmu.o \
+	kernel_map.o
 
 obj-$(CONFIG_FPU_ENABLE) += fpu.o
 

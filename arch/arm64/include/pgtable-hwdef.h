@@ -88,6 +88,14 @@
 #define PTRS_PER_PGD (1 << (VA_BITS - PGDIR_SHIFT))
 
 /*
+ * Contiguous page definitions.
+ */
+#define CONT_PTE_SHIFT (2 + PAGE_SHIFT)
+#define CONT_PTES (1 << (CONT_PTE_SHIFT - PAGE_SHIFT))
+#define CONT_PTE_SIZE (CONT_PTES * PAGE_SIZE)
+#define CONT_PTE_MASK (~(CONT_PTE_SIZE - 1))
+
+/*
  * Hardware page table definitions.
  *
  * Level -1 descriptor (PGD).
