@@ -103,12 +103,19 @@ static inline void __pmd_populate(pmd_t *pmdp, phys_addr_t ptep,
 		unsigned long __boundary = ((addr) + P4D_SIZE) & P4D_MASK;             \
 		(__boundary - 1 < (end)-1) ? __boundary : (end);                       \
 	})
+#define pgd_addr_end(addr, end)                                                \
+	({                                                                         \
+		unsigned long __boundary = ((addr) + PGDIR_SIZE) & PGDIR_MASK;         \
+		(__boundary - 1 < (end)-1) ? __boundary : (end);                       \
+	})
+
 #define pmd_none(pmd) (!pmd_val(pmd))
 
 #define __pud_to_phys(pud) __pte_to_phys(pud_pte(pud))
 #define __phys_to_pud_val(phys) __phys_to_pte_val(phys)
 #define pud_none(pud) (!pud_val(pud))
 #define pud_valid(pud) pte_valid(pud_pte(pud))
+
 static inline void set_pud(pud_t *pudp, pud_t pud) {
 	write_once(*pudp, pud);
 
@@ -182,5 +189,13 @@ static inline void __pgd_populate(pgd_t *pgdp, phys_addr_t p4dp,
 								  pgdval_t prot) {
 	set_pgd(pgdp, __pgd(__phys_to_pgd_val(p4dp) | prot));
 }
+
+static inline pgd_t *pgd_offset_pgd(pgd_t *pgd, unsigned long address) {
+	return (pgd + pgd_index(address));
+};
+
+#define POWER_MASK(x, mask) (((x) + (mask)) & ~(mask))
+#define ALIGN(x, a) POWER_MASK(x, (__typeof__(x))(a)-1)
+#define PAGE_ALIGN(addr) ALIGN(addr, PAGE_SIZE)
 
 #endif

@@ -126,9 +126,9 @@ static void alloc_init_pud(p4d_t *p4dp, unsigned long addr, unsigned long end,
 	} while (pudp++, addr = next, addr != end);
 }
 
-void alloc_init_p4d(pgd_t *pgdp, unsigned long addr, unsigned long end,
-					phys_addr_t phys, pgprot_t prot,
-					phys_addr_t (*pgtable_alloc)(int), int flags) {
+static void alloc_init_p4d(pgd_t *pgdp, unsigned long addr, unsigned long end,
+						   phys_addr_t phys, pgprot_t prot,
+						   phys_addr_t (*pgtable_alloc)(int), int flags) {
 	unsigned long next;
 	pgd_t pgd = read_once(*pgdp);
 	p4d_t *p4dp;
@@ -151,4 +151,28 @@ void alloc_init_p4d(pgd_t *pgdp, unsigned long addr, unsigned long end,
 		alloc_init_pud(p4dp, addr, next, phys, prot, pgtable_alloc, flags);
 		phys += next - addr;
 	} while (p4dp++, addr = next, addr != end);
+}
+
+void create_pgd_mapping(pgd_t *pgdir, phys_addr_t phys, unsigned long virt,
+						phys_addr_t size, pgprot_t prot,
+						phys_addr_t (*pgtable_alloc)(int), int flags) {
+	unsigned long addr, end, next;
+	pgd_t *pgdp = pgd_offset_pgd(pgdir, virt);
+
+	/*
+	 * If the virtual and physical address don't have the same offset
+	 * within a page, we cannot map the region as the caller expects.
+	 */
+	if ((phys ^ virt) & ~PAGE_MASK)
+		return;
+
+	phys &= PAGE_MASK;
+	addr = virt & PAGE_MASK;
+	end = PAGE_ALIGN(virt + size);
+
+	do {
+		next = pgd_addr_end(addr, end);
+		alloc_init_p4d(pgdp, addr, next, phys, prot, pgtable_alloc, flags);
+		phys += next - addr;
+	} while (pgdp++, addr = next, addr != end);
 }
