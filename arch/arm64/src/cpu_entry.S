@@ -1,0 +1,84 @@
+#include <cpu.h>
+
+.globl __start
+.type __start, function
+.section .init.text, "ax"
+start:
+	/* Mask all exceptions */
+	msr	DAIFSet, #0xf
+	mrs	x0, CurrentEL
+	lsr x0, x0, MODE_EL_SHIFT
+	and x0, x0, MODE_EL_MASK
+	cmp	x0, MODE_EL3
+	beq	el3_entry
+	cmp	x0, MODE_EL2
+	beq	el2_entry
+	cmp	x0, MODE_EL1
+	beq	el1_entry
+
+el3_entry:
+	/* set cptr_el3 register */
+	mrs x0, cptr_el3
+	bic x0, x0, CPTR_TTA_BIT   /* Do not trap sysreg accesses */
+	bic x0, x0, CPTR_TFP_BIT   /* Do not trap SVE, SIMD and FP */
+	bic x0, x0, CPTR_TCPAC_BIT /* Do not trap CPTR_EL2 / CPACR_EL1 accesses */
+	msr cptr_el3, x0
+
+	/* set scr_el3 register */
+	mrs x0, scr_el3
+	orr x0, x0, SCR_RW_BIT
+	orr x0, x0, SCR_ST_BIT
+	orr x0, x0, SCR_HCE_BIT
+	orr x0, x0, SCR_SMD_BIT
+	msr scr_el3, x0
+
+	/* set el2_entry */
+	adr	x0, el2_entry
+	msr	elr_el2, x0
+	eret
+
+el2_entry:
+	/* set sctlr_el2 register */
+	mrs x0, sctlr_el2
+	orr x0, x0, SCTLR_I_BIT
+	orr x0, x0, SCTLR_SA_BIT
+	msr sctlr_el2, x0
+
+	/* set hcr_el2 register */
+	mrs x0, hcr_el2
+	bic x0, x0, HCR_IMO_BIT
+	bic x0, x0, HCR_AMO_BIT
+	bic x0, x0, HCR_TGE_BIT
+	orr x0, x0, HCR_RW_BIT
+	msr hcr_el2, x0
+
+	/* set cptr_el2 register */
+	mrs x0, cptr_el2
+	bic x0, x0, CPTR_TFP_BIT
+	bic x0, x0, CPTR_TCPAC_BIT
+	msr cptr_el2, x0
+
+	/* set spsr_el2 register*/
+	mov x0, SPSR_DAIF_MASK
+	orr x0, x0, SPSR_MODE_EL1T
+	msr	spsr_el2, x0
+
+	/* clear cnt register for EL2 */
+	msr cntvoff_el2, xzr
+	msr cnthctl_el2, xzr
+
+	/* set el1_entry */
+	adr	x0, el1_entry
+	msr	elr_el2, x0
+	eret
+
+el1_entry:
+	/* use SP_ELx */
+	msr	SPSel, #1
+
+	/* Enable SError interrupts */
+	msr	DAIFClr, DAIFCLR_ABT_BIT
+	isb
+
+
+
