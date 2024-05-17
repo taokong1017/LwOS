@@ -80,6 +80,26 @@ el1_entry:
 	msr	DAIFClr, DAIFCLR_ABT_BIT
 	isb
 
+	/* clear bss */
+clear_bss:
+	ldr x0, =__bss_start
+	ldr x1, =__bss_end
+	sub x1, x1, x0
+	cbz x1, bss_loop_done
+bss_loop:
+	sub x1, x1, #8
+	str xzr, [x0], #8
+	cbnz x1, bss_loop
+bss_loop_done:
+
+	/* set stack pointer */
+	.extern kernel_stack_end
+	ldr x0, =kernel_stack_end
+	mov sp, x0
+
+	/* set up kernel memory map */
+	bl early_kernel_map
+
 	b .
 
 

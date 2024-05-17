@@ -91,7 +91,6 @@ void early_kernel_map() {
 	pgprot_t rodata_prot = PAGE_KERNEL_RO;
 	pgprot_t data_prot = PAGE_KERNEL;
 
-	memset(__bss_start, 0, (uint64_t)__bss_end - (uint64_t)__bss_start);
 	/* use 1:1 relation to map text section, rodata section and data section */
 	map_segment(init_pg_dir, &pgdp, 0, __text_start, __text_end, text_prot,
 				true, 0);

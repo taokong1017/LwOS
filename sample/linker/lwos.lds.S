@@ -52,6 +52,16 @@ SECTIONS
 
 	. = ALIGN(0x1000);
 	init_pg_dir = .;
-	. += 0x1000;
+	. += 0x6000;
 	init_pg_end = .;
+
+	. = ALIGN(0x1000);
+	kernel_stack_start = .;
+	. += 0x1000;
+	kernel_stack_end = .;
+
+	. = ALIGN(0x1000);
+	interrupt_stack_start = .;
+	. += 0x1000;
+	interrupt_stack_end = .;
 }
