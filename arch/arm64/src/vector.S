@@ -202,7 +202,7 @@ EXCEPTION_HANDLER aarch32_el0_serror_handler
 
 .globl _vector_table
 .type arch_fpu_save, object
-.section .entry.text, "ax"
+.section .text, "ax"
 _vector_table:
 .align 11
 	ventry el1t_sync_handler   /* Synchronous EL1t */

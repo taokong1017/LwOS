@@ -3,7 +3,7 @@
 .globl __start
 .type __start, function
 .section .init.text, "ax"
-start:
+__start:
 	/* Mask all exceptions */
 	msr	DAIFSet, #0xf
 	mrs	x0, CurrentEL
@@ -79,6 +79,8 @@ el1_entry:
 	/* Enable SError interrupts */
 	msr	DAIFClr, DAIFCLR_ABT_BIT
 	isb
+
+	b .
 
 
 

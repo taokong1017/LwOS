@@ -14,9 +14,7 @@ else
 endif
 export srctree = $(BASE_DIR)
 
-define QEMU_RUN
-	qemu-system-aarch64 -machine virt -smp 4 -m 512M -cpu cortex-a53 -nographic -kernel $(1)
-endef
+QEMU_RUN = qemu-system-aarch64 -machine virt -m size=1024M -cpu cortex-a53 -nographic -kernel
 
 define ALL_OBJS
 	$(shell find $(1) -name "*.o")
@@ -49,7 +47,7 @@ endef
 .PHONY: all menuconfig run dbg clean help obj defconfig gen $(LINKER)
 
 all: obj $(LINKER)
-	@$(Q)$(LD) $(LDFLAGS) -T $(LINKER) -e 0x4000000 -o $(TARGET) \
+	$(Q)$(LD) $(LDFLAGS) -T $(LINKER) -e __start -o $(TARGET) \
 		$(strip $(filter-out %/offsets.o, $(call ALL_OBJS, $(srctree))))
 	@echo "build all success"
 
@@ -70,10 +68,10 @@ $(LINKER): %.lds: %.lds.S
 	@echo "build linker success"
 
 run:
-	$(Q)$(call QEMU_RUN, $(OUT_DIR)/$(TARGET))
+	$(Q)$(QEMU_RUN) $(TARGET)
 
 dbg:
-	$(Q)$(call QEMU_RUN, $(OUT_DIR)/$(TARGET)) -S -s
+	$(Q)$(QEMU_RUN) $(TARGET) -S -s
 
 menuconfig:
 	$(Q)python  $(CONFIG_DIR)/usr_config.py
@@ -97,3 +95,4 @@ help:
 	@echo "make all:		make CROSS_COMPILE=~/aarch64-none-elf/bin/aarch64-none-elf- -j"
 	@echo "make clean:		make CROSS_COMPILE=~/aarch64-none-elf/bin/aarch64-none-elf- clean"
 	@echo "make run:		make CROSS_COMPILE=~/aarch64-none-elf/bin/aarch64-none-elf- run"
+	@echo "make dbg:		make CROSS_COMPILE=~/aarch64-none-elf/bin/aarch64-none-elf- dbg"

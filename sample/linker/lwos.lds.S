@@ -3,10 +3,12 @@ OUTPUT_ARCH(aarch64)
 
 SECTIONS
 {
+	. = 0x40000000;
 	.text : {
 		. = ALIGN(4);
 		__text_start = .;		/* define a global symbol at text start */
 
+		*(.init.text)			/* .init.text sections (code) */
 		*(.text)				/* .text sections (code) */
 		*(.text*)				/* .text* sections (code) */
 
