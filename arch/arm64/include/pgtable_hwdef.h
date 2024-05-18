@@ -1,7 +1,7 @@
 #ifndef __ARM64_PGTABLE_HWDEF_H__
 #define __ARM64_PGTABLE_HWDEF_H__
 
-#include <pgtable-types.h>
+#include <pgtable_types.h>
 
 /*
  * 4KB  Granule translate pagetable：

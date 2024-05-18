@@ -97,7 +97,7 @@ bss_loop_done:
 	ldr x0, =kernel_stack_end
 	mov sp, x0
 
-	/* set up kernel memory map */
+	/* set up early kernel memory map */
 	bl early_kernel_map
 
 	b .

@@ -2,7 +2,7 @@
 #include <limits.h>
 #include <pgtable.h>
 #include <memory.h>
-#include <pgtable-prot.h>
+#include <pgtable_prot.h>
 
 #define min(a, b) ((a) < (b) ? (a) : (b))
 

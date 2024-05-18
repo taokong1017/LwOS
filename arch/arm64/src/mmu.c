@@ -2,8 +2,8 @@
 #include <types.h>
 #include <pgtable.h>
 #include <memory.h>
-#include <pgtable-types.h>
-#include <pgtable-prot.h>
+#include <pgtable_types.h>
+#include <pgtable_prot.h>
 
 #define BIT(nr) (1UL << nr)
 #define NO_BLOCK_MAPPINGS BIT(0)

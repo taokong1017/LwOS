@@ -70,7 +70,7 @@
 
 #ifndef __ASSEMBLY__
 
-#include <pgtable-hwdef.h>
+#include <pgtable_hwdef.h>
 
 #define PAGE_KERNEL __pgprot(_PAGE_KERNEL)
 #define PAGE_KERNEL_RO __pgprot(_PAGE_KERNEL_RO)

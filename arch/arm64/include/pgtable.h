@@ -1,8 +1,8 @@
 #ifndef __ARM64_PGTABLE_H__
 #define __ARM64_PGTABLE_H__
 
-#include <pgtable-types.h>
-#include <pgtable-hwdef.h>
+#include <pgtable_types.h>
+#include <pgtable_hwdef.h>
 #include <compiler.h>
 
 static inline pte_t pgd_pte(pgd_t pgd) { return __pte(pgd_val(pgd)); }
