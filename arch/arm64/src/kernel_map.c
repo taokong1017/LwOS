@@ -9,7 +9,6 @@
 void map_range(uint64_t *pte, uint64_t start, uint64_t end, uint64_t pa,
 			   pgprot_t prot, int level, pte_t *tbl, bool may_use_cont,
 			   uint64_t va_offset) {
-	uint64_t cmask = (level == 3) ? CONT_PTE_SIZE - 1 : U64_MAX;
 	uint64_t protval = pgprot_val(prot) & ~PTE_TYPE_MASK;
 	int lshift = (3 - level) * (PAGE_SHIFT - 3);
 	uint64_t lmask = (PAGE_SIZE << lshift) - 1;
@@ -44,21 +43,6 @@ void map_range(uint64_t *pte, uint64_t start, uint64_t end, uint64_t pa,
 					  (pte_t *)(__pte_to_phys(*tbl) + va_offset), may_use_cont,
 					  va_offset);
 		} else {
-			/*
-			 * Start a contiguous range if start and pa are
-			 * suitably aligned
-			 */
-			if (((start | pa) & cmask) == 0 && may_use_cont)
-				protval |= PTE_CONT;
-
-			/*
-			 * Clear the contiguous attribute if the remaining
-			 * range does not cover a contiguous block
-			 */
-			if ((end & ~cmask) <= start)
-				protval &= ~PTE_CONT;
-
-			/* Put down a block or page mapping */
 			*tbl = __pte(__phys_to_pte_val(pa) | protval);
 		}
 		pa += next - start;
@@ -85,6 +69,9 @@ extern char __data_end[];
 extern char __bss_start[];
 extern char __bss_end[];
 extern void *memset(void *s, int c, size_t count);
+
+const int data[1024] = {0, 0, 0};
+
 void early_kernel_map() {
 	uint64_t pgdp = (uint64_t)init_pg_dir + PAGE_SIZE;
 	pgprot_t text_prot = PAGE_KERNEL_ROX;

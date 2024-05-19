@@ -76,9 +76,9 @@ el1_entry:
 	/* use SP_ELx */
 	msr	SPSel, #1
 
-	/* Enable SError interrupts */
-	msr	DAIFClr, DAIFCLR_ABT_BIT
-	isb
+	/* disable instructions trap */
+	mov x0, CPACR_EL1_FPEN_NOTRAP
+	msr cpacr_el1, x0
 
 	/* clear bss */
 clear_bss:
@@ -99,6 +99,9 @@ bss_loop_done:
 
 	/* set up early kernel memory map */
 	bl early_kernel_map
+
+	/* enable MMU */
+	bl mmu_enable
 
 	b .
 

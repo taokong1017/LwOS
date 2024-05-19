@@ -4,11 +4,13 @@
 #include <memory.h>
 #include <pgtable_types.h>
 #include <pgtable_prot.h>
+#include <operate_regs.h>
+#include <sys_regs.h>
 
 #define BIT(nr) (1UL << nr)
-#define NO_BLOCK_MAPPINGS BIT(0)
-#define NO_CONT_MAPPINGS BIT(1)
 #define NO_EXEC_MAPPINGS BIT(2) /* assumes FEAT_HPDS is not used */
+
+extern pgd_t init_pg_dir[];
 
 bool pgattr_change_is_safe(uint64_t old, uint64_t new) {
 	/*
@@ -175,4 +177,30 @@ void create_pgd_mapping(pgd_t *pgdir, phys_addr_t phys, unsigned long virt,
 		alloc_init_p4d(pgdp, addr, next, phys, prot, pgtable_alloc, flags);
 		phys += next - addr;
 	} while (pgdp++, addr = next, addr != end);
+}
+
+void mmu_enable() {
+	uint64_t tcr = 0;
+	uint64_t ttbr0 = 0;
+	uint64_t sctlr = 0;
+
+	/* Set memory attribute */
+	write_mair_el1(MAIR_EL1_SET);
+
+	/* Set translation control */
+	tcr = TCR_T0SZ(VA_BITS) | TCR_T1SZ(VA_BITS) | TCR_IRGN_WBWA |
+		  TCR_ORGN_WBWA | TCR_SHARED | TCR_TG0_4K | TCR_TG1_4K | TCR_ASID16 |
+		  TCR_TBI0 | TCR_A1 | TCR_TBI1 | TCR_TBID1;
+	write_tcr_el1(tcr);
+
+	/* Set translation table */
+	ttbr0 = (uint64_t)init_pg_dir;
+	write_ttbr0_el1(ttbr0);
+
+	/* Set system control */
+	isb();
+	sctlr = read_sctlr_el1();
+	sctlr |= CTLR_EL1_MMU_ON;
+	write_sctlr_el1(sctlr);
+	isb();
 }

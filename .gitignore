@@ -1,6 +1,5 @@
 .config
 .config.old
-menuconfig.h
 *.o
 *.cmd
 *.d
