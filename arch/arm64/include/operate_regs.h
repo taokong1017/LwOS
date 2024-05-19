@@ -38,6 +38,5 @@ declare_el123_reg_operation(sctlr);
 declare_el123_reg_operation(spsr);
 declare_el123_reg_operation(tcr);
 declare_el123_reg_operation(ttbr0);
-declare_el123_reg_operation(vbar);
 
 #endif

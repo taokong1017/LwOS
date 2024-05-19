@@ -103,7 +103,7 @@ bss_loop_done:
 	/* enable MMU */
 	bl mmu_enable
 
+	/* enable interrupt & exception */
+	bl exec_enable
+
 	b .
-
-
-

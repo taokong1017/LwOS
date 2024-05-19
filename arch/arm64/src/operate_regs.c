@@ -51,4 +51,3 @@ define_el123_reg_operation(sctlr);
 define_el123_reg_operation(spsr);
 define_el123_reg_operation(tcr);
 define_el123_reg_operation(ttbr0);
-define_el123_reg_operation(vbar);

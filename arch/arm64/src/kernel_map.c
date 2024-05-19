@@ -70,8 +70,8 @@ extern char __bss_start[];
 extern char __bss_end[];
 extern char __kernel_stack_start[];
 extern char __kernel_stack_end[];
-extern char __interrupt_stack_start[];
-extern char __interrupt_stack_end[];
+extern char __exec_stack_start[];
+extern char __exec_stack_end[];
 extern void *memset(void *s, int c, size_t count);
 
 void early_kernel_map() {
@@ -91,6 +91,6 @@ void early_kernel_map() {
 				0);
 	map_segment(init_pg_dir, &pgdp, 0, __kernel_stack_start, __kernel_stack_end,
 				data_prot, false, 0);
-	map_segment(init_pg_dir, &pgdp, 0, __interrupt_stack_start,
-				__interrupt_stack_end, data_prot, false, 0);
+	map_segment(init_pg_dir, &pgdp, 0, __exec_stack_start, __exec_stack_end,
+				data_prot, false, 0);
 }

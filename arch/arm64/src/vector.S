@@ -201,10 +201,10 @@ EXCEPTION_HANDLER aarch32_el0_serror_handler
 	POP_GENERAL_REGS
 
 .globl _vector_table
-.type arch_fpu_save, object
+.type _vector_table, function
 .section .text, "ax"
-_vector_table:
 .align 11
+_vector_table:
 	ventry el1t_sync_handler   /* Synchronous EL1t */
 	ventry el1t_irq_handler    /* IRQ EL1t */
 	ventry el1t_firq_handler   /* FIQ EL1t */
@@ -224,3 +224,12 @@ _vector_table:
 	ventry aarch32_el0_irq_handler     /* IRQ 32-bit EL0 */
 	ventry aarch32_el0_firq_handler    /* FIQ 32-bit EL0 */
 	ventry aarch32_el0_serror_handler  /* Error 32-bit EL0 */
+
+.globl exec_enable
+.type exec_enable, function
+.section .text, "ax"
+exec_enable:
+	adr x0, _vector_table
+	msr vbar_el1, x0
+	isb
+	ret
