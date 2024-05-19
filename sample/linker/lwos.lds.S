@@ -51,12 +51,12 @@ SECTIONS
 	init_pg_end = .;
 
 	. = ALIGN(0x1000);
-	kernel_stack_start = .;
+	__kernel_stack_start = .;
 	. += 0x1000;
-	kernel_stack_end = .;
+	__kernel_stack_end = .;
 
 	. = ALIGN(0x1000);
-	interrupt_stack_start = .;
+	__interrupt_stack_start = .;
 	. += 0x1000;
-	interrupt_stack_end = .;
+	__interrupt_stack_end = .;
 }

@@ -68,9 +68,11 @@ extern char __data_start[];
 extern char __data_end[];
 extern char __bss_start[];
 extern char __bss_end[];
+extern char __kernel_stack_start[];
+extern char __kernel_stack_end[];
+extern char __interrupt_stack_start[];
+extern char __interrupt_stack_end[];
 extern void *memset(void *s, int c, size_t count);
-
-const int data[1024] = {0, 0, 0};
 
 void early_kernel_map() {
 	uint64_t pgdp = (uint64_t)init_pg_dir + PAGE_SIZE;
@@ -87,4 +89,8 @@ void early_kernel_map() {
 				false, 0);
 	map_segment(init_pg_dir, &pgdp, 0, __bss_start, __bss_end, data_prot, false,
 				0);
+	map_segment(init_pg_dir, &pgdp, 0, __kernel_stack_start, __kernel_stack_end,
+				data_prot, false, 0);
+	map_segment(init_pg_dir, &pgdp, 0, __interrupt_stack_start,
+				__interrupt_stack_end, data_prot, false, 0);
 }
