@@ -72,7 +72,6 @@ extern char __kernel_stack_start[];
 extern char __kernel_stack_end[];
 extern char __exec_stack_start[];
 extern char __exec_stack_end[];
-extern void *memset(void *s, int c, size_t count);
 
 void early_kernel_map() {
 	uint64_t pgdp = (uint64_t)init_pg_dir + PAGE_SIZE;
