@@ -6,7 +6,7 @@
 
 struct arch_regs {
 	/* X0 - X29 */
-	uint64_t gpr[CPU_GPR_COUNT];
+	uint64_t gprs[CPU_GPR_COUNT];
 	/* Link Register (or X30) */
 	uint64_t lr;
 	/* Stack Pointer */

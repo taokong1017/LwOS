@@ -106,98 +106,82 @@
 
 EXCEPTION_HANDLER el1t_sync_handler
 	PUSH_GENERAL_REGS
-	mov	x1, EXC_OS_SYNC_SP0
-	CALL_EXCEPTION_CFUNC default_exception_handler
+	CALL_EXCEPTION_CFUNC el1t_64_sync_handler
 	POP_GENERAL_REGS
 
 EXCEPTION_HANDLER el1t_irq_handler
 	PUSH_GENERAL_REGS
-	mov	x1, EXC_OS_IRQ_SP0
-	CALL_EXCEPTION_CFUNC default_exception_handler
+	CALL_EXCEPTION_CFUNC el1t_64_irq_handler
 	POP_GENERAL_REGS
 
 EXCEPTION_HANDLER el1t_firq_handler
 	PUSH_GENERAL_REGS
-	mov	x1, EXC_OS_FIQ_SP0
-	CALL_EXCEPTION_CFUNC default_exception_handler
+	CALL_EXCEPTION_CFUNC el1t_64_firq_handler
 	POP_GENERAL_REGS
 
 EXCEPTION_HANDLER el1t_serror_handler
 	PUSH_GENERAL_REGS
-	mov	x1, EXC_OS_SERROR_SP0
-	CALL_EXCEPTION_CFUNC default_exception_handler
+	CALL_EXCEPTION_CFUNC el1t_64_serror_handler
 	POP_GENERAL_REGS
 
 EXCEPTION_HANDLER el1h_sync_handler
 	PUSH_GENERAL_REGS
-	mov	x1, EXC_OS_SYNC_SPx
-	CALL_EXCEPTION_CFUNC default_exception_handler
+	CALL_EXCEPTION_CFUNC el1h_64_sync_handler
 	POP_GENERAL_REGS
 
 EXCEPTION_HANDLER el1h_irq_handler
 	PUSH_GENERAL_REGS
-	mov	x1, EXC_OS_IRQ_SPx
-	CALL_EXCEPTION_CFUNC default_exception_handler
+	CALL_EXCEPTION_CFUNC el1h_64_irq_handler
 	POP_GENERAL_REGS
 
 EXCEPTION_HANDLER el1h_firq_handler
 	PUSH_GENERAL_REGS
-	mov	x1, EXC_OS_FIQ_SPx
-	CALL_EXCEPTION_CFUNC default_exception_handler
+	CALL_EXCEPTION_CFUNC el1h_64_firq_handler
 	POP_GENERAL_REGS
 
 EXCEPTION_HANDLER el1h_serror_handler
 	PUSH_GENERAL_REGS
-	mov	x1, EXC_OS_SERROR_SPx
-	CALL_EXCEPTION_CFUNC default_exception_handler
+	CALL_EXCEPTION_CFUNC el1h_64_serror_handler
 	POP_GENERAL_REGS
 
 EXCEPTION_HANDLER aarch64_el0_sync_handler
 	PUSH_GENERAL_REGS
-	mov	x1, EXC_APP_SYNC_A64
-	CALL_EXCEPTION_CFUNC default_exception_handler
+	CALL_EXCEPTION_CFUNC el0t_64_sync_handler
 	POP_GENERAL_REGS
 
 EXCEPTION_HANDLER aarch64_el0_irq_handler
 	PUSH_GENERAL_REGS
-	mov	x1, EXC_APP_IRQ_A64
-	CALL_EXCEPTION_CFUNC default_exception_handler
+	CALL_EXCEPTION_CFUNC el0t_64_irq_handler
 	POP_GENERAL_REGS
 
 EXCEPTION_HANDLER aarch64_el0_firq_handler
 	PUSH_GENERAL_REGS
-	mov	x1, EXC_APP_FIQ_A64
-	CALL_EXCEPTION_CFUNC default_exception_handler
+	CALL_EXCEPTION_CFUNC el0t_64_firq_handler
 	POP_GENERAL_REGS
 
 EXCEPTION_HANDLER aarch64_el0_serror_handler
 	PUSH_GENERAL_REGS
-	mov	x1, EXC_APP_SERROR_A64
-	CALL_EXCEPTION_CFUNC default_exception_handler
+	CALL_EXCEPTION_CFUNC el0t_64_serror_handler
 	POP_GENERAL_REGS
 
 EXCEPTION_HANDLER aarch32_el0_sync_handler
 	PUSH_GENERAL_REGS
-	mov	x1, EXC_APP_SYNC_A32
-	CALL_EXCEPTION_CFUNC default_exception_handler
+	CALL_EXCEPTION_CFUNC el0t_32_sync_handler
 	POP_GENERAL_REGS
 
 EXCEPTION_HANDLER aarch32_el0_irq_handler
 	PUSH_GENERAL_REGS
-	mov	x1, EXC_APP_IRQ_A32
-	CALL_EXCEPTION_CFUNC default_exception_handler
+	CALL_EXCEPTION_CFUNC el0t_32_irq_handler
 	POP_GENERAL_REGS
 
 EXCEPTION_HANDLER aarch32_el0_firq_handler
 	PUSH_GENERAL_REGS
-	mov	x1, EXC_APP_FIQ_A32
-	CALL_EXCEPTION_CFUNC default_exception_handler
+	CALL_EXCEPTION_CFUNC el0t_32_firq_handler
 	POP_GENERAL_REGS
 
 EXCEPTION_HANDLER aarch32_el0_serror_handler
 	PUSH_GENERAL_REGS
-	mov	x1, EXC_APP_SERROR_A32
-	CALL_EXCEPTION_CFUNC default_exception_handler
+	CALL_EXCEPTION_CFUNC el0t_32_serror_handler
 	POP_GENERAL_REGS
 
 .globl _vector_table

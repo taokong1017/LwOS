@@ -4,7 +4,15 @@
 #include <errno.h>
 #include <string.h>
 
-static int write(int fd, const void *buf, size_t size) { return size; }
+static int write(int fd, const void *buf, size_t size) {
+	static char buffer[1024] = {0};
+	int used = 0;
+	if (used < 1000) {
+		strncpy(buffer+used, buf, size);
+		used += size;
+	}
+	return size;
+}
 
 static int fileno(FILE *stream) {
 	intptr_t i = (intptr_t)stream;
