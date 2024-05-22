@@ -3,6 +3,7 @@
 #include <pgtable.h>
 #include <memory.h>
 #include <pgtable_prot.h>
+#include <uart_pl011.h>
 
 #define min(a, b) ((a) < (b) ? (a) : (b))
 
@@ -92,4 +93,6 @@ void early_kernel_map() {
 				data_prot, false, 0);
 	map_segment(init_pg_dir, &pgdp, 0, __exec_stack_start, __exec_stack_end,
 				data_prot, false, 0);
+	map_segment(init_pg_dir, &pgdp, 0, (void *)UART_REG_BASE,
+				(void *)UART_REG_BASE + UART_REG_SIZE, data_prot, false, 0);
 }

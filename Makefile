@@ -1,7 +1,7 @@
 TARGET     = LwOS.elf
 BASE_DIR   = $(CURDIR)
 CONFIG_DIR = $(BASE_DIR)/config
-SUB_DIRS   = arch kernel
+SUB_DIRS   = arch kernel drivers
 LINKER     = $(BASE_DIR)/sample/linker/lwos.lds
 CONFIG     :=
 
@@ -74,11 +74,11 @@ dbg:
 	$(Q)$(QEMU_RUN) $(TARGET) -S -s
 
 menuconfig:
-	$(Q)python  $(CONFIG_DIR)/usr_config.py
+	$(Q)python3  $(CONFIG_DIR)/usr_config.py
 
 defconfig:
 	$(Q)if [ -e $(CONFIG_DIR)/$(CONFIG) ]; then \
-		python $(CONFIG_DIR)/usr_config.py defconfig $(CONFIG_DIR)/$(CONFIG); \
+		python3 $(CONFIG_DIR)/usr_config.py defconfig $(CONFIG_DIR)/$(CONFIG); \
 	else	\
 		echo "*** $(CONFIG_DIR)/$(CONFIG) does not exist ***"; \
 	fi

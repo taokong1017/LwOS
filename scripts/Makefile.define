@@ -11,13 +11,17 @@ ifeq ($(CONFIG_COMPILER_OPTIMIZE_SIZE), y)
 	CFLAGS += -Os
 endif
 
-CFLAGS += -g -Wall -Werror -fno-builtin -nostdinc -nostdlib -pipe \
-	-I$(srctree)/sample/include \
+CFLAGS += -g -Wall -Werror -fno-builtin -nostdinc -nostdlib -pipe  \
+
+INCLUDES := -I$(srctree)/sample/include \
 	-I$(srctree)/kernel/include \
 	-I$(srctree)
 
 ifeq ($(CONFIG_ARM64), y)
-	CFLAGS +=-I$(srctree)/arch/arm64/include
+	CFLAGS += -mgeneral-regs-only \
+		$(INCLUDES) \
+		-I$(srctree)/arch/arm64/include \
+		-I$(srctree)/drivers/serial/include
 endif
 
 AFLAGS += -D__ASSEMBLY__

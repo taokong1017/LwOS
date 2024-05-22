@@ -3,15 +3,11 @@
 #include <types.h>
 #include <errno.h>
 #include <string.h>
+#include <uart_pl011.h>
 
 static int write(int fd, const void *buf, size_t size) {
-	static char buffer[1024] = {0};
-	int used = 0;
-	if (used < 1000) {
-		strncpy(buffer+used, buf, size);
-		used += size;
-	}
-	return size;
+	(void)fd;
+	return uart_puts(buf, size);
 }
 
 static int fileno(FILE *stream) {
