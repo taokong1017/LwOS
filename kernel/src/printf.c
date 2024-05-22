@@ -84,8 +84,11 @@ static int u64toh_r(uint64_t in, char *buffer) {
 		if (dig > 9)
 			dig += 'a' - '0' - 10;
 		pos -= 4;
-		if (dig || digits || pos < 0)
+		if (dig || digits || pos < 0) {
 			buffer[digits++] = '0' + dig;
+		} else {
+			buffer[digits++] = '0' + dig;
+		}
 	} while (pos >= 0);
 
 	buffer[digits] = 0;
