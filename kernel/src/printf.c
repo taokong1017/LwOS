@@ -97,14 +97,14 @@ static void move_right(char *buf, char *end, unsigned len, unsigned spaces) {
 }
 
 static char *widen_string(char *buf, int n, char *end,
-						  struct printf_spec spec) {
+						  struct printf_spec *spec) {
 	unsigned spaces;
 
-	if (n >= spec.field_width)
+	if (n >= spec->field_width)
 		return buf;
 	/* we want to pad the sucker */
-	spaces = spec.field_width - n;
-	if (!(spec.flags & LEFT)) {
+	spaces = spec->field_width - n;
+	if (!(spec->flags & LEFT)) {
 		move_right(buf - n, end, n, spaces);
 		return buf + spaces;
 	}
@@ -117,9 +117,9 @@ static char *widen_string(char *buf, int n, char *end,
 }
 
 static char *string(char *buf, char *end, const char *s,
-					struct printf_spec spec) {
+					struct printf_spec *spec) {
 	int len = 0;
-	int lim = spec.precision;
+	int lim = spec->precision;
 
 	while (lim--) {
 		char c = *s++;
@@ -245,38 +245,38 @@ static char *put_dec(char *buf, unsigned long long n) {
 }
 
 static char *number(char *buf, char *end, unsigned long long num,
-					struct printf_spec spec) {
+					struct printf_spec *spec) {
 	/* put_dec requires 2-byte alignment of the buffer. */
 	char tmp[3 * sizeof(num)];
 	char sign;
 	char locase;
-	int need_pfx = ((spec.flags & SPECIAL) && spec.base != 10);
+	int need_pfx = ((spec->flags & SPECIAL) && spec->base != 10);
 	int i;
 	bool is_zero = num == 0LL;
-	int field_width = spec.field_width;
-	int precision = spec.precision;
+	int field_width = spec->field_width;
+	int precision = spec->precision;
 
 	/* locase = 0 or 0x20. ORing digits or letters with 'locase'
 	 * produces same digits or (maybe lowercased) letters */
-	locase = (spec.flags & SMALL);
-	if (spec.flags & LEFT)
-		spec.flags &= ~ZEROPAD;
+	locase = (spec->flags & SMALL);
+	if (spec->flags & LEFT)
+		spec->flags &= ~ZEROPAD;
 	sign = 0;
-	if (spec.flags & SIGN) {
+	if (spec->flags & SIGN) {
 		if ((signed long long)num < 0) {
 			sign = '-';
 			num = -(signed long long)num;
 			field_width--;
-		} else if (spec.flags & PLUS) {
+		} else if (spec->flags & PLUS) {
 			sign = '+';
 			field_width--;
-		} else if (spec.flags & SPACE) {
+		} else if (spec->flags & SPACE) {
 			sign = ' ';
 			field_width--;
 		}
 	}
 	if (need_pfx) {
-		if (spec.base == 16)
+		if (spec->base == 16)
 			field_width -= 2;
 		else if (!is_zero)
 			field_width--;
@@ -284,13 +284,13 @@ static char *number(char *buf, char *end, unsigned long long num,
 
 	/* generate full string in tmp[], in reverse order */
 	i = 0;
-	if (num < spec.base)
+	if (num < spec->base)
 		tmp[i++] = hex_asc_upper[num] | locase;
-	else if (spec.base != 10) { /* 8 or 16 */
-		int mask = spec.base - 1;
+	else if (spec->base != 10) { /* 8 or 16 */
+		int mask = spec->base - 1;
 		int shift = 3;
 
-		if (spec.base == 16)
+		if (spec->base == 16)
 			shift = 4;
 		do {
 			tmp[i++] = (hex_asc_upper[((unsigned char)num) & mask] | locase);
@@ -305,7 +305,7 @@ static char *number(char *buf, char *end, unsigned long long num,
 		precision = i;
 	/* leading space padding */
 	field_width -= precision;
-	if (!(spec.flags & (ZEROPAD | LEFT))) {
+	if (!(spec->flags & (ZEROPAD | LEFT))) {
 		while (--field_width >= 0) {
 			if (buf < end)
 				*buf = ' ';
@@ -320,20 +320,20 @@ static char *number(char *buf, char *end, unsigned long long num,
 	}
 	/* "0x" / "0" prefix */
 	if (need_pfx) {
-		if (spec.base == 16 || !is_zero) {
+		if (spec->base == 16 || !is_zero) {
 			if (buf < end)
 				*buf = '0';
 			++buf;
 		}
-		if (spec.base == 16) {
+		if (spec->base == 16) {
 			if (buf < end)
 				*buf = ('X' | locase);
 			++buf;
 		}
 	}
 	/* zero or space padding */
-	if (!(spec.flags & LEFT)) {
-		char c = ' ' + (spec.flags & ZEROPAD);
+	if (!(spec->flags & LEFT)) {
+		char c = ' ' + (spec->flags & ZEROPAD);
 
 		while (--field_width >= 0) {
 			if (buf < end)
@@ -364,12 +364,12 @@ static char *number(char *buf, char *end, unsigned long long num,
 }
 
 static char *pointer_string(char *buf, char *end, const void *ptr,
-							struct printf_spec spec) {
-	spec.base = 16;
-	spec.flags |= SMALL;
-	if (spec.field_width == -1) {
-		spec.field_width = 2 * sizeof(ptr);
-		spec.flags |= ZEROPAD;
+							struct printf_spec *spec) {
+	spec->base = 16;
+	spec->flags |= SMALL;
+	if (spec->field_width == -1) {
+		spec->field_width = 2 * sizeof(ptr);
+		spec->flags |= ZEROPAD;
 	}
 
 	return number(buf, end, (unsigned long int)ptr, spec);
@@ -622,12 +622,12 @@ int vsnprintf(char *buf, size_t size, const char *fmt, va_list args) {
 		}
 
 		case FORMAT_TYPE_STR:
-			str = string(str, end, va_arg(args, char *), spec);
+			str = string(str, end, va_arg(args, char *), &spec);
 			break;
 
 		case FORMAT_TYPE_PTR:
 			str = pointer_string(str, end, (const void *)va_arg(args, void *),
-								 spec);
+								 &spec);
 			while (isalnum(*fmt))
 				fmt++;
 			break;
@@ -688,7 +688,7 @@ int vsnprintf(char *buf, size_t size, const char *fmt, va_list args) {
 				num = va_arg(args, unsigned int);
 			}
 
-			str = number(str, end, num, spec);
+			str = number(str, end, num, &spec);
 		}
 	}
 
@@ -712,5 +712,6 @@ int printf(const char *fmt, ...) {
 	ret = vsnprintf(buf, BUF_SIZE, fmt, args);
 	va_end(args);
 	uart_puts(buf, ret);
+
 	return ret;
 }

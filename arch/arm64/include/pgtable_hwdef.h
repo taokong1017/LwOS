@@ -2,6 +2,7 @@
 #define __ARM64_PGTABLE_HWDEF_H__
 
 #include <pgtable_types.h>
+#include <menuconfig.h>
 
 /*
  * 4KB  Granule translate pagetable：
@@ -17,8 +18,11 @@
  * |               +---------------------------> [47:39] L0 index  L4P <-- PGD
  * +-------------------------------------------> [63] TTBR0/1
  */
+#ifdef CONFIG_4K_PAGE_SIZE
 #define PAGE_SHIFT 12
 #define PAGE_SIZE (1UL << PAGE_SHIFT)
+#endif
+
 #define PAGE_MASK (~(PAGE_SIZE - 1))
 #define VA_BITS 48
 

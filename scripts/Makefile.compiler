@@ -9,6 +9,3 @@ OBJDUMP  = $(CROSS_COMPILE)objdump
 SIZE     = $(CROSS_COMPILE)size
 NM       = $(CROSS_COMPILE)nm
 MAKE     = make
-
-$(if $(CROSS_COMPILE),,$(error CROSS_COMPILE is not set))
-

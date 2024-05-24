@@ -100,6 +100,8 @@ bss_loop_done:
 
 	/* set up early kernel memory map */
 	bl early_kernel_map
+
+	/* init uart */
 	bl uart_early_init
 
 	/* enable MMU */
@@ -108,4 +110,5 @@ bss_loop_done:
 	/* enable interrupt & exception */
 	bl exec_enable
 
-	b .
+	/* enter the kernel entry */
+	b kernel_start

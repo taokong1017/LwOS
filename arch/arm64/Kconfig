@@ -14,3 +14,12 @@ config CONFIG_LITTLE_ENDIANE
 	bool "Litte Endiane"
 endchoice
 
+choice
+	prompt "Page Size Option"
+	default CONFIG_4K_PAGE_SIZE
+	help
+		This option is used in configuring the Memory Management Unit (MMU) page size.
+
+config CONFIG_4K_PAGE_SIZE
+	bool "4K Page Size"
+endchoice

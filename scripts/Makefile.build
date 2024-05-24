@@ -8,7 +8,7 @@ PHONY := __build
 __build:
 
 # Read .config if it exist, otherwise ignore
-include $(srctree)/.config
+-include $(srctree)/.config
 include $(srctree)/scripts/Makefile.define
 include $(srctree)/scripts/Makefile.compiler
 include $(srctree)/scripts/Kbuild.include

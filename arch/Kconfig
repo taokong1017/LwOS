@@ -2,7 +2,7 @@ menu "Arch"
 
 choice ARCH_TYPE
 	prompt "Arch Option"
-	default CONFIG_ARM
+	default CONFIG_ARM64
 	help
 		This Option will enable compiler Optimize options.
 

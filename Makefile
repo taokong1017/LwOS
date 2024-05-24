@@ -5,6 +5,8 @@ SUB_DIRS   = arch kernel drivers
 LINKER     = $(BASE_DIR)/sample/linker/lwos.lds
 CONFIG     :=
 
+CROSS_COMPILE :=
+
 ifeq ($(V),1)
 	export quiet =
 	export Q =
@@ -44,18 +46,26 @@ define MAKE_CLEAN_CMD
 	done
 endef
 
-.PHONY: all menuconfig run dbg clean help obj defconfig gen $(LINKER)
+.PHONY: all check menuconfig run dbg clean help obj defconfig gen $(LINKER)
 
 all: obj $(LINKER)
 	$(Q)$(LD) $(LDFLAGS) -T $(LINKER) -e __start -o $(TARGET) \
 		$(strip $(filter-out %/offsets.o, $(call ALL_OBJS, $(srctree))))
 	@echo "build all success"
 
-obj: gen
+check:
+ifeq ($(CROSS_COMPILE),)
+	$(error CROSS_COMPILE is not set)
+endif
+ifeq ($(wildcard .config),)
+	$(error excute make menuconfig or make defconfig ***)
+endif
+
+obj: gen 
 	$(Q)$(call MAKE_CMD, $(SUB_DIRS))
 	@echo "build obj success"
 
-gen:
+gen: check
 ifeq ($(CONFIG_ARM64), y)
 	$(Q)$(CC) $(CFLAGS) -c $(BASE_DIR)/arch/arm64/src/offsets.c -o $(BASE_DIR)/arch/arm64/src/offsets.o
 	$(Q)python3 scripts/gen_offset_header.py -i $(BASE_DIR)/arch/arm64/src/offsets.o -o \
@@ -63,7 +73,7 @@ ifeq ($(CONFIG_ARM64), y)
 	$(Q)$(RM) -rf $(BASE_DIR)/arch/arm64/src/offsets.o
 endif
 
-$(LINKER): %.lds: %.lds.S
+$(LINKER): %.lds: %.lds.S check
 	$(Q)$(call MAKE_LDS, $@, $<);
 	@echo "build linker success"
 
@@ -84,7 +94,7 @@ defconfig:
 	fi
 
 clean:
-	$(Q)$(RM) -rf $(TARGET)
+	$(Q)$(RM) -rf $(TARGET) .config menuconfig.h
 	$(Q)$(RM) -rf $(BASE_DIR)/sample/linker/lwos.lds $(BASE_DIR)/sample/linker/.lwos.lds*
 	$(Q)$(RM) -rf $(BASE_DIR)/arch/arm64/include/offsets.h
 	$(Q)$(call MAKE_CLEAN_CMD, $(SUB_DIRS))
