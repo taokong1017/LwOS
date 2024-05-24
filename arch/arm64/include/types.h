@@ -12,8 +12,10 @@ typedef unsigned long int uint64_t;
 typedef int8_t bool;
 typedef uint64_t phys_addr_t;
 typedef unsigned long size_t;
+typedef long ssize_t;
 typedef unsigned long uintptr_t;
 typedef long intptr_t;
+typedef signed long ptrdiff_t;
 
 #define true 1
 #define false 0

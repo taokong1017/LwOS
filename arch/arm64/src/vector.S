@@ -40,6 +40,7 @@
 
 .macro	ventry	label
 	.align	7
+	msr SPSel, #1
 	b	\label
 .endm
 
