@@ -93,13 +93,9 @@ bss_loop:
 bss_loop_done:
 
 	/* set stack pointer */
-	.extern __exec_stack_end
 	.extern __kernel_stack_end
-	ldr x0, =__exec_stack_end
-	msr SPSel, #1
-	mov sp, x0
 	ldr x0, =__kernel_stack_end
-	msr SPSel, #0
+	msr SPSel, #1
 	mov sp, x0
 
 	/* set up early kernel memory map */

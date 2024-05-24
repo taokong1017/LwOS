@@ -56,7 +56,7 @@ SECTIONS
 	__kernel_stack_end = .;
 
 	. = ALIGN(0x1000);
-	__exec_stack_start = .;
+	__interrupt_stack_start = .;
 	. += 0x1000;
-	__exec_stack_end = .;
+	__interrupt_stack_end = .;
 }

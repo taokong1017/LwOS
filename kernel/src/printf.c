@@ -5,6 +5,7 @@
 #include <string.h>
 #include <limits.h>
 #include <uart_pl011.h>
+#include <menuconfig.h>
 
 #define SIGN 1	   /* unsigned/signed, must be 1 */
 #define LEFT 2	   /* left justified */
@@ -13,6 +14,7 @@
 #define ZEROPAD 16 /* pad with zero, must be 16 == '0' - ' ' */
 #define SMALL 32   /* use lowercase in hex (must be 32 == 0x20) */
 #define SPECIAL 64 /* prefix hex with "0x", octal with "0" */
+#define BUF_SIZE 512
 
 enum format_type {
 	FORMAT_TYPE_NONE, /* Just a string part */
@@ -43,8 +45,8 @@ struct printf_spec {
 	signed int precision : 16;	 /* # of digits/chars */
 };
 
-const char hex_asc[] = "0123456789abcdef";
-const char hex_asc_upper[] = "0123456789ABCDEF";
+static const char hex_asc_upper[] = "0123456789ABCDEF";
+static char buf[BUF_SIZE] = {0};
 
 static inline int isdigit(int c) { return '0' <= c && c <= '9'; }
 
@@ -132,7 +134,7 @@ static char *string(char *buf, char *end, const char *s,
 }
 
 static const uint16_t decpair[100] = {
-#if __BYTE_ORDER == __BIG_ENDIAN
+#ifdef CONFIG_BIG_ENDIANE
 #define bswap_16(x) (((x) >> 8) | ((x) << 8))
 #define cpu_to_le16 bswap_16
 #else
@@ -705,10 +707,9 @@ out:
 int printf(const char *fmt, ...) {
 	va_list args;
 	int ret;
-	char buf[512] = {0};
 
 	va_start(args, fmt);
-	ret = vsnprintf(buf, 512, fmt, args);
+	ret = vsnprintf(buf, BUF_SIZE, fmt, args);
 	va_end(args);
 	uart_puts(buf, ret);
 	return ret;

@@ -12,10 +12,10 @@ void uart_putc(char c) {
 	UARTREG(UART_REG_BASE, UART_DR) = c;
 }
 
-int32_t uart_puts(const char *s, uint32_t len) {
+int32_t uart_puts(const char *s, int32_t len) {
 	const char *ptr = s;
 
-	if (len == 0 || ptr == NULL) {
+	if (len <= 0 || ptr == NULL) {
 		return -1;
 	}
 

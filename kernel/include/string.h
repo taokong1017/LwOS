@@ -41,14 +41,6 @@ char *strncpy(char *dest, const char *src, size_t count);
 size_t strlen(const char *s);
 
 /**
- * @brief Fill a block of memory with a specific value
- * @param dest: Pointer to the start of the memory block to fill
- * @param value: The value to fill the memory block with
- * @param numBytes: The number of bytes to fill
- */
-void *memset(void *dest, unsigned int value, size_t numBytes);
-
-/**
  * @brief Copies a specified number of characters from a source string to a
  * destination string
  * @param dest: Pointer to the destination string

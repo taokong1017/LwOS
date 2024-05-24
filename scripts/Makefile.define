@@ -17,6 +17,12 @@ INCLUDES := -I$(srctree)/sample/include \
 	-I$(srctree)/kernel/include \
 	-I$(srctree)
 
+ifeq ($(CONFIG_BIG_ENDIANE),y)
+	CFLAGS += -mbig-endian
+else
+	CFLAGS += -mlittle-endian
+endif
+
 ifeq ($(CONFIG_ARM64), y)
 	CFLAGS += -mgeneral-regs-only \
 		$(INCLUDES) \
@@ -26,4 +32,10 @@ endif
 
 AFLAGS += -D__ASSEMBLY__
 
-LDFLAGS += -static --no-warn-rwx-segments
+LDFLAGS := -static --no-warn-rwx-segments
+
+ifeq ($(CONFIG_BIG_ENDIANE),y)
+	LDFLAGS += -EB
+else
+	LDFLAGS += -EL
+endif

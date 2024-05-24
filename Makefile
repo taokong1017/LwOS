@@ -20,7 +20,7 @@ define ALL_OBJS
 	$(shell find $(1) -name "*.o")
 endef
 
-include .config
+-include .config
 include scripts/Makefile.compiler
 include scripts/Makefile.define
 include scripts/Kbuild.include

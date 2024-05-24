@@ -16,6 +16,6 @@ void uart_early_init();
 
 void uart_putc(char c);
 
-int32_t uart_puts(const char *s, uint32_t len);
+int32_t uart_puts(const char *s, int32_t len);
 
 #endif
