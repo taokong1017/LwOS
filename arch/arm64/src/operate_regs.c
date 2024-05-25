@@ -32,7 +32,6 @@ define_reg_operation(cnthp_ctl_el2);
 define_reg_operation(cntv_ctl_el0);
 define_reg_operation(cntv_cval_el0);
 define_reg_operation(cntvoff_el2);
-define_reg_operation(currentel);
 define_reg_operation(csselr_el1);
 define_reg_operation(daif);
 define_reg_operation(hcr_el2);
