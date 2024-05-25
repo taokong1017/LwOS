@@ -14,7 +14,7 @@
 #define ZEROPAD 16 /* pad with zero, must be 16 == '0' - ' ' */
 #define SMALL 32   /* use lowercase in hex (must be 32 == 0x20) */
 #define SPECIAL 64 /* prefix hex with "0x", octal with "0" */
-#define BUF_SIZE 512
+#define BUF_SIZE 1024
 
 enum format_type {
 	FORMAT_TYPE_NONE, /* Just a string part */

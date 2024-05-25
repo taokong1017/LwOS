@@ -6,6 +6,7 @@ LINKER     = $(BASE_DIR)/sample/linker/lwos.lds
 CONFIG     :=
 
 CROSS_COMPILE :=
+LOGO       := kernel/src/logo.c
 
 ifeq ($(V),1)
 	export quiet =
@@ -72,6 +73,7 @@ ifeq ($(CONFIG_ARM64), y)
 		$(BASE_DIR)/arch/arm64/include/offsets.h
 	$(Q)$(RM) -rf $(BASE_DIR)/arch/arm64/src/offsets.o
 endif
+	$(Q)python3 scripts/logo_gen.py -o $(LOGO)
 
 $(LINKER): %.lds: %.lds.S check
 	$(Q)$(call MAKE_LDS, $@, $<);
@@ -94,7 +96,7 @@ defconfig:
 	fi
 
 clean:
-	$(Q)$(RM) -rf $(TARGET) .config menuconfig.h
+	$(Q)$(RM) -rf $(TARGET) .config menuconfig.h $(LOGO)
 	$(Q)$(RM) -rf $(BASE_DIR)/sample/linker/lwos.lds $(BASE_DIR)/sample/linker/.lwos.lds*
 	$(Q)$(RM) -rf $(BASE_DIR)/arch/arm64/include/offsets.h
 	$(Q)$(call MAKE_CLEAN_CMD, $(SUB_DIRS))

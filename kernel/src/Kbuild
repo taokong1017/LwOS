@@ -1,4 +1,5 @@
 obj-y := string.o \
 	printf.o \
-	init.o
+	init.o \
+	logo.o
 
