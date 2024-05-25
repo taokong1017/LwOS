@@ -25,6 +25,7 @@ def convert_ascii_art(ascii_art_input, output_file):
 		f.write(full_ascii_art)
 
 # ASCII字符图
+# 网站生成工具，https://www.patorjk.com/software/taag/#p=display&f=Graffiti&t=Type%20Something%20
 ascii_art = '''
   _        _____      _____  _    _  ______  _       _
  | |      / ____|    / ____|| |  | ||  ____|| |     | |
