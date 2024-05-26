@@ -6,5 +6,7 @@ obj-y := vector.o \
 	kernel_map.o \
 	head.o
 
+obj-$(CONFIG_GIC_V2) += gic_v2.o
+
 obj-$(CONFIG_FPU_ENABLE) += fpu.o
 

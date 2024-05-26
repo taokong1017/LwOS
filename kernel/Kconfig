@@ -1,0 +1,9 @@
+menu "Kernel"
+
+config CONFIG_SMP
+	bool "Enable Kernel SMP"
+	default n
+	help
+		this option enables kernel smp to use multiple CPUs.
+
+endmenu

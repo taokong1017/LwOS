@@ -23,3 +23,4 @@ endchoice
 endmenu
 
 source "arch/Kconfig"
+source "kernel/Kconfig"

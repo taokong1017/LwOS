@@ -23,3 +23,19 @@ choice
 config CONFIG_4K_PAGE_SIZE
 	bool "4K Page Size"
 endchoice
+
+config CONFIG_CPUS_MAX_NUM
+	int "CPUs Maximum Number"
+	default 2
+	help
+		This represents the number of phyiscal cores.
+
+choice
+	prompt "GIC Option"
+	default CONFIG_GIC_V2
+	help
+		This Option will generate GIC options.
+
+config CONFIG_GIC_V2
+	bool "GIC V2"
+endchoice
