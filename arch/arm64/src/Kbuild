@@ -4,9 +4,12 @@ obj-y := vector.o \
 	operate_regs.o \
 	mmu.o \
 	kernel_map.o \
-	head.o
+	head.o \
+	isr.o
 
-obj-$(CONFIG_GIC_V2) += gic_v2.o
+obj-$(CONFIG_GIC_V2) += gic_v2.o \
+	isr_table.o \
+	irq.o
 
 obj-$(CONFIG_FPU_ENABLE) += fpu.o
 
