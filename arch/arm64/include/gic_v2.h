@@ -1,6 +1,10 @@
 #ifndef __ARM64_GIC_V2_H__
 #define __ARM64_GIC_V2_H__
 
+/* BIT(0) reserved for IRQ_ZERO_LATENCY */
+#define IRQ_TYPE_LEVEL (1UL << 1)
+#define IRQ_TYPE_EDGE (1UL << 2)
+
 /* GIC Register Interface Base Addresses */
 #define GIC_BASE 0x8000000
 #define GIC_SIZE 0x20000
@@ -63,6 +67,10 @@
 
 /* 0x0010  End of Interrupt Register */
 #define GICC_EOIR (GIC_CPU_BASE + 0x10)
+
+/* 0x00fc  CPU Interface Identification Register */
+#define GICC_IIDR (GIC_CPU_BASE + 0xfc)
+#define GIC_V2_MASK 0x02043B
 
 /* GICC_CTLR */
 #define GICC_CTLR_ENABLEGRP0 (1UL)
@@ -209,6 +217,11 @@ void arm_gic_eoi(uint32_t irq);
  * @param cpu_mask bitmask of target cores
  */
 void gic_raise_sgi(uint32_t sgi_id, uint64_t affinity, uint16_t cpu_mask);
+
+/**
+ * @brief Initialize the GIC (Generic Interrupt Controller)
+ */
+void arm_gic_init();
 
 #endif
 #endif

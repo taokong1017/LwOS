@@ -1,7 +1,9 @@
-#include <gic.h>
+#include <log.h>
 #include <gic_v2.h>
 #include <compiler.h>
 #include <menuconfig.h>
+
+#define GIC_V2_TAG "GICv2"
 
 static inline uint8_t sys_read8(uint32_t addr) {
 	uint8_t val;
@@ -223,9 +225,27 @@ static void gic_cpu_init() {
 }
 
 /**
+ * @brief check gic archtecture version
+ */
+static bool gic_v2_check(void) {
+	uint32_t id = sys_read32(GICC_IIDR);
+
+	if (id == GIC_V2_MASK) {
+		return true;
+	}
+
+	return false;
+}
+
+/**
  * @brief Initialize the GIC driver
  */
 void arm_gic_init() {
+	if (!gic_v2_check()) {
+		log_err(GIC_V2_TAG, "GICv2 not available\n");
+		return;
+	}
+
 	gic_dist_init();
 	gic_cpu_init();
 }
