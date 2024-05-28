@@ -1,5 +1,8 @@
 #include <types.h>
 #include <isr_table.h>
+#include <irq.h>
+
+#define ISR_TABLE_SIZE IRQ_MAX_NUM
 
 static void irq_spurious(const void *uusned);
 

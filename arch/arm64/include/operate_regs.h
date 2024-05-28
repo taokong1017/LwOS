@@ -15,11 +15,10 @@
 
 /* define special register operations */
 declare_reg_operation(cntfrq_el0);
-declare_reg_operation(cnthctl_el2);
-declare_reg_operation(cnthp_ctl_el2);
-declare_reg_operation(cntv_ctl_el0);
-declare_reg_operation(cntv_cval_el0);
-declare_reg_operation(cntvoff_el2);
+declare_reg_operation(cntp_ctl_el0);
+declare_reg_operation(cntpct_el0);
+declare_reg_operation(cntp_cval_el0);
+declare_reg_operation(cntp_tval_el0);
 declare_reg_operation(csselr_el1);
 declare_reg_operation(daif);
 declare_reg_operation(hcr_el2);
