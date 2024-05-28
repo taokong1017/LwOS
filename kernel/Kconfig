@@ -6,4 +6,11 @@ config CONFIG_SMP
 	help
 		this option enables kernel smp to use multiple CPUs.
 
+config CONFIG_TICK_PER_SECOND
+	int "Tick Value Per Second"
+	default 1000
+	range 1 10000
+	help
+	  This represents the tick value per second.
+
 endmenu

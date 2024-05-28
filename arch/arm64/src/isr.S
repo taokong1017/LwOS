@@ -1,5 +1,5 @@
 #include <menuconfig.h>
-#include <isr_table.h>
+#include <irq.h>
 
 .globl cpu_id_get
 .type cpu_id_get, function
@@ -15,7 +15,7 @@ cpu_id_get:
 int_service_routine:
 	/* check if this irq is a spurious interrupt */
 	bl arm_gic_get_active
-	mov	x1, #ISR_TABLE_SIZE - 1
+	mov	x1, #IRQ_MAX_NUM - 1
 	cmp	x0, x1
 	b.hi spurious_continue
 
