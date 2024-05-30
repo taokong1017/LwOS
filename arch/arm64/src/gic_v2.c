@@ -186,6 +186,7 @@ static void gic_dist_init() {
 	 * as these enables are banked registers.
 	 */
 	for (i = GIC_SPI_INT_BASE; i < gic_irqs; i += 32) {
+		sys_write32(0xffffffff, GICD_ICACTIVERn + i / 8);
 		sys_write32(0xffffffff, GICD_ICENABLERn + i / 8);
 	}
 
@@ -204,6 +205,7 @@ static void gic_cpu_init() {
 	 * Deal with the banked PPI and SGI interrupts - disable all
 	 * PPI interrupts, ensure all SGI interrupts are enabled.
 	 */
+	sys_write32(0xffffffff, GICD_ICACTIVERn);
 	sys_write32(0xffff0000, GICD_ICENABLERn);
 	sys_write32(0x0000ffff, GICD_ISENABLERn);
 
@@ -214,12 +216,13 @@ static void gic_cpu_init() {
 		sys_write32(0xa0a0a0a0, GICD_IPRIORITYRn + i);
 	}
 
-	sys_write32(0xf0, GICC_PMR);
+	sys_write32(0xff, GICC_PMR);
 
 	/*
 	 * Enable interrupts and signal them using the IRQ signal.
 	 */
 	val = sys_read32(GICC_CTLR);
+	val &= ~GICC_CTLR_BYPASS_MASK;
 	val |= GICC_CTLR_ENABLE_MASK;
 	sys_write32(val, GICC_CTLR);
 }

@@ -7,9 +7,6 @@
 #define ARCH_TIMER_TAG "ARCH_TIMER"
 #define CYC_PER_TICK (arch_timer_freq_get() / CONFIG_TICK_PER_SECOND)
 
-static uint64_t last_cycle = 0;
-static uint64_t last_tick = 0;
-
 uint64_t arch_timer_freq_get() { return read_cntfrq_el0(); }
 
 void arch_timer_freq_set(uint64_t freq) { write_cntfrq_el0(freq); }
@@ -44,19 +41,24 @@ void arch_timer_set_compare(uint64_t val) { write_cntp_cval_el0(val); }
 
 uint64_t arch_timer_remaining_count() { return read_cntp_tval_el0(); }
 
-static void arch_timer_compare_isr(const void *arg) { (void)arg; }
+void arch_timer_compare_isr(const void *arg) {
+	(void)arg;
+
+	arch_timer_set_compare(arch_timer_count() + CYC_PER_TICK);
+
+	return;
+}
 
 void arch_timer_init() {
-	// connect interrupt
-	bool ret = arch_irq_connect(TICK_IRQ_NUM, GIC_IDLE_PRIO,
-								arch_timer_compare_isr, NULL, IRQ_TYPE_EDGE);
+	bool ret = arch_irq_connect(TICK_IRQ_NUM, 160, arch_timer_compare_isr, NULL,
+								IRQ_TYPE_LEVEL);
 	if (!ret) {
 		log_err(ARCH_TIMER_TAG, "failed to connect interrupt\n");
 	}
-	arch_timer_enable(true);
-	last_tick = arch_timer_count() / CYC_PER_TICK;
-	last_cycle = last_tick * CYC_PER_TICK;
-	arch_timer_set_compare(last_cycle + CYC_PER_TICK);
 	arch_irq_enable(TICK_IRQ_NUM);
 	arch_timer_set_irq_mask(false);
+
+	arch_timer_enable(false);
+	arch_timer_set_compare(arch_timer_count() + CYC_PER_TICK);
+	arch_timer_enable(true);
 }

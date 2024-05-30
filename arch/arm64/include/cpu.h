@@ -7,11 +7,15 @@
 #define DAIFSET_IRQ_BIT BIT(1)
 #define DAIFSET_ABT_BIT BIT(2)
 #define DAIFSET_DBG_BIT BIT(3)
+#define DAIFSET_ALL_BITS                                                       \
+	(DAIFSET_FIQ_BIT | DAIFSET_IRQ_BIT | DAIFSET_ABT_BIT | DAIFSET_DBG_BIT)
 
 #define DAIFCLR_FIQ_BIT BIT(0)
 #define DAIFCLR_IRQ_BIT BIT(1)
 #define DAIFCLR_ABT_BIT BIT(2)
 #define DAIFCLR_DBG_BIT BIT(3)
+#define DAIFCLR_ALL_BITS                                                       \
+	(DAIFCLR_FIQ_BIT | DAIFCLR_IRQ_BIT | DAIFCLR_ABT_BIT DAIFCLR_DBG_BIT)
 
 #define DAIF_FIQ_BIT BIT(6)
 #define DAIF_IRQ_BIT BIT(7)

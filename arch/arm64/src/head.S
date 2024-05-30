@@ -5,7 +5,7 @@
 .section .init.text, "ax"
 __start:
 	/* Mask all exceptions */
-	msr	DAIFSet, #0xf
+	msr	DAIFSet, DAIFSET_ALL_BITS
 	mrs	x0, CurrentEL
 	lsr x0, x0, MODE_EL_SHIFT
 	and x0, x0, MODE_EL_MASK
@@ -111,4 +111,5 @@ bss_loop_done:
 	bl exec_enable
 
 	/* enter the kernel entry */
+	msr	DAIFclr, DAIFSET_ALL_BITS
 	b kernel_start
