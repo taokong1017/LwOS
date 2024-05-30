@@ -44,7 +44,7 @@ uint64_t arch_timer_remaining_count() { return read_cntp_tval_el0(); }
 void arch_timer_compare_isr(const void *arg) {
 	(void)arg;
 
-	arch_timer_set_compare(arch_timer_count() + CYC_PER_TICK);
+	arch_timer_set_compare(read_cntp_cval_el0() + CYC_PER_TICK);
 
 	return;
 }

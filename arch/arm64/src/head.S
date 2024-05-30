@@ -5,7 +5,7 @@
 .section .init.text, "ax"
 __start:
 	/* Mask all exceptions */
-	msr	DAIFSet, DAIFSET_ALL_BITS
+	msr	daifset, DAIFSET_ALL_BITS
 	mrs	x0, CurrentEL
 	lsr x0, x0, MODE_EL_SHIFT
 	and x0, x0, MODE_EL_MASK
@@ -73,9 +73,6 @@ el2_entry:
 	eret
 
 el1_entry:
-	/* use SP_ELx */
-	msr	SPSel, #1
-
 	/* disable instructions trap */
 	mov x0, CPACR_EL1_FPEN_NOTRAP
 	msr cpacr_el1, x0
@@ -111,5 +108,5 @@ bss_loop_done:
 	bl exec_enable
 
 	/* enter the kernel entry */
-	msr	DAIFclr, DAIFSET_ALL_BITS
+	msr	daifclr, DAIFCLR_ALL_BITS
 	b kernel_start

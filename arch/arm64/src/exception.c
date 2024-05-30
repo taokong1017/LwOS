@@ -140,7 +140,6 @@ unhandled_handler_define(el1t, 64, firq);
 unhandled_handler_define(el1t, 64, serror);
 
 unhandled_handler_define(el1h, 64, sync);
-unhandled_handler_define(el1h, 64, irq);
 unhandled_handler_define(el1h, 64, firq);
 unhandled_handler_define(el1h, 64, serror);
 

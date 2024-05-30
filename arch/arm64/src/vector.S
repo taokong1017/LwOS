@@ -37,6 +37,7 @@
  * +------------------+------------------+-------------------------+
  */
 #include <cpu_defines.h>
+#include <cpu.h>
 
 .macro	ventry	label
 	.align	7
@@ -46,6 +47,16 @@
 .macro CALL_EXCEPTION_CFUNC cfunc
 	mov	x0, sp
 	bl	\cfunc
+.endm
+
+.macro CALL_IRQ_CFUNC cfunc
+	mov	x0, sp
+	ldr x1, =__interrupt_stack_end
+	mov sp, x1
+	str x0, [sp, #-8]!
+	bl	\cfunc
+	ldr x0, [sp], #8
+	mov sp, x0
 .endm
 
 .macro EXCEPTION_HANDLER irqname
@@ -131,7 +142,7 @@ EXCEPTION_HANDLER el1h_sync_handler
 
 EXCEPTION_HANDLER el1h_irq_handler
 	PUSH_GENERAL_REGS
-	CALL_EXCEPTION_CFUNC el1h_64_irq_handler
+	CALL_IRQ_CFUNC isr_func
 	POP_GENERAL_REGS
 
 EXCEPTION_HANDLER el1h_firq_handler
