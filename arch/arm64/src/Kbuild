@@ -6,7 +6,8 @@ obj-y := vector.o \
 	kernel_map.o \
 	head.o \
 	isr.o \
-	arch_timer.o
+	arch_timer.o \
+	cpu.o
 
 obj-$(CONFIG_GIC_V2) += gic_v2.o \
 	isr_table.o \

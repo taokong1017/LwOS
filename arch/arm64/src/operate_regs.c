@@ -31,15 +31,11 @@ define_reg_operation(cntp_ctl_el0);
 define_reg_operation(cntpct_el0);
 define_reg_operation(cntp_cval_el0);
 define_reg_operation(cntp_tval_el0);
+define_reg_operation(mpidr_el1);
 define_reg_operation(csselr_el1);
-define_reg_operation(daif);
 define_reg_operation(hcr_el2);
-define_reg_operation(par_el1);
-define_reg_operation(scr_el3);
 define_reg_operation(tpidrro_el0);
-define_reg_operation(vmpidr_el2);
 define_reg_operation(sp_el0);
-
 define_el123_reg_operation(actlr);
 define_el123_reg_operation(elr);
 define_el123_reg_operation(esr);

@@ -66,19 +66,13 @@
 
 /* MPIDR */
 #define MPIDR_AFFLVL_MASK (0xffULL)
-
 #define MPIDR_AFF0_SHIFT (0)
 #define MPIDR_AFF1_SHIFT (8)
 #define MPIDR_AFF2_SHIFT (16)
 #define MPIDR_AFF3_SHIFT (32)
-
-#define MPIDR_AFF_MASK (GENMASK(23, 0) | GENMASK(39, 32))
-
+#define MPIDR_MT_MASK (0x1ULL << 24)
 #define MPIDR_AFFLVL(mpidr, aff_level)                                         \
 	(((mpidr) >> MPIDR_AFF##aff_level##_SHIFT) & MPIDR_AFFLVL_MASK)
-
-#define GET_MPIDR() read_sysreg(mpidr_el1)
-#define MPIDR_TO_CORE(mpidr) (mpidr & MPIDR_AFF_MASK)
 
 #define MODE_EL_SHIFT (0x2)
 #define MODE_EL_MASK (0x3)
@@ -184,5 +178,9 @@
 #define L1_CACHE_SHIFT (6)
 #define L1_CACHE_BYTES BIT(L1_CACHE_SHIFT)
 #define ARM64_CPU_INIT_SIZE L1_CACHE_BYTES
+
+#ifndef __ASSEMBLY__
+uint32_t arch_cpu_id_get();
+#endif
 
 #endif

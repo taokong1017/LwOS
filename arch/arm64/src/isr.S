@@ -1,14 +1,6 @@
 #include <menuconfig.h>
 #include <irq.h>
 
-.globl cpu_id_get
-.type cpu_id_get, function
-.section .text, "ax"
-cpu_id_get:
-	mrs x0, mpidr_el1
-	ubfx x0, x0, #0, #24
-	ret
-
 .globl isr_func
 .type isr_func, function
 .section .text, "ax"
