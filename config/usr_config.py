@@ -21,7 +21,7 @@ def mconfig(argv):
 	kconfig = os.path.join("config", "config.in")
 	kconf = Kconfig(filename=kconfig)
 	if len(argv) == 3 and argv[1] == 'defconfig':
-		kconf.load_allconfig(argv[2])
+		kconf.load_config(argv[2])
 		print(kconf.write_config()) 	# defconfig
 	else:
 		if os.path.exists(target_conf):

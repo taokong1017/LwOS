@@ -31,8 +31,9 @@ isr_func:
 	/* call the ISR, and mask interrupts, later surport unmask */
 	blr	x3
 
-	/* Signal end-of-interrupt */
+	/* signal end-of-interrupt */
 	ldp	x0, xzr, [sp], #16
+
 spurious_continue:
 	/* end of interrupt */
 	bl	arm_gic_eoi
