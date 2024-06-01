@@ -3,6 +3,9 @@
 #include <operate_regs.h>
 #include <menuconfig.h>
 
+uint64_t cpu_map[CONFIG_CPUS_MAX_NUM] = {[0 ... CONFIG_CPUS_MAX_NUM - 1] =
+											 (uint64_t)(-1)};
+
 uint32_t arch_cpu_id_get() {
 	uint32_t cpu_id = 0;
 

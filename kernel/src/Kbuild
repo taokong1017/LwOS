@@ -2,5 +2,7 @@ obj-y := string.o \
 	printf.o \
 	init.o \
 	logo.o \
-	tick.o
+	tick.o \
+	task.o \
+	sched.o
 

@@ -7,7 +7,8 @@ obj-y := vector.o \
 	head.o \
 	isr.o \
 	arch_timer.o \
-	cpu.o
+	cpu.o \
+	arch_task.o
 
 obj-$(CONFIG_GIC_V2) += gic_v2.o \
 	isr_table.o \
