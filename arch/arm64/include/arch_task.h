@@ -1,5 +1,5 @@
-#ifndef __ARM64_TASK_CONTEXT_H__
-#define __ARM64_TASK_CONTEXT_H__
+#ifndef __ARM64_TASK_H__
+#define __ARM64_TASK_H__
 
 #include <types.h>
 #include <fp_context.h>

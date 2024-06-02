@@ -6,6 +6,7 @@
 #include <pgtable_prot.h>
 #include <operate_regs.h>
 #include <sys_regs.h>
+#include <pfn.h>
 
 #define BIT(nr) (1UL << nr)
 #define NO_EXEC_MAPPINGS BIT(2) /* assumes FEAT_HPDS is not used */

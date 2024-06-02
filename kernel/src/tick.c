@@ -4,6 +4,7 @@
 #include <cpu.h>
 #include <limits.h>
 #include <arch_timer.h>
+#include <task.h>
 #include <menuconfig.h>
 
 static uint64_t tick_counts[CONFIG_CPUS_MAX_NUM] = {0};
@@ -12,6 +13,8 @@ void tick_announce() {
 	uint64_t key = arch_irq_save();
 	tick_counts[arch_cpu_id_get()]++;
 	arch_irq_restore(key);
+
+	task_announce();
 }
 
 uint64_t current_ticks() {

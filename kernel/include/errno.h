@@ -1,46 +1,30 @@
-/* SPDX-License-Identifier: GPL-2.0 WITH Linux-syscall-note */
-#ifndef _ASM_GENERIC_ERRNO_BASE_H
-#define _ASM_GENERIC_ERRNO_BASE_H
+#ifndef __LOS_ERRNO_H__
+#define __LOS_ERRNO_H__
 
-#define EPERM 1	   /* Operation not permitted */
-#define ENOENT 2   /* No such file or directory */
-#define ESRCH 3	   /* No such process */
-#define EINTR 4	   /* Interrupted system call */
-#define EIO 5	   /* I/O error */
-#define ENXIO 6	   /* No such device or address */
-#define E2BIG 7	   /* Argument list too long */
-#define ENOEXEC 8  /* Exec format error */
-#define EBADF 9	   /* Bad file number */
-#define ECHILD 10  /* No child processes */
-#define EAGAIN 11  /* Try again */
-#define ENOMEM 12  /* Out of memory */
-#define EACCES 13  /* Permission denied */
-#define EFAULT 14  /* Bad address */
-#define ENOTBLK 15 /* Block device required */
-#define EBUSY 16   /* Device or resource busy */
-#define EEXIST 17  /* File exists */
-#define EXDEV 18   /* Cross-device link */
-#define ENODEV 19  /* No such device */
-#define ENOTDIR 20 /* Not a directory */
-#define EISDIR 21  /* Is a directory */
-#define EINVAL 22  /* Invalid argument */
-#define ENFILE 23  /* File table overflow */
-#define EMFILE 24  /* Too many open files */
-#define ENOTTY 25  /* Not a typewriter */
-#define ETXTBSY 26 /* Text file busy */
-#define EFBIG 27   /* File too large */
-#define ENOSPC 28  /* No space left on device */
-#define ESPIPE 29  /* Illegal seek */
-#define EROFS 30   /* Read-only file system */
-#define EMLINK 31  /* Too many links */
-#define EPIPE 32   /* Broken pipe */
-#define EDOM 33	   /* Math argument out of domain of func */
-#define ERANGE 34  /* Math result not representable */
+#include <types.h>
 
-int errno __attribute__((weak));
-#define set_errno(v)                                                           \
-	do {                                                                       \
-		errno = (v);                                                           \
-	} while (0)
+#define OK 0
+#define ERRNO_OS_ID (0x01U << 16)
+
+#define ERRTYPE_NORMAL (0x01U << 24)
+#define ERRTYPE_WARN (0x02U << 24)
+#define ERRTYPE_ERROR (0x03U << 24)
+#define ERRTYPE_FATAL (0x04U << 24)
+
+#define ERRNO_OS_FATAL(mID, errno)                                             \
+	(ERRTYPE_FATAL | ERRNO_OS_ID | ((uint32_t)(mID) << 8) | ((uint32_t)(errno)))
+#define ERRNO_OS_ERROR(mID, errno)                                             \
+	(ERRTYPE_ERROR | ERRNO_OS_ID | ((uint32_t)(mID) << 8) | ((uint32_t)(errno)))
+#define ERRNO_OS_WARN(mID, errno)                                              \
+	(ERRTYPE_WARN | ERRNO_OS_ID | ((uint32_t)(mID) << 8) | ((uint32_t)(errno)))
+#define ERRNO_OS_NORMAL(MID, ERRNO)                                            \
+	(ERRTYPE_NORMAL | ERRNO_OS_ID | ((uint32_t)(mID) << 8) |                   \
+	 ((uint32_t)(errno)))
+
+enum MOUDLE_ID {
+	MOD_ID_TASK = 0x1,
+};
+
+typedef uint32_t errno_t;
 
 #endif

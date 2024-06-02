@@ -1,5 +1,7 @@
 #include <types.h>
 #include <limits.h>
+#include <pfn.h>
+#include <sys_regs.h>
 #include <pgtable.h>
 #include <memory.h>
 #include <pgtable_prot.h>

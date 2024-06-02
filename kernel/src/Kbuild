@@ -4,5 +4,6 @@ obj-y := string.o \
 	logo.o \
 	tick.o \
 	task.o \
-	sched.o
+	task_sched.o \
+	memory.o
 
