@@ -3,6 +3,34 @@
 
 #include <types.h>
 #include <fp_context.h>
+#include <task.h>
+#include <menuconfig.h>
+
+struct arch_esf_context {
+	uint64_t x0;
+	uint64_t x1;
+	uint64_t x2;
+	uint64_t x3;
+	uint64_t x4;
+	uint64_t x5;
+	uint64_t x6;
+	uint64_t x7;
+	uint64_t x8;
+	uint64_t x9;
+	uint64_t x10;
+	uint64_t x11;
+	uint64_t x12;
+	uint64_t x13;
+	uint64_t x14;
+	uint64_t x15;
+	uint64_t x16;
+	uint64_t x17;
+	uint64_t x18;
+	uint64_t lr;
+	uint64_t spsr;
+	uint64_t elr;
+	uint64_t fp;
+} ALIGNED(16);
 
 struct arch_callee_context {
 	uint64_t x19;
@@ -18,14 +46,18 @@ struct arch_callee_context {
 	uint64_t fp;
 	uint64_t lr;
 	uint64_t sp;
-};
+} ALIGNED(16);
 
 struct arch_task_context {
 	struct arch_callee_context callee_context;
+#ifdef CONFIG_FPU_ENABLE
 	struct arch_fp_context fp_context;
+#endif
 };
 
 typedef struct arch_task_context arch_task_context_t;
 typedef struct arch_callee_context arch_callee_context_t;
+
+void arch_task_init(task_id_t task_id);
 
 #endif

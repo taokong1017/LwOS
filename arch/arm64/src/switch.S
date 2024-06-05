@@ -2,12 +2,12 @@
 #include <menuconfig.h>
 
 /*
- * void arch_context_switch(arch_task_context_t *new, arch_task_context_t *old)
+ * void arch_task_context_switch(arch_task_context_t *new, arch_task_context_t *old)
  */
-.globl arch_context_switch
-.type arch_context_switch, function
+.globl arch_task_context_switch
+.type arch_task_context_switch, function
 .section .text, "ax"
-arch_context_switch:
+arch_task_context_switch:
 	stp	x19, x20, [x1, #ARCH_TASK_CONTEXT_X19_X20_OFFSET]
 	stp	x21, x22, [x1, #ARCH_TASK_CONTEXT_X21_X22_OFFSET]
 	stp	x23, x24, [x1, #ARCH_TASK_CONTEXT_X23_X24_OFFSET]
@@ -34,4 +34,20 @@ arch_context_switch:
 	ldp	x29, x30, [x0, #ARCH_TASK_CONTEXT_FP_LR_OFFSET]
 	str	x3, [x0, #ARCH_TASK_CONTEXT_SP_OFFSET]
 	mov sp, x3
+	ret
+
+/*
+ * void arch_main_task_switch(struct task *task)
+ */
+.globl arch_main_task_switch
+.type arch_main_task_switch, function
+.section .text, "ax"
+arch_main_task_switch:
+	/* switch to new task's sp */
+	ldr	x1, [x0, #TASK_OF_STACK_PTR_OFFSET]
+	mov	sp, x1
+
+	ldr	x1, [x0, #TASK_OF_ARGS_OFFSET]
+	ldr	x0, [x0, #TASK_OF_ENTRY_OFFSET]
+	blr x0
 	ret

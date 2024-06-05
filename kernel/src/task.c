@@ -3,11 +3,15 @@
 #include <errno.h>
 #include <memory.h>
 #include <string.h>
+#include <arch_task.h>
 
+#define forever() for (;;)
 #define ALIGN(start, align) ((start + align - 1) & ~(align - 1))
 #define TASK_TO_ID(task) ((task_id_t)task)
+#define ID_TO_TASK(task_id) ((struct task *)task_id)
 
 void task_announce() { ; }
+extern void arch_main_task_switch(struct task *task);
 
 static errno_t task_params_check(task_id_t *task_id,
 								 const char name[TASK_NAME_LEN],
@@ -29,7 +33,7 @@ static errno_t task_params_check(task_id_t *task_id,
 		return ERRNO_TASK_PTR_NULL;
 	}
 
-	if (!stack_size) {
+	if (stack_size < TASK_STACK_SIZE_MIN) {
 		return ERRNO_TASK_STKSZ_INVALID;
 	}
 
@@ -69,12 +73,48 @@ errno_t task_create(task_id_t *task_id, const char name[TASK_NAME_LEN],
 	stack_limit = mem_alloc_align(align_size, TASK_STACK_ADDR_ALIGN);
 	stack_ptr = stack_limit + align_size;
 	task = (struct task *)mem_alloc(sizeof(struct task));
-	if (!stack_limit || stack_ptr || task) {
+	if (!stack_limit || !task) {
 		return ERRNO_TASK_NO_MEMORY;
 	}
 
 	task_init(task, name, entry, arg0, arg1, arg2, arg3, stack_ptr, align_size);
+	arch_task_init(task->id);
+
 	*task_id = task->id;
+
+	return OK;
+}
+
+void task_entry_point(task_id_t task_id) {
+	struct task *task = ID_TO_TASK(task_id);
+	task->entry(task->args[0], task->args[1], task->args[2], task->args[3]);
+}
+
+static void idle_task_entry() { forever(); }
+
+void idle_task_create() {
+	task_id_t task_id = 0;
+	char task_name[TASK_NAME_LEN] = {0};
+
+	strncpy(task_name, "idle_task", TASK_NAME_LEN);
+	task_create(&task_id, task_name, idle_task_entry, NULL, NULL, NULL, NULL,
+				TASK_STACK_SIZE_MIN);
+	task_prority_set(task_id, TASK_PRIORITY_LOWEST);
+	arch_main_task_switch(ID_TO_TASK(task_id));
+}
+
+errno_t task_prority_set(task_id_t task_id, uint32_t prioriy) {
+	struct task *task = ID_TO_TASK(task_id);
+	if (!task) {
+		return ERRNO_TASK_ID_INVALID;
+	}
+
+	if (prioriy < TASK_PRIORITY_LOWEST || prioriy > TASK_PRIORITY_HIGHEST) {
+		return ERRNO_TASK_PRIOR_ERROR;
+	}
+
+	task->priority = prioriy;
+	// TO DO
 
 	return OK;
 }

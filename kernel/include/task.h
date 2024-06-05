@@ -31,6 +31,7 @@
 /* task stack size definition */
 #define TASK_STACK_SIZE_ALIGN 16U
 #define TASK_STACK_ADDR_ALIGN 8U
+#define TASK_STACK_SIZE_MIN 1024U
 
 /* task error code definition */
 #define ERRNO_TASK_NO_MEMORY ERRNO_OS_FATAL(MOD_ID_TASK, 0x00)
@@ -43,7 +44,7 @@
 #define ERRNO_TASK_ID_INVALID ERRNO_OS_ERROR(MOD_ID_TASK, 0x07)
 
 /* task entry definition */
-typedef void (*task_entry_t)(void *p1, void *p2, void *p3);
+typedef void (*task_entry_t)(void *arg0, void *arg1, void *arg2, void *arg3);
 typedef long task_id_t;
 
 /* task structure definition */
