@@ -29,7 +29,6 @@ struct arch_esf_context {
 	uint64_t lr;
 	uint64_t spsr;
 	uint64_t elr;
-	uint64_t fp;
 } ALIGNED(16);
 
 struct arch_callee_context {
@@ -43,9 +42,10 @@ struct arch_callee_context {
 	uint64_t x26;
 	uint64_t x27;
 	uint64_t x28;
-	uint64_t fp;
+	uint64_t x29;
+	uint64_t sp_el0;
+	uint64_t sp_elx;
 	uint64_t lr;
-	uint64_t sp;
 } ALIGNED(16);
 
 struct arch_task_context {

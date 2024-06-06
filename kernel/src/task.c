@@ -100,7 +100,7 @@ void idle_task_create() {
 	task_create(&task_id, task_name, idle_task_entry, NULL, NULL, NULL, NULL,
 				TASK_STACK_SIZE_MIN);
 	task_prority_set(task_id, TASK_PRIORITY_LOWEST);
-	arch_main_task_switch(ID_TO_TASK(task_id));
+	task_start(task_id);
 }
 
 errno_t task_prority_set(task_id_t task_id, uint32_t prioriy) {
@@ -117,4 +117,127 @@ errno_t task_prority_set(task_id_t task_id, uint32_t prioriy) {
 	// TO DO
 
 	return OK;
+}
+
+errno_t task_prority_get(task_id_t task_id, uint32_t *prioriy) {
+	struct task *task = ID_TO_TASK(task_id);
+	if (!task) {
+		return ERRNO_TASK_ID_INVALID;
+	}
+
+	if (!prioriy) {
+		return ERRNO_TASK_PRIORITY_EMPTY;
+	}
+
+	*prioriy = task->priority;
+
+	return OK;
+}
+
+errno_t task_start(task_id_t task_id) {
+	struct task *task = ID_TO_TASK(task_id);
+	if (!task) {
+		return ERRNO_TASK_ID_INVALID;
+	}
+
+	if (task->status != TASK_STATUS_STOP) {
+		return ERRNO_TASK_STATUS_INVALID;
+	}
+
+	task->status = TASK_STATUS_READY;
+	// TO DO, be careful of active schedule
+	arch_main_task_switch(task);
+
+	return OK;
+}
+
+static task_id_t task_self_id() {
+	task_id_t task_id = TASK_INVALID_ID;
+
+	// TO DO
+	return task_id;
+}
+
+errno_t task_stop(task_id_t task_id) {
+	struct task *task = ID_TO_TASK(task_id);
+	if (!task) {
+		return ERRNO_TASK_ID_INVALID;
+	}
+
+	if (task->status == TASK_STATUS_STOP) {
+		return ERRNO_TASK_STATUS_INVALID;
+	}
+
+	task->status = TASK_STATUS_STOP;
+	// TO DO, becareful of semaphore lock, and stop self
+
+	return OK;
+}
+
+errno_t task_stop_self() { return task_stop(task_self_id()); }
+
+errno_t task_resume(task_id_t task_id) {
+	struct task *task = ID_TO_TASK(task_id);
+	if (!task) {
+		return ERRNO_TASK_ID_INVALID;
+	}
+
+	if (!(task->status & TASK_STATUS_SUSPEND)) {
+		return ERRNO_TASK_STATUS_INVALID;
+	}
+
+	task->status &= ~TASK_STATUS_SUSPEND;
+	// TO DO
+
+	return OK;
+}
+
+errno_t task_suspend(task_id_t task_id) {
+	struct task *task = ID_TO_TASK(task_id);
+	if (!task) {
+		return ERRNO_TASK_ID_INVALID;
+	}
+
+	if (task->status & TASK_STATUS_SUSPEND) {
+		return ERRNO_TASK_STATUS_INVALID;
+	}
+
+	if (task->status == TASK_STATUS_STOP) {
+		return ERRNO_TASK_STATUS_INVALID;
+	}
+
+	task->status &= ~TASK_STATUS_READY;
+	task->status &= ~TASK_STATUS_RUNNING;
+	task->status |= TASK_STATUS_SUSPEND;
+	// TO DO
+
+	return OK;
+}
+
+errno_t task_suspend_self() { return task_suspend(task_self_id()); }
+
+errno_t task_delay(task_id_t task_id, task_id_t tick) {
+	struct task *task = ID_TO_TASK(task_id);
+	if (!task) {
+		return ERRNO_TASK_ID_INVALID;
+	}
+
+	if (task->status == TASK_STATUS_STOP) {
+		return ERRNO_TASK_STATUS_INVALID;
+	}
+
+	if (task->status & TASK_STATUS_PEND) {
+		return ERRNO_TASK_STATUS_INVALID;
+	}
+
+	task->status &= ~TASK_STATUS_READY;
+	task->status &= ~TASK_STATUS_RUNNING;
+	task->status |= TASK_STATUS_PEND;
+	// TO DO
+
+	return OK;
+}
+
+errno_t task_delay_elf(task_id_t tick) {
+	return task_delay(task_self_id(), tick);
 }

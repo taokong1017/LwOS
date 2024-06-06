@@ -7,7 +7,7 @@
 
 /* task default invalid ID definition */
 #define TASK_INVALID_CPUID 0xFFFF
-#define TASK_INVALID_ID 0xFFFFFFFF
+#define TASK_INVALID_ID 0
 
 /* task name definition */
 #define TASK_NAME_LEN 32
@@ -42,6 +42,8 @@
 #define ERRNO_TASK_NAME_EMPTY ERRNO_OS_ERROR(MOD_ID_TASK, 0x05)
 #define ERRNO_TASK_STKSZ_INVALID ERRNO_OS_ERROR(MOD_ID_TASK, 0x06)
 #define ERRNO_TASK_ID_INVALID ERRNO_OS_ERROR(MOD_ID_TASK, 0x07)
+#define ERRNO_TASK_STATUS_INVALID ERRNO_OS_ERROR(MOD_ID_TASK, 0x08)
+#define ERRNO_TASK_PRIORITY_EMPTY ERRNO_OS_ERROR(MOD_ID_TASK, 0x09)
 
 /* task entry definition */
 typedef void (*task_entry_t)(void *arg0, void *arg1, void *arg2, void *arg3);
@@ -70,7 +72,8 @@ errno_t task_stop_self();
 errno_t task_resume(task_id_t task_id);
 errno_t task_suspend(task_id_t task_id);
 errno_t task_suspend_self();
-errno_t task_delay(task_id_t tick);
+errno_t task_delay(task_id_t task_id, task_id_t tick);
+errno_t task_delay_elf(task_id_t tick);
 errno_t task_prority_set(task_id_t task_id, uint32_t prioriy);
 errno_t task_prority_get(task_id_t task_id, uint32_t *prioriy);
 errno_t task_cpu_affi_set(task_id_t task_id, uint32_t affi_mask);
