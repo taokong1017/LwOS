@@ -73,7 +73,7 @@ errno_t task_resume(task_id_t task_id);
 errno_t task_suspend(task_id_t task_id);
 errno_t task_suspend_self();
 errno_t task_delay(task_id_t task_id, task_id_t tick);
-errno_t task_delay_elf(task_id_t tick);
+errno_t task_delay_self(task_id_t tick);
 errno_t task_prority_set(task_id_t task_id, uint32_t prioriy);
 errno_t task_prority_get(task_id_t task_id, uint32_t *prioriy);
 errno_t task_cpu_affi_set(task_id_t task_id, uint32_t affi_mask);

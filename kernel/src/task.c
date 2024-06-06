@@ -238,6 +238,6 @@ errno_t task_delay(task_id_t task_id, task_id_t tick) {
 	return OK;
 }
 
-errno_t task_delay_elf(task_id_t tick) {
+errno_t task_delay_self(task_id_t tick) {
 	return task_delay(task_self_id(), tick);
 }
