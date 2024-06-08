@@ -6,11 +6,12 @@
 #include <menuconfig.h>
 #include <task.h>
 
+#define MASK_NBITS 64
 #define DIV_ROUND_UP(n, d) (((n) + (d)-1) / (d))
-#define PRIQ_BITMAP_SIZE (DIV_ROUND_UP(TASK_PRIORITY_NUM, 8 * sizeof(uint64_t)))
+#define PRIQ_BITMAP_SIZE (DIV_ROUND_UP(TASK_PRIORITY_NUM, MASK_NBITS))
 
 struct priority_mqueue {
-	struct list_head queue[TASK_PRIORITY_NUM];
+	struct list_head queues[TASK_PRIORITY_NUM];
 	uint64_t bitmask[PRIQ_BITMAP_SIZE];
 };
 
@@ -37,5 +38,9 @@ struct kernel {
 	struct per_cpu percpus[CONFIG_CPUS_MAX_NUM];
 	bool pend_ipi;
 };
+
+void prio_mq_add(struct priority_mqueue *prio_mq, struct task *task);
+void prio_mq_remove(struct priority_mqueue *prio_mq, struct task *task);
+struct task *prio_mq_best(struct priority_mqueue *prio_mq);
 
 #endif

@@ -12,6 +12,13 @@
 #define LIST_POISON1 ((void *)0x100)
 #define LIST_POISON2 ((void *)0x122)
 
+#define offsetof(type, member) __builtin_offsetof(type, member)
+#define container_of(ptr, type, member)                                        \
+	({                                                                         \
+		void *__mptr = (void *)(ptr);                                          \
+		((type *)(__mptr - offsetof(type, member)));                           \
+	})
+
 struct list_head {
 	struct list_head *next, *prev;
 };

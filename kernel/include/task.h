@@ -59,7 +59,8 @@ struct task {
 	uint32_t stack_size;
 	task_entry_t entry;
 	void *args[4];
-	struct list_head pend_list;
+	struct list_head entry_node;
+	struct list_head pend_queue;
 };
 
 void task_announce();
