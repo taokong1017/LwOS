@@ -22,14 +22,14 @@ static struct prio_info prio_info_get(uint32_t priority) {
 void prio_mq_add(struct priority_mqueue *prio_mq, struct task *task) {
 	struct prio_info pos = prio_info_get(task->priority);
 
-	list_add(&task->entry_node, &prio_mq->queues[pos.prio]);
+	list_add(&task->node, &prio_mq->queues[pos.prio]);
 	prio_mq->bitmask[pos.idx] |= BIT(pos.bit);
 }
 
 void prio_mq_remove(struct priority_mqueue *prio_mq, struct task *task) {
 	struct prio_info pos = prio_info_get(task->priority);
 
-	list_move(&task->entry_node, &prio_mq->queues[pos.prio]);
+	list_move(&task->node, &prio_mq->queues[pos.prio]);
 
 	if (list_empty(&prio_mq->queues[pos.prio])) {
 		prio_mq->bitmask[pos.idx] &= ~BIT(pos.bit);
@@ -68,7 +68,7 @@ struct task *prio_mq_best(struct priority_mqueue *prio_mq) {
 		struct list_head *list = &prio_mq->queues[idx * MASK_NBITS + bit];
 
 		if (!list_empty(list)) {
-			task = list_first_entry(list, struct task, entry_node);
+			task = list_first_entry(list, struct task, node);
 			break;
 		}
 	}

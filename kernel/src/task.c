@@ -15,7 +15,7 @@ extern void arch_main_task_switch(struct task *task);
 
 static errno_t task_params_check(task_id_t *task_id,
 								 const char name[TASK_NAME_LEN],
-								 task_entry_t entry, void *arg0, void *arg1,
+								 task_entry_func entry, void *arg0, void *arg1,
 								 void *arg2, void *arg3, uint32_t stack_size) {
 	if (!task_id) {
 		return ERRNO_TASK_PTR_NULL;
@@ -41,7 +41,7 @@ static errno_t task_params_check(task_id_t *task_id,
 }
 
 static void task_init(struct task *task, const char name[TASK_NAME_LEN],
-					  task_entry_t entry, void *arg0, void *arg1, void *arg2,
+					  task_entry_func entry, void *arg0, void *arg1, void *arg2,
 					  void *arg3, void *stack_ptr, uint32_t stack_size) {
 	task->id = TASK_TO_ID(task);
 	memcpy(task->name, name, TASK_NAME_LEN);
@@ -56,7 +56,7 @@ static void task_init(struct task *task, const char name[TASK_NAME_LEN],
 }
 
 errno_t task_create(task_id_t *task_id, const char name[TASK_NAME_LEN],
-					task_entry_t entry, void *arg0, void *arg1, void *arg2,
+					task_entry_func entry, void *arg0, void *arg1, void *arg2,
 					void *arg3, uint32_t stack_size) {
 	uint32_t align_size = 0;
 	void *stack_limit = NULL;

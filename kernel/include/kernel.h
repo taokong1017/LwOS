@@ -32,6 +32,7 @@ struct per_cpu {
 
 	/* scheduling related */
 	struct ready_queue ready_queue;
+	struct timer_queue timer_queue;
 };
 
 struct kernel {

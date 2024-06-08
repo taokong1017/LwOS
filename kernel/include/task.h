@@ -4,6 +4,7 @@
 #include <list.h>
 #include <types.h>
 #include <errno.h>
+#include <timeout.h>
 
 /* task default invalid ID definition */
 #define TASK_INVALID_CPUID 0xFFFF
@@ -46,8 +47,12 @@
 #define ERRNO_TASK_PRIORITY_EMPTY ERRNO_OS_ERROR(MOD_ID_TASK, 0x09)
 
 /* task entry definition */
-typedef void (*task_entry_t)(void *arg0, void *arg1, void *arg2, void *arg3);
+typedef void (*task_entry_func)(void *arg0, void *arg1, void *arg2, void *arg3);
 typedef long task_id_t;
+
+struct wait_queue {
+	struct list_head wq;
+};
 
 /* task structure definition */
 struct task {
@@ -57,15 +62,17 @@ struct task {
 	uint32_t priority;
 	void *stack_ptr;
 	uint32_t stack_size;
-	task_entry_t entry;
+	task_entry_func entry;
 	void *args[4];
-	struct list_head entry_node;
-	struct list_head pend_queue;
+	struct list_head node;
+	struct wait_queue *wait_queue_ptr;
+	struct wait_queue halt_queue;
+	struct timeout timeout;
 };
 
 void task_announce();
 errno_t task_create(task_id_t *task_id, const char name[TASK_NAME_LEN],
-					task_entry_t entry, void *arg0, void *arg1, void *arg2,
+					task_entry_func entry, void *arg0, void *arg1, void *arg2,
 					void *arg3, uint32_t stack_size);
 errno_t task_start(task_id_t task_id);
 errno_t task_stop(task_id_t task_id);
