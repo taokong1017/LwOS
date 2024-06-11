@@ -1,5 +1,5 @@
-#ifndef __ARM64__REGS_H__
-#define __ARM64__REGS_H__
+#ifndef __ARM64_REGS_H__
+#define __ARM64_REGS_H__
 
 #include <types.h>
 #include <cpu_defines.h>

@@ -1,5 +1,5 @@
-#ifndef __ATOMIC_H__
-#define __ATOMIC_H__
+#ifndef __ARM64_ATOMIC_H__
+#define __ARM64_ATOMIC_H__
 
 #include <types.h>
 
