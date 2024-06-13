@@ -30,6 +30,9 @@ spurious_continue:
 	/* end of interrupt */
 	bl	arm_gic_eoi
 
+	/* reschedule task */
+	bl task_reschedule_irq
+
 	/* store LR register */
 	ldr	x30, [sp], #8
 	ret

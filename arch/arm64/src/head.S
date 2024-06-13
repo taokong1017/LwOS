@@ -108,5 +108,4 @@ bss_loop_done:
 	bl exec_enable
 
 	/* enter the kernel entry */
-	msr	daifclr, DAIFCLR_ALL_BITS
 	b kernel_start

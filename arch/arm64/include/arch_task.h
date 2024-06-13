@@ -3,8 +3,10 @@
 
 #include <types.h>
 #include <fp_context.h>
-#include <task.h>
+#include <compiler.h>
 #include <menuconfig.h>
+
+typedef long task_id_t;
 
 struct arch_esf_context {
 	uint64_t x0;
@@ -59,5 +61,7 @@ typedef struct arch_task_context arch_task_context_t;
 typedef struct arch_callee_context arch_callee_context_t;
 
 void arch_task_init(task_id_t task_id);
+void arch_task_context_switch(arch_task_context_t *new,
+							  arch_task_context_t *old);
 
 #endif

@@ -37,3 +37,5 @@ void arch_irq_restore(uint32_t key) {
 }
 
 bool arch_irq_lock_check(uint32_t key) { return (key & DAIF_IRQ_BIT) != 0; }
+
+void arch_irq_unlock() { __asm__ volatile("msr daifclr, 0xf"); }

@@ -1,6 +1,6 @@
 #include <arch_task.h>
+#include <task.h>
 
-#define ID_TO_TASK(task_id) ((struct task *)task_id)
 extern void task_entry_point(task_id_t task_id);
 
 void arch_task_init(task_id_t task_id) {

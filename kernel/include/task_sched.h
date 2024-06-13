@@ -3,4 +3,7 @@
 
 #include <kernel.h>
 
+void task_announce();
+void task_sched_init();
+
 #endif

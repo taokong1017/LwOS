@@ -4,7 +4,7 @@
 #include <cpu.h>
 #include <limits.h>
 #include <arch_timer.h>
-#include <task.h>
+#include <task_sched.h>
 #include <menuconfig.h>
 
 static uint64_t tick_counts[CONFIG_CPUS_MAX_NUM] = {0};

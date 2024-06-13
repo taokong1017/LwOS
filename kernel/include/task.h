@@ -5,6 +5,9 @@
 #include <types.h>
 #include <errno.h>
 #include <timeout.h>
+#include <arch_task.h>
+
+#define ID_TO_TASK(task_id) ((struct task *)task_id)
 
 /* task default invalid ID definition */
 #define TASK_INVALID_CPUID 0xFFFF
@@ -48,7 +51,6 @@
 
 /* task entry definition */
 typedef void (*task_entry_func)(void *arg0, void *arg1, void *arg2, void *arg3);
-typedef long task_id_t;
 
 struct wait_queue {
 	struct list_head wq;
@@ -68,9 +70,9 @@ struct task {
 	struct wait_queue *wait_queue_ptr;
 	struct wait_queue halt_queue;
 	struct timeout timeout;
+	struct arch_task_context task_context;
 };
 
-void task_announce();
 errno_t task_create(task_id_t *task_id, const char name[TASK_NAME_LEN],
 					task_entry_func entry, void *arg0, void *arg1, void *arg2,
 					void *arg3, uint32_t stack_size);

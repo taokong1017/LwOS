@@ -5,12 +5,9 @@
 #include <string.h>
 #include <arch_task.h>
 
-#define forever() for (;;)
 #define ALIGN(start, align) ((start + align - 1) & ~(align - 1))
 #define TASK_TO_ID(task) ((task_id_t)task)
-#define ID_TO_TASK(task_id) ((struct task *)task_id)
 
-void task_announce() { ; }
 extern void arch_main_task_switch(struct task *task);
 
 static errno_t task_params_check(task_id_t *task_id,
@@ -90,19 +87,6 @@ void task_entry_point(task_id_t task_id) {
 	task->entry(task->args[0], task->args[1], task->args[2], task->args[3]);
 }
 
-static void idle_task_entry() { forever(); }
-
-void idle_task_create() {
-	task_id_t task_id = 0;
-	char task_name[TASK_NAME_LEN] = {0};
-
-	strncpy(task_name, "idle_task", TASK_NAME_LEN);
-	task_create(&task_id, task_name, idle_task_entry, NULL, NULL, NULL, NULL,
-				TASK_STACK_SIZE_MIN);
-	task_prority_set(task_id, TASK_PRIORITY_LOWEST);
-	task_start(task_id);
-}
-
 errno_t task_prority_set(task_id_t task_id, uint32_t prioriy) {
 	struct task *task = ID_TO_TASK(task_id);
 	if (!task) {
@@ -145,8 +129,6 @@ errno_t task_start(task_id_t task_id) {
 	}
 
 	task->status = TASK_STATUS_READY;
-	// TO DO, be careful of active schedule
-	arch_main_task_switch(task);
 
 	return OK;
 }
