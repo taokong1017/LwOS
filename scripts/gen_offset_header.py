@@ -38,7 +38,7 @@ def gen_offset_header(input_name, input_file, output_file):
 		if isinstance(sym.name, bytes):
 			sym.name = str(sym.name, 'ascii')
 
-		if not sym.name.endswith(('_OFFSET', '_SIZEOF')):
+		if not sym.name.endswith(('_OFFSET', '_SIZEOF', '_SIZE')):
 			continue
 		if sym.entry['st_shndx'] != 'SHN_ABS':
 			continue

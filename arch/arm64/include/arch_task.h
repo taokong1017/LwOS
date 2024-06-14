@@ -63,5 +63,6 @@ typedef struct arch_callee_context arch_callee_context_t;
 void arch_task_init(task_id_t task_id);
 void arch_task_context_switch(arch_task_context_t *new,
 							  arch_task_context_t *old);
+void arch_main_task_switch(task_id_t task_id);
 
 #endif

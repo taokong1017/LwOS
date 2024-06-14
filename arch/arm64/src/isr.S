@@ -31,7 +31,7 @@ spurious_continue:
 	bl	arm_gic_eoi
 
 	/* reschedule task */
-	bl task_reschedule_irq
+	bl task_irq_resched
 
 	/* store LR register */
 	ldr	x30, [sp], #8

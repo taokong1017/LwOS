@@ -8,8 +8,6 @@
 #define ALIGN(start, align) ((start + align - 1) & ~(align - 1))
 #define TASK_TO_ID(task) ((task_id_t)task)
 
-extern void arch_main_task_switch(struct task *task);
-
 static errno_t task_params_check(task_id_t *task_id,
 								 const char name[TASK_NAME_LEN],
 								 task_entry_func entry, void *arg0, void *arg1,
@@ -24,10 +22,6 @@ static errno_t task_params_check(task_id_t *task_id,
 
 	if (!entry) {
 		return ERRNO_TASK_ENTRY_NULL;
-	}
-
-	if (!arg0 || !arg1 || !arg2 || !arg3) {
-		return ERRNO_TASK_PTR_NULL;
 	}
 
 	if (stack_size < TASK_STACK_SIZE_MIN) {
@@ -62,7 +56,7 @@ errno_t task_create(task_id_t *task_id, const char name[TASK_NAME_LEN],
 
 	errno_t err = task_params_check(task_id, name, entry, arg0, arg1, arg2,
 									arg3, stack_size);
-	if (!err) {
+	if (err) {
 		return err;
 	}
 

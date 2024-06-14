@@ -6,6 +6,7 @@
 #include <irq.h>
 
 #define IDLE_TASK_NAME "idle_task"
+#define ROOT_TASK_NAME "main_task"
 #define forever() for (;;)
 #define current_percpu kernel.percpus[arch_cpu_id_get()]
 
@@ -107,7 +108,13 @@ static void task_switch(struct task *new, struct task *old) {
 	arch_task_context_switch(&new->task_context, &old->task_context);
 }
 
-static void idle_task_entry() { forever(); }
+static void idle_task_entry(void *arg0, void *arg1, void *arg2, void *arg3) {
+	(void)arg0;
+	(void)arg1;
+	(void)arg2;
+	(void)arg3;
+	forever();
+}
 
 void idle_task_create() {
 	task_id_t task_id = 0;
@@ -115,8 +122,8 @@ void idle_task_create() {
 	char task_name[TASK_NAME_LEN] = {0};
 
 	strncpy(task_name, IDLE_TASK_NAME, TASK_NAME_LEN);
-	task_create(&task_id, task_name, idle_task_entry, NULL, NULL, NULL, NULL,
-				TASK_STACK_SIZE_MIN);
+	task_create(&task_id, task_name, idle_task_entry, (void *)1, (void *)2,
+				(void *)3, (void *)4, TASK_STACK_SIZE_MIN);
 	task_prority_set(task_id, TASK_PRIORITY_LOWEST);
 	task = ID_TO_TASK(task_id);
 	task->status = TASK_STATUS_READY;
@@ -128,7 +135,26 @@ bool task_is_idle_task(struct task *task) {
 																	   : false;
 }
 
-void task_reschedule_irq() {
+static void root_task_entry(void *arg0, void *arg1, void *arg2, void *arg3) {
+	forever();
+}
+
+void main_task_create() {
+	task_id_t task_id = 0;
+	struct task *task = NULL;
+	char task_name[TASK_NAME_LEN] = {0};
+
+	strncpy(task_name, ROOT_TASK_NAME, TASK_NAME_LEN);
+	task_create(&task_id, task_name, root_task_entry, NULL, NULL, NULL, NULL,
+				TASK_STACK_SIZE_MIN);
+	task_prority_set(task_id, TASK_PRIORITY_HIGHEST);
+	task = ID_TO_TASK(task_id);
+	task->status = TASK_STATUS_READY;
+	current_task_update(task);
+	arch_main_task_switch(task_id);
+}
+
+void task_irq_resched() {
 	struct task *current_task = current_task_get();
 	struct task *next_task = next_task_pick_up();
 
@@ -158,5 +184,6 @@ void task_sched_init() {
 	INIT_LIST_HEAD(&current_percpu.timer_queue.tq);
 
 	idle_task_create();
-	arch_irq_unlock();
+	main_task_create();
+	code_unreachable();
 }

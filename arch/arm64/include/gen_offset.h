@@ -20,6 +20,8 @@
 			: "n"(value))
 
 #define GEN_NAMED_OFFSET_SYM(S, M, N)                                          \
-	GEN_ABSOLUTE_SYM(N##_##OFFSET, offsetof(S, M))
+	GEN_ABSOLUTE_SYM(N##_OFFSET, offsetof(S, M))
+
+#define GEN_NAMED_SIZE_SYM(S, N) GEN_ABSOLUTE_SYM(N##_SIZE, sizeof(S))
 
 #endif

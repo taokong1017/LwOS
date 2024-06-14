@@ -20,4 +20,17 @@ GEN_NAMED_OFFSET_SYM(arch_callee_context_t, sp_elx,
 GEN_NAMED_OFFSET_SYM(arch_task_context_t, fp_context,
 					 TASK_CONTEXT_OF_FP_CONTEXT);
 #endif
+GEN_NAMED_OFFSET_SYM(struct arch_esf_context, x0, ESF_CONTEXT_OF_X0_X1);
+GEN_NAMED_OFFSET_SYM(struct arch_esf_context, x2, ESF_CONTEXT_OF_X2_X3);
+GEN_NAMED_OFFSET_SYM(struct arch_esf_context, x4, ESF_CONTEXT_OF_X4_X5);
+GEN_NAMED_OFFSET_SYM(struct arch_esf_context, x6, ESF_CONTEXT_OF_X6_X7);
+GEN_NAMED_OFFSET_SYM(struct arch_esf_context, x8, ESF_CONTEXT_OF_X8_X9);
+GEN_NAMED_OFFSET_SYM(struct arch_esf_context, x10, ESF_CONTEXT_OF_X10_X11);
+GEN_NAMED_OFFSET_SYM(struct arch_esf_context, x12, ESF_CONTEXT_OF_X12_X13);
+GEN_NAMED_OFFSET_SYM(struct arch_esf_context, x14, ESF_CONTEXT_OF_X14_X15);
+GEN_NAMED_OFFSET_SYM(struct arch_esf_context, x16, ESF_CONTEXT_OF_X16_X17);
+GEN_NAMED_OFFSET_SYM(struct arch_esf_context, x18, ESF_CONTEXT_OF_X18_LR);
+GEN_NAMED_OFFSET_SYM(struct arch_esf_context, spsr, ESF_CONTEXT_OF_SPSR_ELR);
+GEN_NAMED_SIZE_SYM(struct arch_esf_context, ESF_CONTEXT);
+
 GEN_ABS_SYM_END
