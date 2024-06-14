@@ -8,7 +8,15 @@
 #define SHELL_LOGO "[LS Kernel]# "
 #define shell_logo_show() printf(SHELL_LOGO)
 extern void logo_show();
-extern void arch_timer_compare_isr(const void *arg);
+
+void root_task_entry(void *arg0, void *arg1, void *arg2, void *arg3) {
+	(void)arg0;
+	(void)arg1;
+	(void)arg2;
+	(void)arg3;
+
+	forever();
+}
 
 void kernel_start() {
 	logo_show();

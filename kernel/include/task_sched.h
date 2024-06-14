@@ -3,6 +3,8 @@
 
 #include <kernel.h>
 
+#define forever() for (;;)
+
 void task_announce();
 void task_sched_init();
 

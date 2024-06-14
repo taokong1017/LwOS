@@ -7,8 +7,9 @@
 
 #define IDLE_TASK_NAME "idle_task"
 #define ROOT_TASK_NAME "main_task"
-#define forever() for (;;)
 #define current_percpu kernel.percpus[arch_cpu_id_get()]
+
+extern void root_task_entry(void *arg0, void *arg1, void *arg2, void *arg3);
 
 struct prio_info {
 	uint32_t prio;
@@ -133,10 +134,6 @@ void idle_task_create() {
 bool task_is_idle_task(struct task *task) {
 	return strncmp(task->name, IDLE_TASK_NAME, strlen(IDLE_TASK_NAME)) ? true
 																	   : false;
-}
-
-static void root_task_entry(void *arg0, void *arg1, void *arg2, void *arg3) {
-	forever();
 }
 
 void main_task_create() {
