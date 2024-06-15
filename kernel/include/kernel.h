@@ -5,6 +5,7 @@
 #include <list.h>
 #include <menuconfig.h>
 #include <task.h>
+#include <spin_lock.h>
 
 #define MASK_NBITS 64
 #define DIV_ROUND_UP(n, d) (((n) + (d)-1) / (d))
@@ -37,7 +38,6 @@ struct per_cpu {
 
 struct kernel {
 	struct per_cpu percpus[CONFIG_CPUS_MAX_NUM];
-	bool pend_ipi;
 };
 
 void prio_mq_add(struct priority_mqueue *prio_mq, struct task *task);

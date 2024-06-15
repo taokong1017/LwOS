@@ -8,6 +8,7 @@
 #define IDLE_TASK_NAME "idle_task"
 #define ROOT_TASK_NAME "main_task"
 #define current_percpu kernel.percpus[arch_cpu_id_get()]
+static struct spinlock sched_spinlock;
 
 extern void root_task_entry(void *arg0, void *arg1, void *arg2, void *arg3);
 
@@ -39,29 +40,24 @@ void prio_mq_add(struct priority_mqueue *prio_mq, struct task *task) {
 void prio_mq_remove(struct priority_mqueue *prio_mq, struct task *task) {
 	struct prio_info pos = prio_info_get(task->priority);
 
-	list_move(&task->node, &prio_mq->queues[pos.prio]);
-
-	if (list_empty(&prio_mq->queues[pos.prio])) {
+	if (!list_empty(&prio_mq->queues[pos.prio])) {
+		list_move(&task->node, &prio_mq->queues[pos.prio]);
 		prio_mq->bitmask[pos.idx] &= ~BIT(pos.bit);
 	}
 }
 
 static uint64_t mask_trailing_zeros(uint64_t mask) {
-	uint64_t idx = 0;
-	uint32_t shift = 63;
+	uint32_t shift = MASK_NBITS - 1;
 
 	if (mask == 0) {
 		return 0;
 	}
 
-	idx = mask;
-	while (!(idx & (1ULL << shift))) {
+	while (!(mask & (1ULL << shift))) {
 		shift--;
 	}
 
-	idx &= (1ULL << (shift + 1)) - 1;
-
-	return idx;
+	return shift;
 }
 
 struct task *prio_mq_best(struct priority_mqueue *prio_mq) {
@@ -86,23 +82,34 @@ struct task *prio_mq_best(struct priority_mqueue *prio_mq) {
 	return task;
 }
 
-static struct task *current_task_get() { return current_percpu.current_task; }
+struct task *current_task_get() {
+	return current_percpu.current_task;
+}
+
+struct spinlock_key sched_spin_lock() {
+	return spin_lock(&sched_spinlock);
+}
+
+void sched_spin_unlock(struct spinlock_key key) {
+	spin_unlock(&sched_spinlock, key);
+}
+
+void sched_ready_queue_remove(uint32_t cpu_id, struct task *task) {
+	prio_mq_remove(&kernel.percpus[cpu_id].ready_queue.run_queue, task);
+}
+
+void sched_ready_queue_add(uint32_t cpu_id, struct task *task) {
+	prio_mq_add(&kernel.percpus[cpu_id].ready_queue.run_queue, task);
+}
+
+bool is_in_irq() { return current_percpu.irq_nested_cnt > 0 ? true : false; }
 
 static void current_task_update(struct task *task) {
 	current_percpu.current_task = task;
 }
 
 static struct task *next_task_pick_up() {
-	struct task *next_task = NULL;
-
-	next_task = prio_mq_best(&current_percpu.ready_queue.run_queue);
-	if (!next_task) {
-		next_task = current_percpu.idle_task;
-	} else {
-		prio_mq_remove(&current_percpu.ready_queue.run_queue, next_task);
-	}
-
-	return next_task;
+	return prio_mq_best(&current_percpu.ready_queue.run_queue);
 }
 
 static void task_switch(struct task *new, struct task *old) {
@@ -124,16 +131,16 @@ void idle_task_create() {
 
 	strncpy(task_name, IDLE_TASK_NAME, TASK_NAME_LEN);
 	task_create(&task_id, task_name, idle_task_entry, (void *)1, (void *)2,
-				(void *)3, (void *)4, TASK_STACK_SIZE_MIN);
+				(void *)3, (void *)4, TASK_STACK_SIZE_MIN, TASK_DEFAULT_FLAG);
 	task_prority_set(task_id, TASK_PRIORITY_LOWEST);
 	task = ID_TO_TASK(task_id);
 	task->status = TASK_STATUS_READY;
 	current_percpu.idle_task = task;
+	sched_ready_queue_add(task->cpu_id, task);
 }
 
 bool task_is_idle_task(struct task *task) {
-	return strncmp(task->name, IDLE_TASK_NAME, strlen(IDLE_TASK_NAME)) ? true
-																	   : false;
+	return current_percpu.idle_task == task ? true : false;
 }
 
 void main_task_create() {
@@ -143,15 +150,16 @@ void main_task_create() {
 
 	strncpy(task_name, ROOT_TASK_NAME, TASK_NAME_LEN);
 	task_create(&task_id, task_name, root_task_entry, NULL, NULL, NULL, NULL,
-				TASK_STACK_SIZE_MIN);
+				TASK_STACK_SIZE_MIN, TASK_DEFAULT_FLAG);
 	task_prority_set(task_id, TASK_PRIORITY_HIGHEST);
 	task = ID_TO_TASK(task_id);
-	task->status = TASK_STATUS_READY;
+	task->status = TASK_STATUS_RUNNING;
+	sched_ready_queue_add(task->cpu_id, task);
 	current_task_update(task);
 	arch_main_task_switch(task_id);
 }
 
-void task_irq_resched() {
+void task_resched() {
 	struct task *current_task = current_task_get();
 	struct task *next_task = next_task_pick_up();
 
@@ -159,11 +167,11 @@ void task_irq_resched() {
 		return;
 	}
 
-	current_task->status = TASK_STATUS_READY;
-	if (!task_is_idle_task(current_task)) {
-		prio_mq_add(&current_percpu.ready_queue.run_queue, current_task);
+	if (current_task->lock_cnt > 0) {
+		return;
 	}
 
+	current_task->status = TASK_STATUS_READY;
 	next_task->status = TASK_STATUS_RUNNING;
 	current_task_update(next_task);
 	task_switch(next_task, current_task);

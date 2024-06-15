@@ -29,8 +29,13 @@
 #define TASK_STATUS_RUNNING 0x0010U
 
 /* task flag definition */
-#define TASK_FLAG_DETACHED 0x0001U
-#define TASK_FLAG_SYSTEM 0x0002U
+#define TASK_FLAG_SYSTEM 0x0001U
+#define TASK_FLAG_KERNEL 0x0002U
+#define TASK_FLAG_USER 0x0004U
+#define TASK_FLAG_DETACHED 0x0008U
+#define TASK_DEFAULT_FLAG (TASK_FLAG_SYSTEM | TASK_FLAG_KERNEL)
+#define TASK_FLAG_MASK                                                         \
+	(TASK_FLAG_SYSTEM | TASK_FLAG_KERNEL | TASK_FLAG_USER | TASK_FLAG_DETACHED)
 
 /* task stack size definition */
 #define TASK_STACK_SIZE_ALIGN 16U
@@ -48,6 +53,12 @@
 #define ERRNO_TASK_ID_INVALID ERRNO_OS_ERROR(MOD_ID_TASK, 0x07)
 #define ERRNO_TASK_STATUS_INVALID ERRNO_OS_ERROR(MOD_ID_TASK, 0x08)
 #define ERRNO_TASK_PRIORITY_EMPTY ERRNO_OS_ERROR(MOD_ID_TASK, 0x09)
+#define ERRNO_TASK_FLAG_INVALID ERRNO_OS_ERROR(MOD_ID_TASK, 0x0A)
+#define ERRNO_TASK_IN_IRQ_STATUS ERRNO_OS_ERROR(MOD_ID_TASK, 0x0A)
+
+/* task cpu affinity */
+#define TASK_CPU_DEFAULT_AFFI 0x00000001U
+#define TASK_CPU_AFFI_MASK ((1U < CONFIG_CPUS_MAX_NUM) - 1)
 
 /* task entry definition */
 typedef void (*task_entry_func)(void *arg0, void *arg1, void *arg2, void *arg3);
@@ -62,8 +73,12 @@ struct task {
 	char name[TASK_NAME_LEN];
 	uint32_t status;
 	uint32_t priority;
+	uint32_t cpu_affi;
+	uint32_t flag;
 	void *stack_ptr;
 	uint32_t stack_size;
+	uint64_t lock_cnt;
+	uint32_t cpu_id;
 	task_entry_func entry;
 	void *args[4];
 	struct list_head node;
@@ -75,7 +90,7 @@ struct task {
 
 errno_t task_create(task_id_t *task_id, const char name[TASK_NAME_LEN],
 					task_entry_func entry, void *arg0, void *arg1, void *arg2,
-					void *arg3, uint32_t stack_size);
+					void *arg3, uint32_t stack_size, uint32_t flag);
 errno_t task_start(task_id_t task_id);
 errno_t task_stop(task_id_t task_id);
 errno_t task_stop_self();
@@ -86,8 +101,8 @@ errno_t task_delay(task_id_t task_id, task_id_t tick);
 errno_t task_delay_self(task_id_t tick);
 errno_t task_prority_set(task_id_t task_id, uint32_t prioriy);
 errno_t task_prority_get(task_id_t task_id, uint32_t *prioriy);
-errno_t task_cpu_affi_set(task_id_t task_id, uint32_t affi_mask);
-errno_t task_cpu_affi_get(task_id_t task_id, uint32_t *affi_mask);
+errno_t task_cpu_affi_set(task_id_t task_id, uint32_t cpu_affi);
+errno_t task_cpu_affi_get(task_id_t task_id, uint32_t *cpu_affi);
 void task_lock();
 void task_unlock();
 
