@@ -18,6 +18,6 @@ void arch_task_init(task_id_t task_id) {
 	esf->elr = (uint64_t)task_entry_point;
 
 	/* 其它任务，在任务切换后，通过异常退出流程进入 */
-	task->task_context.callee_context.sp_elx = (uint64_t)esf;
-	task->task_context.callee_context.lr = (uint64_t)arch_exc_exit;
+	task->task_context.callee_context.sp = (uint64_t)esf;
+	task->task_context.callee_context.x30 = (uint64_t)arch_exc_exit;
 }

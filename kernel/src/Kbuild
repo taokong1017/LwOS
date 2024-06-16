@@ -6,5 +6,6 @@ obj-y := string.o \
 	task.o \
 	task_sched.o \
 	memory.o \
-	spin_lock.o
+	spin_lock.o \
+	timeout.o
 

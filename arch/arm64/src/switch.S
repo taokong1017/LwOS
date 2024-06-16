@@ -9,15 +9,27 @@
 .type arch_task_context_switch, function
 .section .text, "ax"
 arch_task_context_switch:
-	mrs x2, sp_el0
-	mov	x3, sp
-	stp	x19, x20, [x1, #ARCH_TASK_CONTEXT_X19_X20_OFFSET]
-	stp	x21, x22, [x1, #ARCH_TASK_CONTEXT_X21_X22_OFFSET]
-	stp	x23, x24, [x1, #ARCH_TASK_CONTEXT_X23_X24_OFFSET]
-	stp	x25, x26, [x1, #ARCH_TASK_CONTEXT_X25_X26_OFFSET]
-	stp	x27, x28, [x1, #ARCH_TASK_CONTEXT_X27_X28_OFFSET]
-	stp	x29, x2,  [x1, #CALLEE_CONTEXT_OF_X29_SP_EL0_OFFSET]
-	stp	x3,  lr,  [x1, #CALLEE_CONTEXT_OF_SP_ELx_LR_OFFSET]
+	stp	x0, x1,   [x1, #ARCH_TASK_CONTEXT_X0_X1_OFFSET]
+	stp	x2, x3,   [x1, #ARCH_TASK_CONTEXT_X2_X3_OFFSET]
+	stp	x4, x5,   [x1, #ARCH_TASK_CONTEXT_X4_X5_OFFSET]
+	stp	x6, x7,   [x1, #ARCH_TASK_CONTEXT_X6_X7_OFFSET]
+	stp	x8, x9,   [x1, #ARCH_TASK_CONTEXT_X8_X9_OFFSET]
+	stp	x10, x11, [x1, #ARCH_TASK_CONTEXT_X10_X11_OFFSET]
+	stp	x12, x13, [x1, #ARCH_TASK_CONTEXT_X12_X13_OFFSET]
+	stp	x14, x15, [x1, #ARCH_TASK_CONTEXT_X14_X15_OFFSET]
+	stp	x16, x17, [x1, #ARCH_TASK_CONTEXT_X16_X17_OFFSET]
+	stp	x18, x19, [x1, #ARCH_TASK_CONTEXT_X18_X19_OFFSET]
+	stp	x20, x21, [x1, #ARCH_TASK_CONTEXT_X20_X21_OFFSET]
+	stp	x22, x23, [x1, #ARCH_TASK_CONTEXT_X22_X23_OFFSET]
+	stp	x24, x25, [x1, #ARCH_TASK_CONTEXT_X24_X25_OFFSET]
+	stp	x26, x27, [x1, #ARCH_TASK_CONTEXT_X26_X27_OFFSET]
+	stp	x28, x29, [x1, #ARCH_TASK_CONTEXT_X28_X29_OFFSET]
+	mov x2, sp
+	stp	x30, x2,  [x1, #ARCH_TASK_CONTEXT_X30_SP_OFFSET]
+	mrs x2, daif
+	mrs x3, nzcv
+	stp	x2, x3, [x1, #ARCH_TASK_CONTEXT_DAIF_NZCV_OFFSET]
+
 #ifdef CONFIG_FPU_ENABLE
 	stp x0, x1, [sp, #-16]!
 	add x0, x1, #ARCH_TASK_FP_CONTEXT_OFFSET
@@ -28,15 +40,26 @@ arch_task_context_switch:
 	bl arch_fpu_restore
 	ldp x0, x1, [sp], #-16
 #endif
-	ldp	x19, x20, [x0, #ARCH_TASK_CONTEXT_X19_X20_OFFSET]
-	ldp	x21, x22, [x0, #ARCH_TASK_CONTEXT_X21_X22_OFFSET]
-	ldp	x23, x24, [x0, #ARCH_TASK_CONTEXT_X23_X24_OFFSET]
-	ldp	x25, x26, [x0, #ARCH_TASK_CONTEXT_X25_X26_OFFSET]
-	ldp	x27, x28, [x0, #ARCH_TASK_CONTEXT_X27_X28_OFFSET]
-	ldp	x29, x2,  [x0, #CALLEE_CONTEXT_OF_X29_SP_EL0_OFFSET]
-	ldp	x3,  lr,  [x0, #CALLEE_CONTEXT_OF_SP_ELx_LR_OFFSET]
-	msr sp_el0, x2
-	mov	sp, x3
+	ldp	x2, x3,   [x0, #ARCH_TASK_CONTEXT_DAIF_NZCV_OFFSET]
+	msr daif, x2
+	msr nzcv, x3
+	ldp	x30, x2,  [x0, #ARCH_TASK_CONTEXT_X30_SP_OFFSET]
+	mov sp, x2
+	ldp	x28, x29, [x0, #ARCH_TASK_CONTEXT_X28_X29_OFFSET]
+	ldp	x26, x27, [x0, #ARCH_TASK_CONTEXT_X26_X27_OFFSET]
+	ldp	x24, x25, [x0, #ARCH_TASK_CONTEXT_X24_X25_OFFSET]
+	ldp	x22, x23, [x0, #ARCH_TASK_CONTEXT_X22_X23_OFFSET]
+	ldp	x20, x21, [x0, #ARCH_TASK_CONTEXT_X20_X21_OFFSET]
+	ldp	x18, x19, [x0, #ARCH_TASK_CONTEXT_X18_X19_OFFSET]
+	ldp	x16, x17, [x0, #ARCH_TASK_CONTEXT_X16_X17_OFFSET]
+	ldp	x14, x15, [x0, #ARCH_TASK_CONTEXT_X14_X15_OFFSET]
+	ldp	x12, x13, [x0, #ARCH_TASK_CONTEXT_X12_X13_OFFSET]
+	ldp	x10, x11, [x0, #ARCH_TASK_CONTEXT_X10_X11_OFFSET]
+	ldp	x8, x9,   [x0, #ARCH_TASK_CONTEXT_X8_X9_OFFSET]
+	ldp	x6, x7,   [x0, #ARCH_TASK_CONTEXT_X6_X7_OFFSET]
+	ldp	x4, x5,   [x0, #ARCH_TASK_CONTEXT_X4_X5_OFFSET]
+	ldp	x2, x3,   [x0, #ARCH_TASK_CONTEXT_X2_X3_OFFSET]
+	ldp	x0, x1,   [x0, #ARCH_TASK_CONTEXT_X0_X1_OFFSET]
 	ret
 
 /*

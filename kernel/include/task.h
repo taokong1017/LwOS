@@ -53,8 +53,10 @@
 #define ERRNO_TASK_ID_INVALID ERRNO_OS_ERROR(MOD_ID_TASK, 0x07)
 #define ERRNO_TASK_STATUS_INVALID ERRNO_OS_ERROR(MOD_ID_TASK, 0x08)
 #define ERRNO_TASK_PRIORITY_EMPTY ERRNO_OS_ERROR(MOD_ID_TASK, 0x09)
-#define ERRNO_TASK_FLAG_INVALID ERRNO_OS_ERROR(MOD_ID_TASK, 0x0A)
-#define ERRNO_TASK_IN_IRQ_STATUS ERRNO_OS_ERROR(MOD_ID_TASK, 0x0A)
+#define ERRNO_TASK_FLAG_INVALID ERRNO_OS_ERROR(MOD_ID_TASK, 0x0a)
+#define ERRNO_TASK_IN_IRQ_STATUS ERRNO_OS_ERROR(MOD_ID_TASK, 0x0b)
+#define ERRNO_TASK_OPERATE_INVALID ERRNO_OS_ERROR(MOD_ID_TASK, 0x0c)
+#define ERRNO_TASK_IS_LOCKED ERRNO_OS_ERROR(MOD_ID_TASK, 0x0c)
 
 /* task cpu affinity */
 #define TASK_CPU_DEFAULT_AFFI 0x00000001U
@@ -97,8 +99,7 @@ errno_t task_stop_self();
 errno_t task_resume(task_id_t task_id);
 errno_t task_suspend(task_id_t task_id);
 errno_t task_suspend_self();
-errno_t task_delay(task_id_t task_id, task_id_t tick);
-errno_t task_delay_self(task_id_t tick);
+errno_t task_delay(uint64_t ticks);
 errno_t task_prority_set(task_id_t task_id, uint32_t prioriy);
 errno_t task_prority_get(task_id_t task_id, uint32_t *prioriy);
 errno_t task_cpu_affi_set(task_id_t task_id, uint32_t cpu_affi);

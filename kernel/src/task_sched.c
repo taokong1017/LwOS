@@ -86,6 +86,10 @@ struct task *current_task_get() {
 	return current_percpu.current_task;
 }
 
+struct per_cpu *current_percpu_get() {
+	return &current_percpu;
+}
+
 struct spinlock_key sched_spin_lock() {
 	return spin_lock(&sched_spinlock);
 }
@@ -150,7 +154,7 @@ void main_task_create() {
 
 	strncpy(task_name, ROOT_TASK_NAME, TASK_NAME_LEN);
 	task_create(&task_id, task_name, root_task_entry, NULL, NULL, NULL, NULL,
-				TASK_STACK_SIZE_MIN, TASK_DEFAULT_FLAG);
+				TASK_STACK_SIZE_MIN, TASK_FLAG_KERNEL);
 	task_prority_set(task_id, TASK_PRIORITY_HIGHEST);
 	task = ID_TO_TASK(task_id);
 	task->status = TASK_STATUS_RUNNING;
@@ -171,13 +175,11 @@ void task_resched() {
 		return;
 	}
 
-	current_task->status = TASK_STATUS_READY;
+	current_task->status &= ~TASK_STATUS_RUNNING;
 	next_task->status = TASK_STATUS_RUNNING;
 	current_task_update(next_task);
 	task_switch(next_task, current_task);
 }
-
-void task_announce() { ; }
 
 void task_sched_init() {
 	int32_t i = 0;
@@ -186,7 +188,7 @@ void task_sched_init() {
 	for (i = 0; i < TASK_PRIORITY_NUM; i++) {
 		INIT_LIST_HEAD(&current_percpu.ready_queue.run_queue.queues[i]);
 	}
-	INIT_LIST_HEAD(&current_percpu.timer_queue.tq);
+	INIT_LIST_HEAD(&current_percpu.timer_queue.queue);
 
 	idle_task_create();
 	main_task_create();

@@ -3,18 +3,24 @@
 
 #include <types.h>
 #include <list.h>
+#include <errno.h>
+
+#define ERRNO_TIMEOUT_ADD_EMPTY_NODE ERRNO_OS_ERROR(MOD_ID_TIMEOUT, 0x00)
 
 struct timeout;
 typedef void (*timeout_func)(struct timeout *timeout);
 
 struct timer_queue {
-	struct list_head tq;
+	struct list_head queue;
 };
 
 struct timeout {
 	struct list_head node;
-	timeout_func timeout;
+	timeout_func func;
 	uint64_t deadline_ticks;
 };
+
+void timeout_queue_handle(uint64_t cur_ticks);
+errno_t timeout_queue_add(struct timeout *timeout);
 
 #endif

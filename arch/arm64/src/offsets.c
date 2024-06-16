@@ -8,14 +8,23 @@ GEN_NAMED_OFFSET_SYM(struct task, args, TASK_OF_ARGS);
 GEN_NAMED_OFFSET_SYM(struct task, stack_ptr, TASK_OF_STACK_PTR);
 GEN_NAMED_OFFSET_SYM(arch_task_context_t, callee_context,
 					 TASK_CONTEXT_OF_CALLEE_CONTEXT);
-GEN_NAMED_OFFSET_SYM(arch_callee_context_t, x19, CALLEE_CONTEXT_OF_X19_X20);
-GEN_NAMED_OFFSET_SYM(arch_callee_context_t, x21, CALLEE_CONTEXT_OF_X21_X22);
-GEN_NAMED_OFFSET_SYM(arch_callee_context_t, x23, CALLEE_CONTEXT_OF_X23_X24);
-GEN_NAMED_OFFSET_SYM(arch_callee_context_t, x25, CALLEE_CONTEXT_OF_X25_X26);
-GEN_NAMED_OFFSET_SYM(arch_callee_context_t, x27, CALLEE_CONTEXT_OF_X27_X28);
-GEN_NAMED_OFFSET_SYM(arch_callee_context_t, x29, CALLEE_CONTEXT_OF_X29_SP_EL0);
-GEN_NAMED_OFFSET_SYM(arch_callee_context_t, sp_elx,
-					 CALLEE_CONTEXT_OF_SP_ELx_LR);
+GEN_NAMED_OFFSET_SYM(arch_callee_context_t, x0, CALLEE_CONTEXT_OF_X0_X1);
+GEN_NAMED_OFFSET_SYM(arch_callee_context_t, x2, CALLEE_CONTEXT_OF_X2_X3);
+GEN_NAMED_OFFSET_SYM(arch_callee_context_t, x4, CALLEE_CONTEXT_OF_X4_X5);
+GEN_NAMED_OFFSET_SYM(arch_callee_context_t, x6, CALLEE_CONTEXT_OF_X6_X7);
+GEN_NAMED_OFFSET_SYM(arch_callee_context_t, x8, CALLEE_CONTEXT_OF_X8_X9);
+GEN_NAMED_OFFSET_SYM(arch_callee_context_t, x10, CALLEE_CONTEXT_OF_X10_X11);
+GEN_NAMED_OFFSET_SYM(arch_callee_context_t, x12, CALLEE_CONTEXT_OF_X12_X13);
+GEN_NAMED_OFFSET_SYM(arch_callee_context_t, x14, CALLEE_CONTEXT_OF_X14_X15);
+GEN_NAMED_OFFSET_SYM(arch_callee_context_t, x16, CALLEE_CONTEXT_OF_X16_X17);
+GEN_NAMED_OFFSET_SYM(arch_callee_context_t, x18, CALLEE_CONTEXT_OF_X18_X19);
+GEN_NAMED_OFFSET_SYM(arch_callee_context_t, x20, CALLEE_CONTEXT_OF_X20_X21);
+GEN_NAMED_OFFSET_SYM(arch_callee_context_t, x22, CALLEE_CONTEXT_OF_X22_X23);
+GEN_NAMED_OFFSET_SYM(arch_callee_context_t, x24, CALLEE_CONTEXT_OF_X24_X25);
+GEN_NAMED_OFFSET_SYM(arch_callee_context_t, x26, CALLEE_CONTEXT_OF_X26_X27);
+GEN_NAMED_OFFSET_SYM(arch_callee_context_t, x28, CALLEE_CONTEXT_OF_X28_X29);
+GEN_NAMED_OFFSET_SYM(arch_callee_context_t, x30, CALLEE_CONTEXT_OF_X30_SP);
+GEN_NAMED_OFFSET_SYM(arch_callee_context_t, daif, CALLEE_CONTEXT_OF_DAIF_NZCV);
 #ifdef CONFIG_FPU_ENABLE
 GEN_NAMED_OFFSET_SYM(arch_task_context_t, fp_context,
 					 TASK_CONTEXT_OF_FP_CONTEXT);

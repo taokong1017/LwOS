@@ -5,9 +5,20 @@
 #include <string.h>
 #include <arch_task.h>
 #include <task_sched.h>
+#include <tick.h>
 
 #define ALIGN(start, align) ((start + align - 1) & ~(align - 1))
 #define TASK_TO_ID(task) ((task_id_t)task)
+
+static void task_delay_timeout(struct timeout *timeout) {
+	struct task *task = container_of(timeout, struct task, timeout);
+	if (task->status == TASK_STATUS_PEND) {
+		task->status = TASK_STATUS_READY;
+		sched_ready_queue_add(task->cpu_id, task);
+	} else {
+		task->status &= ~TASK_STATUS_PEND;
+	}
+}
 
 static errno_t task_params_check(task_id_t *task_id,
 								 const char name[TASK_NAME_LEN],
@@ -55,6 +66,7 @@ static void task_init(struct task *task, const char name[TASK_NAME_LEN],
 	task->args[1] = arg1;
 	task->args[2] = arg2;
 	task->args[3] = arg3;
+	task->timeout.func = task_delay_timeout;
 }
 
 errno_t task_create(task_id_t *task_id, const char name[TASK_NAME_LEN],
@@ -201,6 +213,12 @@ errno_t task_stop(task_id_t task_id) {
 		}
 
 		temp_status = task->status;
+
+		if (task->flag & TASK_FLAG_SYSTEM) {
+			sched_spin_unlock(lock_key);
+			return ERRNO_TASK_OPERATE_INVALID;
+		}
+
 		if (temp_status == TASK_STATUS_STOP) {
 			sched_spin_unlock(lock_key);
 			return ERRNO_TASK_STATUS_INVALID;
@@ -276,28 +294,38 @@ errno_t task_suspend(task_id_t task_id) {
 
 errno_t task_suspend_self() { return task_suspend(task_self_id()); }
 
-errno_t task_delay(task_id_t task_id, task_id_t tick) {
-	struct task *task = ID_TO_TASK(task_id);
-	if (!task) {
-		return ERRNO_TASK_ID_INVALID;
+errno_t task_delay(uint64_t ticks) {
+	struct task *task = current_task_get();
+	struct spinlock_key lock_key;
+
+	if (is_in_irq()) {
+		return ERRNO_TASK_IN_IRQ_STATUS;
 	}
 
-	if (task->status == TASK_STATUS_STOP) {
+	if (task->flag & TASK_FLAG_SYSTEM) {
+		return ERRNO_TASK_OPERATE_INVALID;
+	}
+
+	lock_key = sched_spin_lock();
+	if (task->lock_cnt > 0) {
+		sched_spin_unlock(lock_key);
+		return ERRNO_TASK_IS_LOCKED;
+	}
+
+	if (task->status != TASK_STATUS_RUNNING) {
+		sched_spin_unlock(lock_key);
 		return ERRNO_TASK_STATUS_INVALID;
 	}
 
-	if (task->status & TASK_STATUS_PEND) {
-		return ERRNO_TASK_STATUS_INVALID;
+	if (ticks > 0) {
+		sched_ready_queue_remove(task->cpu_id, task);
+		task->status = TASK_STATUS_PEND;
+		task->timeout.deadline_ticks = current_ticks() + ticks;
+		timeout_queue_add(&task->timeout);
 	}
 
-	task->status &= ~TASK_STATUS_READY;
-	task->status &= ~TASK_STATUS_RUNNING;
-	task->status |= TASK_STATUS_PEND;
-	// TO DO
+	task_resched();
+	sched_spin_unlock(lock_key);
 
 	return OK;
-}
-
-errno_t task_delay_self(task_id_t tick) {
-	return task_delay(task_self_id(), tick);
 }
