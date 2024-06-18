@@ -17,7 +17,7 @@ isr_func:
 	stp	x0, xzr, [sp, #-16]!
 	/* retrieve the interrupt service routine */
 	ldr	x1, =sw_isr_table
-	add	x1, x1, x0, lsl #4
+	add	x1, x1, x0, lsl #4 /* table is 16-byte wide */
 	ldp	x0, x3, [x1]
 
 	/* call the ISR, and mask interrupts, later surport unmask */

@@ -4,12 +4,15 @@
 #include <task_sched.h>
 #include <string.h>
 #include <irq.h>
+#include <operate_regs.h>
 
 #define IDLE_TASK_NAME "idle_task"
 #define ROOT_TASK_NAME "main_task"
 #define current_percpu kernel.percpus[arch_cpu_id_get()]
 static struct spinlock sched_spinlock;
 
+extern char __interrupt_stack_start[];
+extern char __interrupt_stack_end[];
 extern void root_task_entry(void *arg0, void *arg1, void *arg2, void *arg3);
 
 struct prio_info {
@@ -194,6 +197,9 @@ void task_sched_init() {
 		INIT_LIST_HEAD(&current_percpu.ready_queue.run_queue.queues[i]);
 	}
 	INIT_LIST_HEAD(&current_percpu.timer_queue.queue);
+	write_tpidrro_el0((uint64_t)current_percpu_get());
+	current_percpu_get()->irq_stack_ptr = (void *)__interrupt_stack_end;
+	current_percpu_get()->irq_stack_size = 0x1000;
 
 	idle_task_create();
 	main_task_create();

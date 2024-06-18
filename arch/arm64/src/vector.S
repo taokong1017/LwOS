@@ -38,6 +38,7 @@
  */
 #include <cpu_defines.h>
 #include <cpu.h>
+#include <offsets.h>
 
 .macro	ventry	label
 	.align	7
@@ -50,13 +51,29 @@
 .endm
 
 .macro CALL_IRQ_CFUNC cfunc
-	mov	x0, sp
-	ldr x1, =__interrupt_stack_end
-	mov sp, x1
-	str x0, [sp, #-8]!
+	mrs	x0, tpidrro_el0
+	ldr w1, [x0, #PER_CPU_OF_IRQ_NESTED_CNT_OFFSET]
+	add w2, w1, #1
+	str w2, [x0, #PER_CPU_OF_IRQ_NESTED_CNT_OFFSET]
+
+	cbnz w1, ready_sp
+	ldr x2, [x0, #PER_CPU_OF_IRQ_STACK_PTR_OFFSET]
+	mov x1, sp
+	mov sp, x2
+	str x1, [sp, #-8]!
+
+ready_sp:
 	bl	\cfunc
+
+	mrs	x0, tpidrro_el0
+	ldr w1, [x0, #PER_CPU_OF_IRQ_NESTED_CNT_OFFSET]
+	subs w2, w1, #1
+	str w2, [x0, #PER_CPU_OF_IRQ_NESTED_CNT_OFFSET]
+	bne w2, nested_exit
+
 	ldr x0, [sp], #8
 	mov sp, x0
+nested_exit:
 .endm
 
 .macro EXCEPTION_HANDLER irqname

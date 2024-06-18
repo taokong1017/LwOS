@@ -1,6 +1,7 @@
 #include <gen_offset.h>
 #include <arch_task.h>
 #include <task.h>
+#include <kernel.h>
 
 GEN_ABS_SYM_BEGIN(ARM64_TASK_SYMBOLE)
 GEN_NAMED_OFFSET_SYM(struct task, entry, TASK_OF_ENTRY);
@@ -42,4 +43,7 @@ GEN_NAMED_OFFSET_SYM(struct arch_esf_context, x18, ESF_CONTEXT_OF_X18_LR);
 GEN_NAMED_OFFSET_SYM(struct arch_esf_context, spsr, ESF_CONTEXT_OF_SPSR_ELR);
 GEN_NAMED_SIZE_SYM(struct arch_esf_context, ESF_CONTEXT);
 
+GEN_NAMED_OFFSET_SYM(struct per_cpu, irq_nested_cnt, PER_CPU_OF_IRQ_NESTED_CNT);
+GEN_NAMED_OFFSET_SYM(struct per_cpu, irq_stack_ptr, PER_CPU_OF_IRQ_STACK_PTR);
+GEN_NAMED_OFFSET_SYM(struct per_cpu, irq_stack_size, PER_CPU_OF_IRQ_STACK_SIZE);
 GEN_ABS_SYM_END
