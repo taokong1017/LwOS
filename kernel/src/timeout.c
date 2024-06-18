@@ -26,8 +26,8 @@ void timeout_queue_handle(uint64_t cur_ticks) {
 			timeout = list_entry(pos, struct timeout, node);
 			if (timeout && timeout->func &&
 				cur_ticks >= timeout->deadline_ticks) {
+				list_del_init(pos);
 				timeout->func(timeout);
-				list_del(pos);
 			}
 		}
 	}

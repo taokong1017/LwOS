@@ -38,11 +38,16 @@ void prio_mq_add(struct priority_mqueue *prio_mq, struct task *task) {
 }
 
 void prio_mq_remove(struct priority_mqueue *prio_mq, struct task *task) {
-	struct prio_info pos = prio_info_get(task->priority);
+	struct prio_info pri = prio_info_get(task->priority);
+	struct list_head *queue = &prio_mq->queues[pri.prio];
+	struct list_head *pos = NULL;
+	struct list_head *next = NULL;
 
-	if (!list_empty(&prio_mq->queues[pos.prio])) {
-		list_move(&task->node, &prio_mq->queues[pos.prio]);
-		prio_mq->bitmask[pos.idx] &= ~BIT(pos.bit);
+	list_for_each_safe(pos, next, queue) {
+		if (pos == &task->node) {
+			list_del_init(pos);
+			prio_mq->bitmask[pri.idx] &= ~BIT(pri.bit);
+		}
 	}
 }
 

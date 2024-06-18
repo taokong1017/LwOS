@@ -10,7 +10,7 @@
 #define ALIGN(start, align) ((start + align - 1) & ~(align - 1))
 #define TASK_TO_ID(task) ((task_id_t)task)
 
-static void task_delay_timeout(struct timeout *timeout) {
+void task_delay_timeout(struct timeout *timeout) {
 	struct task *task = container_of(timeout, struct task, timeout);
 	if (task->status == TASK_STATUS_PEND) {
 		task->status = TASK_STATUS_READY;
@@ -67,6 +67,7 @@ static void task_init(struct task *task, const char name[TASK_NAME_LEN],
 	task->args[2] = arg2;
 	task->args[3] = arg3;
 	task->timeout.func = task_delay_timeout;
+	INIT_LIST_HEAD(&task->timeout.node);
 }
 
 errno_t task_create(task_id_t *task_id, const char name[TASK_NAME_LEN],

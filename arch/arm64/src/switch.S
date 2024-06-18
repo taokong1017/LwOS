@@ -24,27 +24,27 @@ arch_task_context_switch:
 	stp	x24, x25, [x1, #ARCH_TASK_CONTEXT_X24_X25_OFFSET]
 	stp	x26, x27, [x1, #ARCH_TASK_CONTEXT_X26_X27_OFFSET]
 	stp	x28, x29, [x1, #ARCH_TASK_CONTEXT_X28_X29_OFFSET]
-	mov x2, sp
-	stp	x30, x2,  [x1, #ARCH_TASK_CONTEXT_X30_SP_OFFSET]
 	mrs x2, daif
 	mrs x3, nzcv
-	stp	x2, x3, [x1, #ARCH_TASK_CONTEXT_DAIF_NZCV_OFFSET]
+	stp	x2, x3,  [x1, #ARCH_TASK_CONTEXT_DAIF_NZCV_OFFSET]
+	mov x2, sp
+	stp	x30, x2, [x1, #ARCH_TASK_CONTEXT_X30_SP_OFFSET]
 
 #ifdef CONFIG_FPU_ENABLE
 	stp x0, x1, [sp, #-16]!
 	add x0, x1, #ARCH_TASK_FP_CONTEXT_OFFSET
 	bl arch_fpu_save
-	ldp x0, x1, [sp], #-16
+	ldp x0, x1, [sp], #16
 	stp x0, x1, [sp, #-16]!
 	add x0, x0, #ARCH_TASK_FP_CONTEXT_OFFSET
 	bl arch_fpu_restore
-	ldp x0, x1, [sp], #-16
+	ldp x0, x1, [sp], #16
 #endif
+	ldp	x30, x2,  [x0, #ARCH_TASK_CONTEXT_X30_SP_OFFSET]
+	mov sp, x2
 	ldp	x2, x3,   [x0, #ARCH_TASK_CONTEXT_DAIF_NZCV_OFFSET]
 	msr daif, x2
 	msr nzcv, x3
-	ldp	x30, x2,  [x0, #ARCH_TASK_CONTEXT_X30_SP_OFFSET]
-	mov sp, x2
 	ldp	x28, x29, [x0, #ARCH_TASK_CONTEXT_X28_X29_OFFSET]
 	ldp	x26, x27, [x0, #ARCH_TASK_CONTEXT_X26_X27_OFFSET]
 	ldp	x24, x25, [x0, #ARCH_TASK_CONTEXT_X24_X25_OFFSET]

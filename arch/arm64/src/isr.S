@@ -5,8 +5,8 @@
 .type isr_func, function
 .section .text, "ax"
 isr_func:
-	/* save LR register */
-	str x30, [sp, #-8]!
+	/* save FP & LR register */
+	stp	x29, x30, [sp, #-32]!
 
 	/* check if this irq is a spurious interrupt */
 	bl arm_gic_get_active
@@ -33,6 +33,6 @@ spurious_continue:
 	/* reschedule task */
 	bl task_resched
 
-	/* store LR register */
-	ldr	x30, [sp], #8
+	/* store FP & LR register */
+	ldp	x29, x30, [sp], #32
 	ret
