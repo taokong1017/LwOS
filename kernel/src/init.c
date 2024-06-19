@@ -18,7 +18,7 @@ void root_task_entry(void *arg0, void *arg1, void *arg2, void *arg3) {
 
 	uint64_t i = 0;
 	for (;;) {
-		printf("%d\n", i++);
+		printf("root task %d\n", i++);
 		task_delay(1000);
 	}
 }

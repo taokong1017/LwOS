@@ -128,12 +128,49 @@ static void task_switch(struct task *new, struct task *old) {
 	arch_task_context_switch(&new->task_context, &old->task_context);
 }
 
+#include <tick.h>
+#include <stdio.h>
+uint32_t test() {
+	uint32_t d1 = 1;
+	uint32_t d2 = 2;
+	uint32_t d3 = 3;
+	uint32_t d4 = 4;
+	uint32_t d5 = 5;
+	uint32_t d6 = 6;
+	uint32_t d7 = 7;
+	uint32_t d8 = 8;
+	uint32_t d9 = 9;
+	uint32_t d10 = 10;
+	uint32_t d11 = 11;
+	uint32_t d12 = 12;
+	uint32_t d13 = 13;
+	uint32_t d14 = 14;
+	uint32_t d15 = 15;
+	uint32_t d16 = 16;
+	uint32_t d17 = 17;
+	uint32_t d18 = 18;
+	uint32_t d19 = 19;
+	uint32_t d20 = 20;
+	uint32_t d21 = 21;
+	uint32_t d22 = 22;
+	uint32_t d23 = 23;
+	uint32_t d24 = 24;
+	uint32_t sum = 0;
+
+	mdelay(1000);
+	sum = d1 + d2 + d3 + d4 + d5 + d6 + d7 + d8 + d9 + d10 + d11 + d12 + d13 +
+		  d14 + d15 + d16 + d17 + d18 + d19 + d20 + d21 + d22 + d23 + d24;
+	return sum;
+}
+
 static void idle_task_entry(void *arg0, void *arg1, void *arg2, void *arg3) {
 	(void)arg0;
 	(void)arg1;
 	(void)arg2;
 	(void)arg3;
-	forever();
+	for (;;) {
+		printf("idle task %d\n", test());
+	}
 }
 
 void idle_task_create() {
