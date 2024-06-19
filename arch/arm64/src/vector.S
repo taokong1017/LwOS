@@ -69,10 +69,13 @@ ready_sp:
 	ldr w1, [x0, #PER_CPU_OF_IRQ_NESTED_CNT_OFFSET]
 	subs w2, w1, #1
 	str w2, [x0, #PER_CPU_OF_IRQ_NESTED_CNT_OFFSET]
-	bne w2, nested_exit
+	cbnz w2, nested_exit
 
+	/* reschedule task */
 	ldr x0, [sp], #8
 	mov sp, x0
+	bl task_resched
+
 nested_exit:
 .endm
 

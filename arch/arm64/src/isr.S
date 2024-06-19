@@ -1,5 +1,6 @@
 #include <menuconfig.h>
 #include <irq.h>
+#include <offsets.h>
 
 .globl isr_func
 .type isr_func, function
@@ -29,9 +30,6 @@ isr_func:
 spurious_continue:
 	/* end of interrupt */
 	bl	arm_gic_eoi
-
-	/* reschedule task */
-	bl task_resched
 
 	/* store FP & LR register */
 	ldp	x29, x30, [sp], #32
