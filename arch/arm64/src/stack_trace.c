@@ -97,7 +97,7 @@ static void unwind_init_from_regs(struct unwind_state *state,
 static void unwind_init_from_caller(struct unwind_state *state) {
 	unwind_init(state, current_task_get());
 
-	state->fp = (phys_addr_t)__builtin_frame_address(0);
+	state->fp = (phys_addr_t)__builtin_frame_address(1);
 	state->pc = (phys_addr_t)__builtin_return_address(0);
 }
 
