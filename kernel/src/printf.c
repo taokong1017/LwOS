@@ -709,7 +709,7 @@ int printf(const char *fmt, ...) {
 	int ret;
 
 	va_start(args, fmt);
-	ret = vsnprintf(buf, BUF_SIZE, fmt, args);
+	ret = vsnprintf(buf, BUF_SIZE - 1, fmt, args);
 	va_end(args);
 	uart_puts(buf, ret);
 

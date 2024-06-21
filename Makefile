@@ -99,7 +99,7 @@ clean:
 	$(Q)$(RM) -rf $(BASE_DIR)/sample/linker/lwos.lds $(BASE_DIR)/sample/linker/.lwos.lds*
 	$(Q)$(RM) -rf $(BASE_DIR)/arch/arm64/include/offsets.h
 	$(Q)$(call MAKE_CLEAN_CMD, $(SUB_DIRS))
-	$(Q)$(RM) -rf $(TARGET) .config menuconfig.h $(LOGO)
+	$(Q)$(RM) -rf $(TARGET) $(LOGO)
 
 help:
 	@echo "make config:		make CROSS_COMPILE=~/aarch64-none-linux-gnu/bin/aarch64-none-linux-gnu- menuconfig"

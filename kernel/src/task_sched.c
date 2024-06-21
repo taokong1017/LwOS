@@ -36,7 +36,7 @@ static struct prio_info prio_info_get(uint32_t priority) {
 void prio_mq_add(struct priority_mqueue *prio_mq, struct task *task) {
 	struct prio_info pos = prio_info_get(task->priority);
 
-	list_add(&task->node, &prio_mq->queues[pos.prio]);
+	list_add_tail(&task->node, &prio_mq->queues[pos.prio]);
 	prio_mq->bitmask[pos.idx] |= BIT(pos.bit);
 }
 
