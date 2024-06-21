@@ -3,6 +3,7 @@
 
 #include <types.h>
 #include <cpu_defines.h>
+#include <compiler.h>
 
 struct arch_regs {
 	/* X0 - X29 */
@@ -15,6 +16,6 @@ struct arch_regs {
 	uint64_t pc;
 	/* PState/CPSR */
 	uint64_t pstate;
-} __packed;
+} ALIGNED(16);
 
 #endif

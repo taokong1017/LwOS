@@ -1,5 +1,5 @@
-#ifndef __ARM64_FP_CONTEXT_H__
-#define __ARM64_FP_CONTEXT_H__
+#ifndef __ARM64_CPU_DEFINES_H__
+#define __ARM64_CPU_DEFINES_H__
 
 /* Field offsets for struct arch_regs */
 #define ARM_ARCH_REGS_GPR0		0x0
