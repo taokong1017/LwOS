@@ -94,7 +94,7 @@ static void unwind_init_from_regs(struct unwind_state *state,
 								  struct arch_regs *regs) {
 	unwind_init(state, current_task_get());
 
-	state->fp = regs->sp;
+	state->fp = regs->gprs[29];
 	state->pc = regs->pc;
 }
 

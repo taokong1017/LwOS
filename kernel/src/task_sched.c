@@ -174,12 +174,20 @@ uint32_t test() {
 	return sum;
 }
 
+static bool show_Linker(void *cookie, phys_addr_t pc) {
+	uint32_t *level = (uint32_t *)cookie;
+	printf("%u: 0x%016llx\n", (*level)++, pc);
+	return true;
+}
+
 static void idle_task_entry(void *arg0, void *arg1, void *arg2, void *arg3) {
 	(void)arg0;
 	(void)arg1;
 	(void)arg2;
 	(void)arg3;
 	for (;;) {
+		uint32_t level = 0;
+		arch_stack_walk(show_Linker, &level, current_task_get(), NULL);
 		printf("idle task %d\n", test());
 	}
 }

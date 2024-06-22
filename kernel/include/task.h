@@ -41,7 +41,7 @@
 /* task stack size definition */
 #define TASK_STACK_SIZE_ALIGN 16U
 #define TASK_STACK_ADDR_ALIGN 8U
-#define TASK_STACK_SIZE_MIN 1024U
+#define TASK_STACK_SIZE_MIN 8192U
 
 /* task error code definition */
 #define ERRNO_TASK_NO_MEMORY ERRNO_OS_FATAL(MOD_ID_TASK, 0x00)

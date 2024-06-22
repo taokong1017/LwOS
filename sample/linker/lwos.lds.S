@@ -52,11 +52,11 @@ SECTIONS
 
 	. = ALIGN(0x1000);
 	__kernel_stack_start = .;
-	. += 0x1000;
+	. += 0x2000;
 	__kernel_stack_end = .;
 
 	. = ALIGN(0x1000);
 	__interrupt_stack_start = .;
-	. += 0x1000;
+	. += 0x2000;
 	__interrupt_stack_end = .;
 }
