@@ -128,6 +128,17 @@ static void task_switch(struct task *new, struct task *old) {
 	arch_task_context_switch(&new->task_context, &old->task_context);
 }
 
+struct stack_info irq_stack_info(struct task *task) {
+	uint32_t cpu_id = task->cpu_id;
+	struct stack_info irq_stack;
+
+	irq_stack.high = (phys_addr_t)kernel.percpus[cpu_id].irq_stack_ptr;
+	irq_stack.low = (phys_addr_t)kernel.percpus[cpu_id].irq_stack_ptr -
+					kernel.percpus[cpu_id].irq_stack_size;
+
+	return irq_stack;
+}
+
 #include <tick.h>
 #include <stdio.h>
 uint32_t test() {

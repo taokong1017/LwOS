@@ -104,3 +104,13 @@ arch_exc_exit:
 	ldp	x18, lr,  [sp, #ESF_CONTEXT_OF_X18_LR_OFFSET]
 	add	sp, sp, #ESF_CONTEXT_SIZE
 	eret
+
+/*
+ * uint64_t current_pc_get()
+ */
+.globl current_pc_get
+.type current_pc_get, function
+.section .text, "ax"
+current_pc_get:
+	mov x0, lr
+	ret

@@ -25,6 +25,7 @@ endif
 
 ifeq ($(CONFIG_ARM64), y)
 	CFLAGS += -mgeneral-regs-only \
+		-mno-omit-leaf-frame-pointer \
 		$(INCLUDES) \
 		-I$(srctree)/arch/arm64/include \
 		-I$(srctree)/drivers/serial/include

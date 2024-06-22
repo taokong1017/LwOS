@@ -6,6 +6,7 @@
 #include <menuconfig.h>
 #include <task.h>
 #include <spin_lock.h>
+#include <stack_trace.h>
 
 #define MASK_NBITS 64
 #define DIV_ROUND_UP(n, d) (((n) + (d)-1) / (d))
@@ -43,5 +44,6 @@ struct kernel {
 void prio_mq_add(struct priority_mqueue *prio_mq, struct task *task);
 void prio_mq_remove(struct priority_mqueue *prio_mq, struct task *task);
 struct task *prio_mq_best(struct priority_mqueue *prio_mq);
+struct stack_info irq_stack_info(struct task *task);
 
 #endif
