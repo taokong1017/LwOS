@@ -36,4 +36,14 @@ void arch_irq_restore(uint32_t key) {
 	__asm__ __volatile__("msr daif, %0 " ::"r"(key) : "memory");
 }
 
+uint32_t arch_irq_unlock() {
+	uint32_t key;
+	__asm__ __volatile__("mrs %0, daif \n"
+						 "msr daifclr, #3"
+						 : "=r"(key)
+						 :
+						 : "memory");
+	return key;
+}
+
 bool arch_irq_lock_check(uint32_t key) { return (key & DAIF_IRQ_BIT) != 0; }

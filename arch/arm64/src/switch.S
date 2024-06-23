@@ -73,7 +73,6 @@ arch_main_task_switch:
 	ldr	x1, [x0, #TASK_OF_STACK_PTR_OFFSET]
 	mov	sp, x1
 
-	msr daifclr, DAIFCLR_ALL_BITS
 	ldr	x4, [x0, #TASK_OF_ENTRY_OFFSET]
 	ldr	x3, [x0, #TASK_OF_ARGS_OFFSET + 24]
 	ldr	x2, [x0, #TASK_OF_ARGS_OFFSET + 16]

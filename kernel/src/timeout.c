@@ -6,7 +6,7 @@
 #include <task_sched.h>
 #include <stdio.h>
 
-static struct spinlock timeout_locks[CONFIG_CPUS_MAX_NUM];
+static struct spinlock timeout_locks[CONFIG_CPUS_MAX_NUM] = {{0}};
 
 void timeout_queue_handle(uint64_t cur_ticks) {
 	struct list_head *queue = NULL;
@@ -21,8 +21,7 @@ void timeout_queue_handle(uint64_t cur_ticks) {
 
 	list_for_each_safe(pos, next, queue) {
 		timeout = list_entry(pos, struct timeout, node);
-		if (timeout && timeout->func &&
-			cur_ticks >= timeout->deadline_ticks) {
+		if (timeout && timeout->func && cur_ticks >= timeout->deadline_ticks) {
 			list_del_init(pos);
 			timeout->func(timeout);
 		}

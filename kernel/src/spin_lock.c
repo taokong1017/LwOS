@@ -33,34 +33,26 @@ void spin_unlock(struct spinlock *lock) {
 }
 
 void spin_lock_save(struct spinlock *lock, uint32_t *key) {
-	spin_lock(lock);
 	*key = arch_irq_save();
+	spin_lock(lock);
 
 	return;
 }
 
 void spin_lock_restore(struct spinlock *lock, uint32_t key) {
-	spin_lock(lock);
+	spin_unlock(lock);
 	arch_irq_restore(key);
 
 	return;
 }
 
-void spin_lock_init(struct spinlock *lock)
-{
-	lock->rawlock = 0;
-}
+void spin_lock_init(struct spinlock *lock) { lock->rawlock = 0; }
 
-bool spin_lock_is_locked(struct spinlock *lock)
-{
-	return lock->rawlock != 0;
-}
+bool spin_lock_is_locked(struct spinlock *lock) { return lock->rawlock != 0; }
 
 #else
 
-void spin_lock(struct spinlock *lock) {
-	(void)lock;
-}
+void spin_lock(struct spinlock *lock) { (void)lock; }
 
 int32_t spin_trylock(struct spinlock *lock) {
 	(void)lock;
@@ -68,9 +60,7 @@ int32_t spin_trylock(struct spinlock *lock) {
 	return true;
 }
 
-void spin_unlock(struct spinlock *lock) {
-	(void)lock;
-}
+void spin_unlock(struct spinlock *lock) { (void)lock; }
 
 void spin_lock_save(struct spinlock *lock, uint32_t *key) {
 	(void)lock;
@@ -84,14 +74,8 @@ void spin_lock_restore(struct spinlock *lock, uint32_t key) {
 	arch_irq_restore(key);
 }
 
-void spin_lock_init(struct spinlock *lock)
-{
-	(void)lock;
-}
+void spin_lock_init(struct spinlock *lock) { (void)lock; }
 
-bool spin_lock_is_locked(struct spinlock *lock)
-{
-	return true;
-}
+bool spin_lock_is_locked(struct spinlock *lock) { return true; }
 
 #endif

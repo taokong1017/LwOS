@@ -6,10 +6,19 @@
 #include <arch_task.h>
 #include <task_sched.h>
 #include <tick.h>
+#include <irq.h>
 
 #define ALIGN(start, align) ((start + align - 1) & ~(align - 1))
 #define TASK_TO_ID(task) ((task_id_t)task)
 
+/*
+ * when the delay task exceeds timeout, it will be added to ready
+ * queue and then the task will be scheduled.
+ *
+ * Here, we don't need to use shched locker to protect task status,
+ * because the task which put in the percpu timer queue is already
+ * locked using the interface spin_lock_save.
+ */
 void task_delay_timeout(struct timeout *timeout) {
 	struct task *task = container_of(timeout, struct task, timeout);
 	if (task->status == TASK_STATUS_PEND) {
@@ -107,10 +116,13 @@ errno_t task_create(task_id_t *task_id, const char name[TASK_NAME_LEN],
 
 void task_entry_point(task_id_t task_id) {
 	struct task *task = ID_TO_TASK(task_id);
+
+	arch_irq_unlock();
 	task->entry(task->args[0], task->args[1], task->args[2], task->args[3]);
 }
 
 errno_t task_prority_set(task_id_t task_id, uint32_t prioriy) {
+	uint32_t key = 0;
 	struct task *task = ID_TO_TASK(task_id);
 
 	if (!task) {
@@ -121,9 +133,9 @@ errno_t task_prority_set(task_id_t task_id, uint32_t prioriy) {
 		return ERRNO_TASK_PRIOR_ERROR;
 	}
 
-	sched_spin_lock();
+	key = sched_spin_lock();
 	if (is_in_irq()) {
-		sched_spin_unlock();
+		sched_spin_unlock(key);
 		return ERRNO_TASK_IN_IRQ_STATUS;
 	}
 	if (task->status == TASK_STATUS_READY) {
@@ -134,13 +146,14 @@ errno_t task_prority_set(task_id_t task_id, uint32_t prioriy) {
 	} else {
 		task->priority = prioriy;
 	}
-	sched_spin_unlock();
+	sched_spin_unlock(key);
 
 	return OK;
 }
 
 errno_t task_prority_get(task_id_t task_id, uint32_t *prioriy) {
 	struct task *task = ID_TO_TASK(task_id);
+	uint32_t key = 0;
 
 	if (!task) {
 		return ERRNO_TASK_ID_INVALID;
@@ -150,19 +163,20 @@ errno_t task_prority_get(task_id_t task_id, uint32_t *prioriy) {
 		return ERRNO_TASK_PRIORITY_EMPTY;
 	}
 
-	sched_spin_lock();
+	key = sched_spin_lock();
 	if (is_in_irq()) {
-		sched_spin_unlock();
+		sched_spin_unlock(key);
 		return ERRNO_TASK_IN_IRQ_STATUS;
 	}
 	*prioriy = task->priority;
-	sched_spin_unlock();
+	sched_spin_unlock(key);
 
 	return OK;
 }
 
 errno_t task_start(task_id_t task_id) {
 	struct task *task = ID_TO_TASK(task_id);
+	uint32_t key = 0;
 
 	if (!task) {
 		return ERRNO_TASK_ID_INVALID;
@@ -172,31 +186,32 @@ errno_t task_start(task_id_t task_id) {
 		return ERRNO_TASK_STATUS_INVALID;
 	}
 
-	sched_spin_lock(); 
+	key = sched_spin_lock();
 	if (is_in_irq()) {
-		sched_spin_unlock();
+		sched_spin_unlock(key);
 		return ERRNO_TASK_IN_IRQ_STATUS;
 	}
 	task->status = TASK_STATUS_READY;
 	sched_ready_queue_add(task->cpu_id, task);
 	task_resched();
-	sched_spin_unlock();
+	sched_spin_unlock(key);
 
 	return OK;
 }
 
-static task_id_t task_self_id() {
+task_id_t task_self_id() {
 	task_id_t task_id = 0;
+	uint32_t key = 0;
 
-	sched_spin_lock();
+	key = sched_spin_lock();
 
 	if (is_in_irq()) {
-		sched_spin_unlock();
+		sched_spin_unlock(key);
 		return ERRNO_TASK_IN_IRQ_STATUS;
 	}
 
 	task_id = current_task_get()->id;
-	sched_spin_unlock();
+	sched_spin_unlock(key);
 
 	return task_id;
 }
@@ -204,26 +219,27 @@ static task_id_t task_self_id() {
 errno_t task_stop(task_id_t task_id) {
 	struct task *task = ID_TO_TASK(task_id);
 	uint32_t temp_status = 0;
+	uint32_t key = 0;
 
 	if (!task) {
 		return ERRNO_TASK_ID_INVALID;
 	}
 
-	sched_spin_lock();
+	key = sched_spin_lock();
 	if (is_in_irq()) {
-		sched_spin_unlock();
+		sched_spin_unlock(key);
 		return ERRNO_TASK_IN_IRQ_STATUS;
 	}
 
 	temp_status = task->status;
 
 	if (task->flag & TASK_FLAG_SYSTEM) {
-		sched_spin_unlock();
+		sched_spin_unlock(key);
 		return ERRNO_TASK_OPERATE_INVALID;
 	}
 
 	if (temp_status == TASK_STATUS_STOP) {
-		sched_spin_unlock();
+		sched_spin_unlock(key);
 		return ERRNO_TASK_STATUS_INVALID;
 	}
 
@@ -250,7 +266,7 @@ errno_t task_stop(task_id_t task_id) {
 			// send task->cpu_id resched IPI
 		}
 	}
-	sched_spin_unlock();
+	sched_spin_unlock(key);
 
 	return OK;
 }
@@ -299,6 +315,7 @@ errno_t task_suspend_self() { return task_suspend(task_self_id()); }
 
 errno_t task_delay(uint64_t ticks) {
 	struct task *task = current_task_get();
+	uint32_t key = 0;
 
 	if (is_in_irq()) {
 		return ERRNO_TASK_IN_IRQ_STATUS;
@@ -308,14 +325,14 @@ errno_t task_delay(uint64_t ticks) {
 		return ERRNO_TASK_OPERATE_INVALID;
 	}
 
-	sched_spin_lock();
+	key = sched_spin_lock();
 	if (task->lock_cnt > 0) {
-		sched_spin_unlock();
+		sched_spin_unlock(key);
 		return ERRNO_TASK_IS_LOCKED;
 	}
 
 	if (task->status != TASK_STATUS_RUNNING) {
-		sched_spin_unlock();
+		sched_spin_unlock(key);
 		return ERRNO_TASK_STATUS_INVALID;
 	}
 
@@ -327,17 +344,11 @@ errno_t task_delay(uint64_t ticks) {
 	}
 
 	task_resched();
-	sched_spin_unlock();
+	sched_spin_unlock(key);
 
 	return OK;
 }
 
-void task_lock()
-{
+void task_lock() {}
 
-}
-
-void task_unlock()
-{
-
-}
+void task_unlock() {}

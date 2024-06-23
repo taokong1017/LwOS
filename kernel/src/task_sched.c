@@ -9,7 +9,7 @@
 #define IDLE_TASK_NAME "idle_task"
 #define ROOT_TASK_NAME "main_task"
 #define current_percpu kernel.percpus[arch_cpu_id_get()]
-static struct spinlock sched_spinlock;
+static struct spinlock sched_spinlock = {.rawlock = 0};
 
 extern char __interrupt_stack_start[];
 extern char __interrupt_stack_end[];
@@ -98,12 +98,15 @@ struct per_cpu *current_percpu_get() {
 	return &current_percpu;
 }
 
-void sched_spin_lock() {
-	spin_lock(&sched_spinlock);
+uint32_t sched_spin_lock() {
+	uint32_t key = 0;
+	spin_lock_save(&sched_spinlock, &key);
+
+	return key;
 }
 
-void sched_spin_unlock() {
-	spin_unlock(&sched_spinlock);
+void sched_spin_unlock(uint32_t key) {
+	spin_lock_restore(&sched_spinlock, key);
 }
 
 void sched_ready_queue_remove(uint32_t cpu_id, struct task *task) {
@@ -199,7 +202,8 @@ void idle_task_create() {
 
 	strncpy(task_name, IDLE_TASK_NAME, TASK_NAME_LEN);
 	task_create(&task_id, task_name, idle_task_entry, (void *)1, (void *)2,
-				(void *)3, (void *)4, TASK_STACK_DEFAULT_SIZE, TASK_DEFAULT_FLAG);
+				(void *)3, (void *)4, TASK_STACK_DEFAULT_SIZE,
+				TASK_DEFAULT_FLAG);
 	task_prority_set(task_id, TASK_PRIORITY_LOWEST);
 	task = ID_TO_TASK(task_id);
 	task->status = TASK_STATUS_READY;

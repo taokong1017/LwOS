@@ -112,6 +112,7 @@ errno_t task_prority_set(task_id_t task_id, uint32_t prioriy);
 errno_t task_prority_get(task_id_t task_id, uint32_t *prioriy);
 errno_t task_cpu_affi_set(task_id_t task_id, uint32_t cpu_affi);
 errno_t task_cpu_affi_get(task_id_t task_id, uint32_t *cpu_affi);
+task_id_t task_self_id();
 void task_lock();
 void task_unlock();
 
