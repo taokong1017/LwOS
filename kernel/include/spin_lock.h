@@ -8,23 +8,14 @@
 
 #define ERRNO_SPINLOCK_TRY_LOCK_FAILED ERRNO_OS_WARN(MOD_ID_SPINLOCK, 0x00)
 
-struct spinlock_key {
-	uint32_t key;
-};
-
 struct spinlock {
-#ifdef CONFIG_SMP
-	atomic_t owner;
-	atomic_t tail;
-#else
-	atomic_t locked;
-#endif
+	uint32_t rawlock;
 };
 
-struct spinlock_key spin_lock(struct spinlock *lock);
-int32_t spin_trylock(struct spinlock *lock, struct spinlock_key *key);
-void spin_unlock(struct spinlock *lock, struct spinlock_key key);
-bool spin_is_locked(struct spinlock *lock);
-void spin_release(struct spinlock *lock);
+void spin_lock(struct spinlock *lock);
+int32_t spin_trylock(struct spinlock *lock);
+void spin_unlock(struct spinlock *lock);
+void spin_lock_init(struct spinlock *lock);
+bool spin_lock_is_locked(struct spinlock *lock);
 
 #endif

@@ -98,12 +98,12 @@ struct per_cpu *current_percpu_get() {
 	return &current_percpu;
 }
 
-struct spinlock_key sched_spin_lock() {
-	return spin_lock(&sched_spinlock);
+void sched_spin_lock() {
+	spin_lock(&sched_spinlock);
 }
 
-void sched_spin_unlock(struct spinlock_key key) {
-	spin_unlock(&sched_spinlock, key);
+void sched_spin_unlock() {
+	spin_unlock(&sched_spinlock);
 }
 
 void sched_ready_queue_remove(uint32_t cpu_id, struct task *task) {
@@ -199,7 +199,7 @@ void idle_task_create() {
 
 	strncpy(task_name, IDLE_TASK_NAME, TASK_NAME_LEN);
 	task_create(&task_id, task_name, idle_task_entry, (void *)1, (void *)2,
-				(void *)3, (void *)4, TASK_STACK_SIZE_MIN, TASK_DEFAULT_FLAG);
+				(void *)3, (void *)4, TASK_STACK_DEFAULT_SIZE, TASK_DEFAULT_FLAG);
 	task_prority_set(task_id, TASK_PRIORITY_LOWEST);
 	task = ID_TO_TASK(task_id);
 	task->status = TASK_STATUS_READY;
@@ -218,7 +218,7 @@ void main_task_create() {
 
 	strncpy(task_name, ROOT_TASK_NAME, TASK_NAME_LEN);
 	task_create(&task_id, task_name, root_task_entry, NULL, NULL, NULL, NULL,
-				TASK_STACK_SIZE_MIN, TASK_FLAG_KERNEL);
+				TASK_STACK_DEFAULT_SIZE, TASK_FLAG_KERNEL);
 	task_prority_set(task_id, TASK_PRIORITY_HIGHEST);
 	task = ID_TO_TASK(task_id);
 	task->status = TASK_STATUS_RUNNING;

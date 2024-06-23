@@ -9,7 +9,8 @@ obj-y := vector.o \
 	arch_timer.o \
 	cpu.o \
 	arch_task.o \
-	stack_trace.o
+	stack_trace.o \
+	arch_spinlock.o
 
 obj-$(CONFIG_GIC_V2) += gic_v2.o \
 	isr_table.o \
