@@ -3,11 +3,13 @@
 #include <arch_spinlock.h>
 #include <irq.h>
 #include <menuconfig.h>
+#include <task_sched.h>
 
 #ifdef CONFIG_SMP
 void spin_lock(struct spinlock *lock) {
 	task_lock();
 	arch_spin_lock(&lock->rawlock);
+	lock->owner = current_task_get();
 
 	return;
 }
@@ -28,6 +30,7 @@ int32_t spin_trylock(struct spinlock *lock) {
 void spin_unlock(struct spinlock *lock) {
 	arch_spin_unlock(&lock->rawlock);
 	task_unlock();
+	lock->owner = NULL;
 
 	return;
 }

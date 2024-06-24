@@ -116,7 +116,9 @@ errno_t task_create(task_id_t *task_id, const char name[TASK_NAME_LEN],
 
 void task_entry_point(task_id_t task_id) {
 	struct task *task = ID_TO_TASK(task_id);
+	extern struct spinlock sched_spinlock;
 
+	spin_unlock(&sched_spinlock);
 	arch_irq_unlock();
 	task->entry(task->args[0], task->args[1], task->args[2], task->args[3]);
 }

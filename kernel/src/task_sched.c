@@ -9,7 +9,7 @@
 #define IDLE_TASK_NAME "idle_task"
 #define ROOT_TASK_NAME "main_task"
 #define current_percpu kernel.percpus[arch_cpu_id_get()]
-static struct spinlock sched_spinlock = {.rawlock = 0};
+struct spinlock sched_spinlock = {.rawlock = 0};
 
 extern char __interrupt_stack_start[];
 extern char __interrupt_stack_end[];
@@ -190,6 +190,9 @@ static void idle_task_entry(void *arg0, void *arg1, void *arg2, void *arg3) {
 	(void)arg3;
 	for (;;) {
 		uint32_t level = 0;
+		uint32_t prioriy = -1;
+		task_prority_get(task_self_id(), &prioriy);
+		printf("idle task priority %d\n", prioriy);
 		arch_stack_walk(show_Linker, &level, current_task_get(), NULL);
 		printf("idle task %d\n", test());
 	}
@@ -204,8 +207,8 @@ void idle_task_create() {
 	task_create(&task_id, task_name, idle_task_entry, (void *)1, (void *)2,
 				(void *)3, (void *)4, TASK_STACK_DEFAULT_SIZE,
 				TASK_DEFAULT_FLAG);
-	task_prority_set(task_id, TASK_PRIORITY_LOWEST);
 	task = ID_TO_TASK(task_id);
+	task->priority = TASK_PRIORITY_LOWEST;
 	task->status = TASK_STATUS_READY;
 	current_percpu.idle_task = task;
 	sched_ready_queue_add(task->cpu_id, task);
@@ -223,8 +226,8 @@ void main_task_create() {
 	strncpy(task_name, ROOT_TASK_NAME, TASK_NAME_LEN);
 	task_create(&task_id, task_name, root_task_entry, NULL, NULL, NULL, NULL,
 				TASK_STACK_DEFAULT_SIZE, TASK_FLAG_KERNEL);
-	task_prority_set(task_id, TASK_PRIORITY_HIGHEST);
 	task = ID_TO_TASK(task_id);
+	task->priority = TASK_PRIORITY_HIGHEST;
 	task->status = TASK_STATUS_RUNNING;
 	sched_ready_queue_add(task->cpu_id, task);
 	current_task_update(task);

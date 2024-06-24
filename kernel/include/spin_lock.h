@@ -10,6 +10,7 @@
 
 struct spinlock {
 	uint32_t rawlock;
+	struct task *owner;
 };
 
 void spin_lock(struct spinlock *lock);
