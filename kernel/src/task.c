@@ -4,6 +4,7 @@
 #include <memory.h>
 #include <string.h>
 #include <arch_task.h>
+#include <arch_spinlock.h>
 #include <task_sched.h>
 #include <tick.h>
 #include <irq.h>
@@ -11,6 +12,8 @@
 #define ALIGN(start, align) ((start + align - 1) & ~(align - 1))
 #define TASK_TO_ID(task) ((task_id_t)task)
 #define TASK_SCHED_LOCKED(task) (task->lock_cnt > 1)
+
+extern struct spinlock sched_spinlock;
 
 /*
  * when the delay task exceeds timeout, it will be added to ready
@@ -117,7 +120,6 @@ errno_t task_create(task_id_t *task_id, const char name[TASK_NAME_LEN],
 
 void task_entry_point(task_id_t task_id) {
 	struct task *task = ID_TO_TASK(task_id);
-	extern struct spinlock sched_spinlock;
 
 	spin_unlock(&sched_spinlock);
 	arch_irq_unlock();
@@ -365,15 +367,33 @@ void task_lock() {
 }
 
 void task_unlock() {
-	uint32_t key = 0;
+	uint32_t irq_key = 0, spin_key = 0;
 	struct task *task = NULL;
 
-	key = arch_irq_save();
+	irq_key = arch_irq_save();
 	task = current_task_get();
+
 	if (task->lock_cnt > 0) {
 		task->lock_cnt--;
-	}
+		if (task->lock_cnt == 0) {
+			spin_key = sched_spin_lock();
 
-	arch_irq_restore(key);
+			/* Needs to schedule when at the moment of task unlocking for other
+			 * higher priority tasks.
+			 */
+			task_resched();
+
+			/*
+			 * Shouldn't use the sched_spin_unlock function to unlock the
+			 * schedule spin locker(sched_spinlock), because that "task_unlock"
+			 * function has been used in it.
+			 */
+			task->lock_cnt--;
+			arch_spin_unlock(&sched_spinlock.rawlock);
+			arch_irq_restore(spin_key);
+		}
+	}
+	arch_irq_restore(irq_key);
+
 	return;
 }

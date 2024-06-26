@@ -10,6 +10,7 @@
 #define IDLE_TASK_NAME "idle_task"
 #define ROOT_TASK_NAME "main_task"
 #define TASK_SCHED_TAG "TASK_SCHED"
+#define TASK_IS_LOCKED(task) (task->lock_cnt > 0)
 #define current_percpu kernel.percpus[arch_cpu_id_get()]
 
 SPIN_LOCK_DEFINE(sched_spinlock);
@@ -263,6 +264,10 @@ void task_irq_resched() {
 		log_err(TASK_SCHED_TAG, "the sched_spinlock is locked\n");
 		spin_lock_dump(&sched_spinlock);
 		forever();
+	}
+
+	if (TASK_IS_LOCKED(current_task)) {
+		return;
 	}
 
 	key = sched_spin_lock();
