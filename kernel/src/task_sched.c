@@ -5,12 +5,14 @@
 #include <string.h>
 #include <irq.h>
 #include <operate_regs.h>
+#include <log.h>
 
 #define IDLE_TASK_NAME "idle_task"
 #define ROOT_TASK_NAME "main_task"
+#define TASK_SCHED_TAG "TASK_SCHED"
 #define current_percpu kernel.percpus[arch_cpu_id_get()]
-struct spinlock sched_spinlock = {.rawlock = 0};
 
+SPIN_LOCK_DEFINE(sched_spinlock);
 extern char __interrupt_stack_start[];
 extern char __interrupt_stack_end[];
 extern void root_task_entry(void *arg0, void *arg1, void *arg2, void *arg3);
@@ -242,14 +244,35 @@ void task_resched() {
 		return;
 	}
 
-	if (current_task->lock_cnt > 0) {
-		return;
-	}
-
 	current_task->status &= ~TASK_STATUS_RUNNING;
 	next_task->status = TASK_STATUS_RUNNING;
 	current_task_update(next_task);
 	task_switch(next_task, current_task);
+}
+
+void task_irq_resched() {
+	uint32_t key = 0;
+	struct task *current_task = current_task_get();
+	struct task *next_task = next_task_pick_up();
+
+	if (current_task == next_task) {
+		return;
+	}
+
+	if (spin_lock_is_locked(&sched_spinlock)) {
+		log_err(TASK_SCHED_TAG, "the sched_spinlock is locked\n");
+		spin_lock_dump(&sched_spinlock);
+		forever();
+	}
+
+	key = sched_spin_lock();
+	current_task->status &= ~TASK_STATUS_RUNNING;
+	next_task->status = TASK_STATUS_RUNNING;
+	current_task_update(next_task);
+	task_switch(next_task, current_task);
+	sched_spin_unlock(key);
+
+	return;
 }
 
 void task_sched_init() {

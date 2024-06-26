@@ -10,6 +10,7 @@
 
 #define ALIGN(start, align) ((start + align - 1) & ~(align - 1))
 #define TASK_TO_ID(task) ((task_id_t)task)
+#define TASK_SCHED_LOCKED(task) (task->lock_cnt > 1)
 
 /*
  * when the delay task exceeds timeout, it will be added to ready
@@ -328,7 +329,7 @@ errno_t task_delay(uint64_t ticks) {
 	}
 
 	key = sched_spin_lock();
-	if (task->lock_cnt > 0) {
+	if (TASK_SCHED_LOCKED(task)) {
 		sched_spin_unlock(key);
 		return ERRNO_TASK_IS_LOCKED;
 	}
@@ -351,6 +352,28 @@ errno_t task_delay(uint64_t ticks) {
 	return OK;
 }
 
-void task_lock() {}
+void task_lock() {
+	uint32_t key = 0;
+	struct task *task = NULL;
 
-void task_unlock() {}
+	key = arch_irq_save();
+	task = current_task_get();
+	task->lock_cnt++;
+	arch_irq_restore(key);
+
+	return;
+}
+
+void task_unlock() {
+	uint32_t key = 0;
+	struct task *task = NULL;
+
+	key = arch_irq_save();
+	task = current_task_get();
+	if (task->lock_cnt > 0) {
+		task->lock_cnt--;
+	}
+
+	arch_irq_restore(key);
+	return;
+}

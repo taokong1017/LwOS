@@ -14,13 +14,7 @@ void tick_announce() {
 	timeout_queue_handle(current_ticks());
 }
 
-uint64_t current_ticks() {
-	uint64_t key = arch_irq_save();
-	uint64_t ticks = tick_counts[arch_cpu_id_get()];
-	arch_irq_restore(key);
-
-	return ticks;
-}
+uint64_t current_ticks() { return tick_counts[arch_cpu_id_get()]; }
 
 uint64_t current_cycles() {
 	uint64_t cycles = 0;
