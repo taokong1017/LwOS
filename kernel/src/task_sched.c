@@ -16,7 +16,7 @@
 SPIN_LOCK_DEFINE(sched_spinlock);
 extern char __interrupt_stack_start[];
 extern char __interrupt_stack_end[];
-extern void root_task_entry(void *arg0, void *arg1, void *arg2, void *arg3);
+extern void main_task_entry(void *arg0, void *arg1, void *arg2, void *arg3);
 
 struct prio_info {
 	uint32_t prio;
@@ -145,60 +145,13 @@ struct stack_info irq_stack_info(struct task *task) {
 	return irq_stack;
 }
 
-#include <tick.h>
-#include <stdio.h>
-uint32_t test() {
-	uint32_t d1 = 1;
-	uint32_t d2 = 2;
-	uint32_t d3 = 3;
-	uint32_t d4 = 4;
-	uint32_t d5 = 5;
-	uint32_t d6 = 6;
-	uint32_t d7 = 7;
-	uint32_t d8 = 8;
-	uint32_t d9 = 9;
-	uint32_t d10 = 10;
-	uint32_t d11 = 11;
-	uint32_t d12 = 12;
-	uint32_t d13 = 13;
-	uint32_t d14 = 14;
-	uint32_t d15 = 15;
-	uint32_t d16 = 16;
-	uint32_t d17 = 17;
-	uint32_t d18 = 18;
-	uint32_t d19 = 19;
-	uint32_t d20 = 20;
-	uint32_t d21 = 21;
-	uint32_t d22 = 22;
-	uint32_t d23 = 23;
-	uint32_t d24 = 24;
-	uint32_t sum = 0;
-
-	mdelay(1000);
-	sum = d1 + d2 + d3 + d4 + d5 + d6 + d7 + d8 + d9 + d10 + d11 + d12 + d13 +
-		  d14 + d15 + d16 + d17 + d18 + d19 + d20 + d21 + d22 + d23 + d24;
-	return sum;
-}
-
-static bool show_Linker(void *cookie, phys_addr_t pc) {
-	uint32_t *level = (uint32_t *)cookie;
-	printf("%u: 0x%016llx\n", (*level)++, pc);
-	return true;
-}
-
 static void idle_task_entry(void *arg0, void *arg1, void *arg2, void *arg3) {
 	(void)arg0;
 	(void)arg1;
 	(void)arg2;
 	(void)arg3;
-	for (;;) {
-		uint32_t level = 0;
-		uint32_t prioriy = -1;
-		task_prority_get(task_self_id(), &prioriy);
-		printf("idle task priority %d\n", prioriy);
-		arch_stack_walk(show_Linker, &level, current_task_get(), NULL);
-		printf("idle task %d\n", test());
-	}
+
+	forever();
 }
 
 void idle_task_create() {
@@ -227,7 +180,7 @@ void main_task_create() {
 	char task_name[TASK_NAME_LEN] = {0};
 
 	strncpy(task_name, ROOT_TASK_NAME, TASK_NAME_LEN);
-	task_create(&task_id, task_name, root_task_entry, NULL, NULL, NULL, NULL,
+	task_create(&task_id, task_name, main_task_entry, NULL, NULL, NULL, NULL,
 				TASK_STACK_DEFAULT_SIZE, TASK_FLAG_KERNEL);
 	task = ID_TO_TASK(task_id);
 	task->priority = TASK_PRIORITY_HIGHEST;

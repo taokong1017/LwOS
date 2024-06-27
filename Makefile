@@ -1,7 +1,7 @@
 TARGET     = LwOS.elf
 BASE_DIR   = $(CURDIR)
 CONFIG_DIR = $(BASE_DIR)/config
-SUB_DIRS   = arch kernel drivers
+SUB_DIRS   = arch kernel drivers sample
 LINKER     = $(BASE_DIR)/sample/linker/lwos.lds
 CONFIG     :=
 
