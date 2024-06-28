@@ -91,9 +91,8 @@ struct task {
 	uint32_t cpu_id;
 	task_entry_func entry;
 	void *args[4];
-	struct list_head node;
-	struct wait_queue *wait_queue_ptr;
-	struct wait_queue halt_queue;
+	struct list_head task_list; /* ready queue */
+	struct list_head pend_list; /* pend queue */
 	struct timeout timeout;
 	struct arch_task_context task_context;
 };

@@ -18,7 +18,6 @@ struct priority_mqueue {
 };
 
 struct ready_queue {
-	struct task *next_task;
 	struct priority_mqueue run_queue;
 };
 

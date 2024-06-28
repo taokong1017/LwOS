@@ -39,7 +39,7 @@ static struct prio_info prio_info_get(uint32_t priority) {
 void prio_mq_add(struct priority_mqueue *prio_mq, struct task *task) {
 	struct prio_info pos = prio_info_get(task->priority);
 
-	list_add_tail(&task->node, &prio_mq->queues[pos.prio]);
+	list_add_tail(&task->task_list, &prio_mq->queues[pos.prio]);
 	prio_mq->bitmask[pos.idx] |= BIT(pos.bit);
 }
 
@@ -50,7 +50,7 @@ void prio_mq_remove(struct priority_mqueue *prio_mq, struct task *task) {
 	struct list_head *next = NULL;
 
 	list_for_each_safe(pos, next, queue) {
-		if (pos == &task->node) {
+		if (pos == &task->task_list) {
 			list_del_init(pos);
 			prio_mq->bitmask[pri.idx] &= ~BIT(pri.bit);
 		}
@@ -85,7 +85,7 @@ struct task *prio_mq_best(struct priority_mqueue *prio_mq) {
 		struct list_head *list = &prio_mq->queues[idx * MASK_NBITS + bit];
 
 		if (!list_empty(list)) {
-			task = list_first_entry(list, struct task, node);
+			task = list_first_entry(list, struct task, task_list);
 			break;
 		}
 	}
@@ -181,7 +181,7 @@ void main_task_create() {
 
 	strncpy(task_name, ROOT_TASK_NAME, TASK_NAME_LEN);
 	task_create(&task_id, task_name, main_task_entry, NULL, NULL, NULL, NULL,
-				TASK_STACK_DEFAULT_SIZE, TASK_FLAG_KERNEL);
+				TASK_STACK_DEFAULT_SIZE, TASK_DEFAULT_FLAG);
 	task = ID_TO_TASK(task_id);
 	task->priority = TASK_PRIORITY_HIGHEST;
 	task->status = TASK_STATUS_RUNNING;
@@ -224,9 +224,14 @@ void task_irq_resched() {
 	}
 
 	key = sched_spin_lock();
-	current_task->status &= ~TASK_STATUS_RUNNING;
+
+	current_task->status = TASK_STATUS_READY;
+	sched_ready_queue_remove(current_task->cpu_id, current_task);
+	sched_ready_queue_add(current_task->cpu_id, current_task);
+
 	next_task->status = TASK_STATUS_RUNNING;
 	current_task_update(next_task);
+
 	task_switch(next_task, current_task);
 	sched_spin_unlock(key);
 

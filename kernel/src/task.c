@@ -14,6 +14,7 @@
 #define TASK_SCHED_LOCKED(task) (task->lock_cnt > 1)
 
 extern struct spinlock sched_spinlock;
+extern void task_irq_resched();
 
 /*
  * when the delay task exceeds timeout, it will be added to ready
@@ -279,39 +280,85 @@ errno_t task_stop(task_id_t task_id) {
 errno_t task_stop_self() { return task_stop(task_self_id()); }
 
 errno_t task_resume(task_id_t task_id) {
+	uint32_t key = 0;
 	struct task *task = ID_TO_TASK(task_id);
+	struct task *current_task = current_task_get();
+
 	if (!task) {
 		return ERRNO_TASK_ID_INVALID;
 	}
 
-	if (!(task->status & TASK_STATUS_SUSPEND)) {
+	if (task == current_task) {
+		return ERRNO_TASK_ID_INVALID;
+	}
+
+	key = sched_spin_lock();
+	if (task->status & TASK_STATUS_STOP) {
+		sched_spin_unlock(key);
+		return ERRNO_TASK_STATUS_INVALID;
+	}
+
+	if ((task->status & TASK_STATUS_RUNNING) ||
+		(task->status & TASK_STATUS_READY)) {
+		sched_spin_unlock(key);
+		return ERRNO_TASK_STATUS_INVALID;
+	}
+
+	if (task->status & TASK_STATUS_PEND) {
+		task->status &= ~TASK_STATUS_SUSPEND;
+		sched_spin_unlock(key);
 		return ERRNO_TASK_STATUS_INVALID;
 	}
 
 	task->status &= ~TASK_STATUS_SUSPEND;
-	// TO DO
+	task->status |= TASK_STATUS_READY;
+	sched_ready_queue_add(task->cpu_id, task);
+	task_resched();
+	sched_spin_unlock(key);
 
 	return OK;
 }
 
 errno_t task_suspend(task_id_t task_id) {
+	uint32_t key = 0;
 	struct task *task = ID_TO_TASK(task_id);
+	struct task *current_task = current_task_get();
+
 	if (!task) {
 		return ERRNO_TASK_ID_INVALID;
 	}
 
+	if (is_in_irq()) {
+		return ERRNO_TASK_IN_IRQ_STATUS;
+	}
+
+	key = sched_spin_lock();
 	if (task->status & TASK_STATUS_SUSPEND) {
+		sched_spin_unlock(key);
 		return ERRNO_TASK_STATUS_INVALID;
 	}
 
 	if (task->status == TASK_STATUS_STOP) {
+		sched_spin_unlock(key);
 		return ERRNO_TASK_STATUS_INVALID;
 	}
 
-	task->status &= ~TASK_STATUS_READY;
-	task->status &= ~TASK_STATUS_RUNNING;
+	if (task->status & TASK_STATUS_READY) {
+		task->status &= ~TASK_STATUS_READY;
+		sched_ready_queue_remove(task->cpu_id, task);
+	}
+
+	if (task->status & TASK_STATUS_RUNNING) {
+		task->status &= ~TASK_STATUS_RUNNING;
+		/* For no smp, delete task is OK */
+		sched_ready_queue_remove(task->cpu_id, task);
+	}
+
 	task->status |= TASK_STATUS_SUSPEND;
-	// TO DO
+	if (task == current_task) {
+		task_resched();
+	}
+	sched_spin_unlock(key);
 
 	return OK;
 }
@@ -367,33 +414,21 @@ void task_lock() {
 }
 
 void task_unlock() {
-	uint32_t irq_key = 0, spin_key = 0;
+	uint32_t key = 0;
 	struct task *task = NULL;
 
-	irq_key = arch_irq_save();
+	key = arch_irq_save();
 	task = current_task_get();
 
 	if (task->lock_cnt > 0) {
 		task->lock_cnt--;
 		if (task->lock_cnt == 0) {
-			spin_key = sched_spin_lock();
-
-			/* Needs to schedule when at the moment of task unlocking for other
-			 * higher priority tasks.
-			 */
-			task_resched();
-
-			/*
-			 * Shouldn't use the sched_spin_unlock function to unlock the
-			 * schedule spin locker(sched_spinlock), because that "task_unlock"
-			 * function has been used in it.
-			 */
-			task->lock_cnt--;
-			arch_spin_unlock(&sched_spinlock.rawlock);
-			arch_irq_restore(spin_key);
+			arch_irq_restore(key);
+			task_irq_resched();
+			return;
 		}
 	}
-	arch_irq_restore(irq_key);
+	arch_irq_restore(key);
 
 	return;
 }

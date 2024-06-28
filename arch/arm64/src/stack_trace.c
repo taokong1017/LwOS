@@ -168,8 +168,8 @@ struct unwind_consume_entry_data {
 	void *cookie;
 };
 
-static bool arch_kunwind_consume_entry(const struct unwind_state *state,
-									   void *cookie) {
+static bool arch_unwind_consume_entry(const struct unwind_state *state,
+									  void *cookie) {
 	struct unwind_consume_entry_data *data = cookie;
 	return data->consume_entry(data->cookie, state->pc);
 }
@@ -181,5 +181,5 @@ void arch_stack_walk(stack_trace_consume_func consume_entry, void *cookie,
 		.cookie = cookie,
 	};
 
-	unwind_stack_walk(arch_kunwind_consume_entry, &data, task, regs);
+	unwind_stack_walk(arch_unwind_consume_entry, &data, task, regs);
 }
