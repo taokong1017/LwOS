@@ -52,8 +52,12 @@ void prio_mq_remove(struct priority_mqueue *prio_mq, struct task *task) {
 	list_for_each_safe(pos, next, queue) {
 		if (pos == &task->task_list) {
 			list_del_init(pos);
-			prio_mq->bitmask[pri.idx] &= ~BIT(pri.bit);
+			break;
 		}
+	}
+
+	if (list_empty(queue)) {
+		prio_mq->bitmask[pri.idx] &= ~BIT(pri.bit);
 	}
 }
 
@@ -166,12 +170,7 @@ void idle_task_create() {
 	task = ID_TO_TASK(task_id);
 	task->priority = TASK_PRIORITY_LOWEST;
 	task->status = TASK_STATUS_READY;
-	current_percpu.idle_task = task;
 	sched_ready_queue_add(task->cpu_id, task);
-}
-
-bool task_is_idle_task(struct task *task) {
-	return current_percpu.idle_task == task ? true : false;
 }
 
 void main_task_create() {

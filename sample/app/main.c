@@ -36,7 +36,7 @@ static void test_task1_entry(void *arg0, void *arg1, void *arg2, void *arg3) {
 		arch_stack_walk(show_Linker, &level, current_task_get(), NULL);
 
 		printf("task %s %d\n", TEST_TASK1_NAME, i++);
-		task_delay(100);
+		task_delay(500);
 	}
 }
 
@@ -73,10 +73,27 @@ static void test_task2_entry(void *arg0, void *arg1, void *arg2, void *arg3) {
 	(void)arg2;
 	(void)arg3;
 	uint32_t i = 0;
+	errno_t ret = 0;
+	uint32_t priority = 1;
+	uint32_t priority1 = 15;
 
 	for (;;) {
 		printf("task %s %d\n", TEST_TASK2_NAME, i++);
-		task_delay(100);
+		task_delay(1000);
+		ret = task_prority_set(test_task1_id, priority);
+		if (ret == OK) {
+			printf("set task %s priority %d\n", TEST_TASK1_NAME, priority);
+		} else {
+			printf("set task %s priority %d failed\n", TEST_TASK1_NAME,
+				   priority);
+		}
+		ret = task_prority_set(test_task2_id, priority1);
+		if (ret == OK) {
+			printf("set task %s priority %d\n", TEST_TASK2_NAME, priority1);
+		} else {
+			printf("set task %s priority %d failed\n", TEST_TASK2_NAME,
+				   priority1);
+		}
 	}
 }
 
@@ -114,29 +131,15 @@ static void test_task3_entry(void *arg0, void *arg1, void *arg2, void *arg3) {
 	(void)arg3;
 
 	uint32_t i = 0;
-	uint32_t j = 0;
-	int ret = 0;
 
 	for (;;) {
-		printf("task %s %d\n", TEST_TASK3_NAME, j++);
-		if (i == 1) {
-			ret = task_suspend(test_task2_id);
-			if (ret == OK) {
-				printf("task %s suspend\n", TEST_TASK2_NAME);
-			} else {
-				printf("task %s suspend failed\n", TEST_TASK2_NAME);
-			}
-		}
-		task_delay(500);
-		if (i == 3) {
-			ret = task_resume(test_task2_id);
-			if (ret == OK) {
-				printf("task %s resume\n", TEST_TASK2_NAME);
-			} else {
-				printf("task %s resume failed\n", TEST_TASK2_NAME);
-			}
-		}
-		i = (i + 1) % 4;
+		printf("task %s %d\n", TEST_TASK3_NAME, i++);
+		task_suspend(test_task2_id);
+		printf("task %s suspend\n", TEST_TASK2_NAME);
+		task_delay(2000);
+		task_resume(test_task2_id);
+		printf("task %s resume\n", TEST_TASK2_NAME);
+		task_delay(100);
 	}
 }
 

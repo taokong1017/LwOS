@@ -135,7 +135,7 @@ errno_t task_prority_set(task_id_t task_id, uint32_t prioriy) {
 		return ERRNO_TASK_ID_INVALID;
 	}
 
-	if (prioriy < TASK_PRIORITY_LOWEST || prioriy > TASK_PRIORITY_HIGHEST) {
+	if (prioriy > TASK_PRIORITY_HIGHEST) {
 		return ERRNO_TASK_PRIOR_ERROR;
 	}
 
@@ -144,14 +144,23 @@ errno_t task_prority_set(task_id_t task_id, uint32_t prioriy) {
 		sched_spin_unlock(key);
 		return ERRNO_TASK_IN_IRQ_STATUS;
 	}
-	if (task->status == TASK_STATUS_READY) {
+
+	if (task->status == TASK_STATUS_STOP) {
+		task->priority = prioriy;
+		sched_spin_unlock(key);
+		return OK;
+	}
+
+	if ((task->status == TASK_STATUS_READY) ||
+		(task->status == TASK_STATUS_RUNNING)) {
 		sched_ready_queue_remove(task->cpu_id, task);
 		task->priority = prioriy;
 		sched_ready_queue_add(task->cpu_id, task);
-		task_resched();
 	} else {
 		task->priority = prioriy;
 	}
+
+	task_resched();
 	sched_spin_unlock(key);
 
 	return OK;
@@ -180,6 +189,55 @@ errno_t task_prority_get(task_id_t task_id, uint32_t *prioriy) {
 	return OK;
 }
 
+errno_t task_cpu_affi_set(task_id_t task_id, uint32_t cpu_affi) {
+	struct task *task = ID_TO_TASK(task_id);
+	uint32_t key = 0;
+
+	if (!task) {
+		return ERRNO_TASK_ID_INVALID;
+	}
+
+	if (cpu_affi > TASK_CPU_AFFI_MASK) {
+		return ERRNO_TASK_CPU_AFFI_INAVLID;
+	}
+
+	key = sched_spin_lock();
+	if (is_in_irq()) {
+		sched_spin_unlock(key);
+		return ERRNO_TASK_IN_IRQ_STATUS;
+	}
+
+	// TO DO
+
+	sched_spin_unlock(key);
+
+	return OK;
+}
+
+errno_t task_cpu_affi_get(task_id_t task_id, uint32_t *cpu_affi) {
+	struct task *task = ID_TO_TASK(task_id);
+	uint32_t key = 0;
+
+	if (!cpu_affi) {
+		return ERRNO_TASK_PTR_NULL;
+	}
+
+	if (!task) {
+		return ERRNO_TASK_ID_INVALID;
+	}
+
+	key = sched_spin_lock();
+	if (is_in_irq()) {
+		sched_spin_unlock(key);
+		return ERRNO_TASK_IN_IRQ_STATUS;
+	}
+
+	*cpu_affi = task->cpu_affi;
+	sched_spin_unlock(key);
+
+	return OK;
+}
+
 errno_t task_start(task_id_t task_id) {
 	struct task *task = ID_TO_TASK(task_id);
 	uint32_t key = 0;
@@ -188,15 +246,17 @@ errno_t task_start(task_id_t task_id) {
 		return ERRNO_TASK_ID_INVALID;
 	}
 
-	if (task->status != TASK_STATUS_STOP) {
-		return ERRNO_TASK_STATUS_INVALID;
-	}
-
 	key = sched_spin_lock();
 	if (is_in_irq()) {
 		sched_spin_unlock(key);
 		return ERRNO_TASK_IN_IRQ_STATUS;
 	}
+
+	if (task->status != TASK_STATUS_STOP) {
+		sched_spin_unlock(key);
+		return ERRNO_TASK_STATUS_INVALID;
+	}
+
 	task->status = TASK_STATUS_READY;
 	sched_ready_queue_add(task->cpu_id, task);
 	task_resched();
@@ -301,7 +361,7 @@ errno_t task_resume(task_id_t task_id) {
 	if ((task->status & TASK_STATUS_RUNNING) ||
 		(task->status & TASK_STATUS_READY)) {
 		sched_spin_unlock(key);
-		return ERRNO_TASK_STATUS_INVALID;
+		return OK;
 	}
 
 	if (task->status & TASK_STATUS_PEND) {
@@ -335,7 +395,7 @@ errno_t task_suspend(task_id_t task_id) {
 	key = sched_spin_lock();
 	if (task->status & TASK_STATUS_SUSPEND) {
 		sched_spin_unlock(key);
-		return ERRNO_TASK_STATUS_INVALID;
+		return OK;
 	}
 
 	if (task->status == TASK_STATUS_STOP) {

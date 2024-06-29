@@ -29,7 +29,6 @@ struct per_cpu {
 
 	/* task related */
 	struct task *current_task;
-	struct task *idle_task;
 
 	/* scheduling related */
 	struct ready_queue ready_queue;
