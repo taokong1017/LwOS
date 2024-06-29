@@ -3,6 +3,7 @@
 #include <tick.h>
 #include <string.h>
 #include <task_sched.h>
+#include <stack_trace.h>
 
 #define TEST_TASK1_NAME "test_task1"
 #define TEST_TASK2_NAME "test_task2"
@@ -12,12 +13,6 @@ static task_id_t test_task1_id = 0;
 static task_id_t test_task2_id = 0;
 static task_id_t test_task3_id = 0;
 
-static bool show_Linker(void *cookie, phys_addr_t pc) {
-	uint32_t *level = (uint32_t *)cookie;
-	printf("%u: 0x%016llx\n", (*level)++, pc);
-	return true;
-}
-
 static void test_task1_entry(void *arg0, void *arg1, void *arg2, void *arg3) {
 	(void)arg0;
 	(void)arg1;
@@ -25,15 +20,15 @@ static void test_task1_entry(void *arg0, void *arg1, void *arg2, void *arg3) {
 	(void)arg3;
 
 	uint32_t i = 0;
-	uint32_t level = 0;
 	uint32_t prioriy = -1;
 
 	for (;;) {
 		task_prority_get(task_self_id(), &prioriy);
 		printf("task %s priority %d\n", TEST_TASK1_NAME, prioriy);
 
-		level = 0;
-		arch_stack_walk(show_Linker, &level, current_task_get(), NULL);
+		arch_stack_default_walk(TEST_TASK1_NAME, current_task_get(), NULL);
+		arch_stack_default_walk(TEST_TASK2_NAME, (struct task *)test_task2_id,
+								NULL);
 
 		printf("task %s %d\n", TEST_TASK1_NAME, i++);
 		task_delay(500);

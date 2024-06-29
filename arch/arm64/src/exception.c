@@ -4,6 +4,8 @@
 #include <stdio.h>
 #include <stack_trace.h>
 
+#define EXC_TAG "EXCECTION"
+
 #define PSR_F_BIT 0x00000040
 #define PSR_I_BIT 0x00000080
 #define PSR_A_BIT 0x00000100
@@ -119,20 +121,12 @@ static void show_regs(struct arch_regs *regs) {
 	}
 }
 
-static bool show_Linker(void *cookie, phys_addr_t pc) {
-	uint32_t *level = (uint32_t *)cookie;
-	printf("%u: 0x%016llx\n", (*level)++, pc);
-	return true;
-}
-
 static void panic_unhandled(struct arch_regs *regs, const char *vector,
 							unsigned long esr) {
-	uint32_t level = 0;
 	printf("Unhandled %s exception, ESR 0x%016lx -- %s\n", vector, esr,
 		   esr_get_class_string(esr));
 	show_regs(regs);
-	printf("Stack trace:\n");
-	arch_stack_walk(show_Linker, &level, NULL, regs);
+	arch_stack_default_walk(EXC_TAG, NULL, regs);
 	while (1) {
 		;
 	}

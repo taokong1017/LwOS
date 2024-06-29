@@ -6,7 +6,6 @@
 #include <errno.h>
 #include <timeout.h>
 #include <arch_task.h>
-#include <stack_trace.h>
 
 #define ID_TO_TASK(task_id) ((struct task *)task_id)
 

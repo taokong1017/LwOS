@@ -1,12 +1,13 @@
 #include <types.h>
 #include <cpu_defines.h>
-#include <stack_trace.h>
 #include <compiler.h>
 #include <arch_regs.h>
 #include <menuconfig.h>
 #include <fp_context.h>
 #include <task.h>
 #include <task_sched.h>
+#include <stack_trace.h>
+#include <stdio.h>
 
 #define array_size(x) (sizeof(x) / sizeof((x)[0]))
 
@@ -21,13 +22,12 @@ static struct stack_info stackinfo_get_unknown() {
 	return stack;
 }
 
-static bool stackinfo_on_stack(const struct stack_info *info, phys_addr_t sp,
-							   phys_addr_t size) {
+static bool stackinfo_on_stack(const struct stack_info *info, phys_addr_t sp) {
 	if (!info->low) {
 		return false;
 	}
 
-	if (sp < info->low || sp + size < sp || sp + size > info->high) {
+	if (sp < info->low || sp > info->high) {
 		return false;
 	}
 
@@ -35,12 +35,11 @@ static bool stackinfo_on_stack(const struct stack_info *info, phys_addr_t sp,
 }
 
 static struct stack_info *
-unwind_find_next_stack(const struct unwind_state *state, phys_addr_t sp,
-					   size_t size) {
+unwind_find_next_stack(const struct unwind_state *state, phys_addr_t sp) {
 	for (int i = 0; i < state->stacks_num; i++) {
 		struct stack_info *info = &state->stacks[i];
 
-		if (stackinfo_on_stack(info, sp, size)) {
+		if (stackinfo_on_stack(info, sp)) {
 			return info;
 		}
 	}
@@ -52,12 +51,12 @@ static bool unwind_consume_stack(struct unwind_state *state, phys_addr_t sp,
 								 size_t size) {
 	struct stack_info *next;
 
-	if (stackinfo_on_stack(&state->stack, sp, size)) {
+	if (stackinfo_on_stack(&state->stack, sp)) {
 		state->stack.low = sp + size;
 		return true;
 	}
 
-	next = unwind_find_next_stack(state, sp, size);
+	next = unwind_find_next_stack(state, sp);
 	if (!next) {
 		return false;
 	}
@@ -85,34 +84,36 @@ static bool unwind_next_frame_record(struct unwind_state *state) {
 	return true;
 }
 
-static void unwind_init(struct unwind_state *state, struct task *task) {
-	state->stack = stackinfo_get_unknown();
-	state->task = task;
-}
-
 static void unwind_init_from_regs(struct unwind_state *state,
 								  struct arch_regs *regs) {
-	unwind_init(state, current_task_get());
-
 	state->fp = regs->gprs[29];
 	state->pc = regs->pc;
+	state->stack = stackinfo_get_unknown();
 }
 
 static void unwind_init_from_caller(struct unwind_state *state) {
-	unwind_init(state, current_task_get());
 	uint64_t fp = 0;
 
 	__asm__ __volatile__("mov %0, x29" : "=r"(fp)::"memory");
 	state->fp = (phys_addr_t)fp;
 	state->pc = (phys_addr_t)current_pc_get();
+	state->stack = stackinfo_get_unknown();
 }
 
 static void unwind_init_from_task(struct unwind_state *state,
 								  struct task *task) {
-	unwind_init(state, task);
-
 	state->fp = task_saved_fp(task);
 	state->pc = task_saved_lr(task);
+	state->stack = stackinfo_get_unknown();
+}
+
+static void unwind_init_from_irq(struct unwind_state *state) {
+	uint64_t fp = 0;
+
+	__asm__ __volatile__("mov %0, x29" : "=r"(fp)::"memory");
+	state->fp = (phys_addr_t)fp;
+	state->pc = (phys_addr_t)current_pc_get();
+	state->stack = stackinfo_get_unknown();
 }
 
 static bool unwind_next(struct unwind_state *state) {
@@ -148,16 +149,14 @@ static void unwind_stack_walk(unwind_consume_func consume_state, void *cookie,
 		.stacks_num = array_size(stacks),
 	};
 
-	if (!task && !regs) {
-		return;
-	}
-
 	if (regs) {
 		unwind_init_from_regs(&state, regs);
 	} else if (task == current_task) {
 		unwind_init_from_caller(&state);
-	} else {
+	} else if (task) {
 		unwind_init_from_task(&state, task);
+	} else {
+		unwind_init_from_irq(&state);
 	}
 
 	do_kunwind(&state, consume_state, cookie);
@@ -182,4 +181,24 @@ void arch_stack_walk(stack_trace_consume_func consume_entry, void *cookie,
 	};
 
 	unwind_stack_walk(arch_unwind_consume_entry, &data, task, regs);
+}
+
+static bool show_Linker(void *cookie, phys_addr_t pc) {
+	uint32_t *level = (uint32_t *)cookie;
+	printf("  %u: 0x%016llx\n", (*level)++, pc);
+	return true;
+}
+
+void arch_stack_default_walk(char *tag, struct task *task,
+							 struct arch_regs *regs) {
+	uint32_t level = 0;
+
+	if (tag == NULL) {
+		return;
+	}
+
+	printf("[%s] stack trace:\n", tag);
+	arch_stack_walk(show_Linker, &level, task, regs);
+
+	return;
 }

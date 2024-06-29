@@ -12,6 +12,7 @@
 #define ALIGN(start, align) ((start + align - 1) & ~(align - 1))
 #define TASK_TO_ID(task) ((task_id_t)task)
 #define TASK_SCHED_LOCKED(task) (task->lock_cnt > 1)
+#define TASK_TAG "Task"
 
 extern struct spinlock sched_spinlock;
 extern void task_irq_resched();
