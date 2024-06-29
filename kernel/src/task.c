@@ -87,8 +87,6 @@ static void task_init(struct task *task, const char name[TASK_NAME_LEN],
 
 static void task_reset(struct task *task) {
 	task->status = TASK_STATUS_STOP;
-	memset(task->stack_ptr - task->stack_size, 0, task->stack_size);
-
 	INIT_LIST_HEAD(&task->timeout.node);
 	arch_task_init(task->id);
 }

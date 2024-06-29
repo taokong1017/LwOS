@@ -1,6 +1,7 @@
 #include <arch_task.h>
 #include <task.h>
 #include <cpu.h>
+#include <string.h>
 
 extern void task_entry_point(task_id_t task_id);
 extern void arch_exc_exit();
@@ -10,8 +11,9 @@ void arch_task_init(task_id_t task_id) {
 	struct task *task = ID_TO_TASK(task_id);
 
 	/* root任务主动切换调度 */
-	task->stack_ptr -= sizeof(struct arch_esf_context);
-	esf = (struct arch_esf_context *)task->stack_ptr;
+	memset(task->stack_ptr - task->stack_size, 0xFE, task->stack_size);
+	esf = (struct arch_esf_context *)(task->stack_ptr -
+									  sizeof(struct arch_esf_context));
 	esf->x0 = (uint64_t)task_id;
 	esf->x1 = (uint64_t)task_entry_point;
 	esf->spsr = SPSR_MODE_EL1H | DAIF_FIQ_BIT;
