@@ -85,6 +85,14 @@ static void task_init(struct task *task, const char name[TASK_NAME_LEN],
 	INIT_LIST_HEAD(&task->timeout.node);
 }
 
+static void task_reset(struct task *task) {
+	task->status = TASK_STATUS_STOP;
+	memset(task->stack_ptr - task->stack_size, 0, task->stack_size);
+
+	INIT_LIST_HEAD(&task->timeout.node);
+	arch_task_init(task->id);
+}
+
 errno_t task_create(task_id_t *task_id, const char name[TASK_NAME_LEN],
 					task_entry_func entry, void *arg0, void *arg1, void *arg2,
 					void *arg3, uint32_t stack_size, uint32_t flag) {
@@ -285,7 +293,6 @@ task_id_t task_self_id() {
 
 errno_t task_stop(task_id_t task_id) {
 	struct task *task = ID_TO_TASK(task_id);
-	uint32_t temp_status = 0;
 	uint32_t key = 0;
 
 	if (!task) {
@@ -298,41 +305,42 @@ errno_t task_stop(task_id_t task_id) {
 		return ERRNO_TASK_IN_IRQ_STATUS;
 	}
 
-	temp_status = task->status;
-
 	if (task->flag & TASK_FLAG_SYSTEM) {
 		sched_spin_unlock(key);
 		return ERRNO_TASK_OPERATE_INVALID;
 	}
 
-	if (temp_status == TASK_STATUS_STOP) {
+	if (task->status == TASK_STATUS_STOP) {
 		sched_spin_unlock(key);
 		return ERRNO_TASK_STATUS_INVALID;
 	}
 
-	if (temp_status == TASK_STATUS_READY) {
+	if (task->status == TASK_STATUS_READY) {
 		sched_ready_queue_remove(task->cpu_id, task);
 	}
 
-	if (temp_status & TASK_STATUS_SUSPEND) {
+	if (task->status & TASK_STATUS_SUSPEND) {
 		task->status &= ~TASK_STATUS_SUSPEND;
-		// TO DO
 	}
 
-	if (temp_status & TASK_STATUS_PEND) {
+	if (task->status & TASK_STATUS_PEND) {
 		task->status &= ~TASK_STATUS_PEND;
-		// TO DO
+		timeout_queue_del(&task->timeout);
 	}
 
-	task->status = TASK_STATUS_STOP;
-	if (temp_status == TASK_STATUS_RUNNING) {
-		if (current_task_get()->id == task_id) {
+	if (task->status == TASK_STATUS_RUNNING) {
+		if (current_task_get() == task) {
 			sched_ready_queue_remove(task->cpu_id, task);
-			task_locked_sched();
+			task->status = TASK_STATUS_STOP;
+			// notify service to delete
+			code_unreachable();
 		} else {
-			// send task->cpu_id resched IPI
+			// notify smp task pending schedule
 		}
+	} else {
+		task_reset(task);
 	}
+
 	sched_spin_unlock(key);
 
 	return OK;

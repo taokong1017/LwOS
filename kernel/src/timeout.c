@@ -26,11 +26,33 @@ errno_t timeout_queue_add(struct timeout *timeout) {
 	struct list_head *queue = NULL;
 
 	if (!timeout) {
-		return ERRNO_TIMEOUT_ADD_EMPTY_NODE;
+		return ERRNO_TIMEOUT_EMPTY_PTR;
 	}
 
 	queue = &current_percpu_get()->timer_queue.queue;
 	list_add(&timeout->node, queue);
+
+	return OK;
+}
+
+errno_t timeout_queue_del(struct timeout *timeout) {
+	struct list_head *queue = NULL;
+	struct list_head *pos = NULL;
+	struct list_head *next = NULL;
+	struct timeout *tmp_timeout = NULL;
+
+	if (!timeout) {
+		return ERRNO_TIMEOUT_EMPTY_PTR;
+	}
+
+	queue = &current_percpu_get()->timer_queue.queue;
+	list_for_each_safe(pos, next, queue) {
+		tmp_timeout = list_entry(pos, struct timeout, node);
+		if (tmp_timeout == timeout) {
+			list_del_init(pos);
+			break;
+		}
+	}
 
 	return OK;
 }

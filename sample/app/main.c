@@ -131,10 +131,13 @@ static void test_task3_entry(void *arg0, void *arg1, void *arg2, void *arg3) {
 		printf("task %s %d\n", TEST_TASK3_NAME, i++);
 		task_suspend(test_task2_id);
 		printf("task %s suspend\n", TEST_TASK2_NAME);
-		task_delay(2000);
+		task_delay(20000);
 		task_resume(test_task2_id);
 		printf("task %s resume\n", TEST_TASK2_NAME);
 		task_delay(100);
+		task_stop(test_task1_id);
+		task_delay(20000);
+		task_start(test_task1_id);
 	}
 }
 

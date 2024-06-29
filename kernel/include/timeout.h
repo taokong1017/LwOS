@@ -5,7 +5,7 @@
 #include <list.h>
 #include <errno.h>
 
-#define ERRNO_TIMEOUT_ADD_EMPTY_NODE ERRNO_OS_ERROR(MOD_ID_TIMEOUT, 0x00)
+#define ERRNO_TIMEOUT_EMPTY_PTR ERRNO_OS_ERROR(MOD_ID_TIMEOUT, 0x00)
 
 struct timeout;
 typedef void (*timeout_func)(struct timeout *timeout);
@@ -22,5 +22,6 @@ struct timeout {
 
 void timeout_queue_handle(uint64_t cur_ticks);
 errno_t timeout_queue_add(struct timeout *timeout);
+errno_t timeout_queue_del(struct timeout *timeout);
 
 #endif
