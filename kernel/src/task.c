@@ -15,7 +15,7 @@
 #define TASK_TAG "Task"
 
 extern struct spinlock sched_spinlock;
-extern void task_irq_resched();
+extern void task_unlocked_sched();
 
 /*
  * when the delay task exceeds timeout, it will be added to ready
@@ -161,7 +161,7 @@ errno_t task_prority_set(task_id_t task_id, uint32_t prioriy) {
 		task->priority = prioriy;
 	}
 
-	task_resched();
+	task_locked_sched();
 	sched_spin_unlock(key);
 
 	return OK;
@@ -260,7 +260,7 @@ errno_t task_start(task_id_t task_id) {
 
 	task->status = TASK_STATUS_READY;
 	sched_ready_queue_add(task->cpu_id, task);
-	task_resched();
+	task_locked_sched();
 	sched_spin_unlock(key);
 
 	return OK;
@@ -328,7 +328,7 @@ errno_t task_stop(task_id_t task_id) {
 	if (temp_status == TASK_STATUS_RUNNING) {
 		if (current_task_get()->id == task_id) {
 			sched_ready_queue_remove(task->cpu_id, task);
-			task_resched();
+			task_locked_sched();
 		} else {
 			// send task->cpu_id resched IPI
 		}
@@ -374,7 +374,7 @@ errno_t task_resume(task_id_t task_id) {
 	task->status &= ~TASK_STATUS_SUSPEND;
 	task->status |= TASK_STATUS_READY;
 	sched_ready_queue_add(task->cpu_id, task);
-	task_resched();
+	task_locked_sched();
 	sched_spin_unlock(key);
 
 	return OK;
@@ -417,7 +417,7 @@ errno_t task_suspend(task_id_t task_id) {
 
 	task->status |= TASK_STATUS_SUSPEND;
 	if (task == current_task) {
-		task_resched();
+		task_locked_sched();
 	}
 	sched_spin_unlock(key);
 
@@ -456,7 +456,7 @@ errno_t task_delay(uint64_t ticks) {
 		timeout_queue_add(&task->timeout);
 	}
 
-	task_resched();
+	task_locked_sched();
 	sched_spin_unlock(key);
 
 	return OK;
@@ -485,7 +485,7 @@ void task_unlock() {
 		task->lock_cnt--;
 		if (task->lock_cnt == 0) {
 			arch_irq_restore(key);
-			task_irq_resched();
+			task_unlocked_sched();
 			return;
 		}
 	}
