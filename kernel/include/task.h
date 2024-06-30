@@ -8,6 +8,7 @@
 #include <arch_task.h>
 
 #define ID_TO_TASK(task_id) ((struct task *)task_id)
+#define TASK_WAIT_FOREVER WAIT_FOREVER
 
 /* task default invalid ID definition */
 #define TASK_INVALID_CPUID 0xFFFF
@@ -74,7 +75,7 @@
 typedef void (*task_entry_func)(void *arg0, void *arg1, void *arg2, void *arg3);
 
 struct wait_queue {
-	struct list_head wq;
+	struct list_head wait_list;
 };
 
 /* task structure definition */
