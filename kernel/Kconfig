@@ -13,4 +13,22 @@ config CONFIG_TICK_PER_SECOND
 	help
 	  This represents the tick value per second.
 
+menu "Message Queue"
+
+config CONFIG_MSGQ_MAX_NUM
+	int "Maximum Message Queue Number"
+	default 10
+	range 1 1024
+	help
+	  This represents the maximum message number.
+
+config CONFIG_MSGQ_MAX_SIZE
+	int "Maximum Message Size"
+	default 128
+	range 1 1024
+	help
+	  This represents the maximum message size.
+
+endmenu
+
 endmenu

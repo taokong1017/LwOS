@@ -25,6 +25,7 @@ enum MOUDLE_ID {
 	MOD_ID_TASK = 0x1,
 	MOD_ID_SPINLOCK,
 	MOD_ID_TIMEOUT,
+	MOD_ID_MSGQ,
 };
 
 typedef uint32_t errno_t;
