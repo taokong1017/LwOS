@@ -11,7 +11,7 @@ void arch_task_init(task_id_t task_id) {
 	struct task *task = ID_TO_TASK(task_id);
 
 	/* root任务主动切换调度 */
-	memset(task->stack_ptr - task->stack_size, 0xFE, task->stack_size);
+	memset(task->stack_ptr - task->stack_size, 0, task->stack_size);
 	esf = (struct arch_esf_context *)(task->stack_ptr -
 									  sizeof(struct arch_esf_context));
 	esf->x0 = (uint64_t)task_id;
@@ -20,6 +20,7 @@ void arch_task_init(task_id_t task_id) {
 	esf->elr = (uint64_t)task_entry_point;
 
 	/* 其它任务，在任务切换后，通过异常退出流程进入 */
+	memset(&task->task_context, 0, sizeof(task->task_context));
 	task->task_context.callee_context.sp = (uint64_t)esf;
 	task->task_context.callee_context.x30 = (uint64_t)arch_exc_exit;
 }

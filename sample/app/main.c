@@ -130,14 +130,15 @@ static void test_task3_entry(void *arg0, void *arg1, void *arg2, void *arg3) {
 	for (;;) {
 		printf("task %s %d\n", TEST_TASK3_NAME, i++);
 		task_suspend(test_task2_id);
-		printf("task %s suspend\n", TEST_TASK2_NAME);
-		task_delay(20000);
-		task_resume(test_task2_id);
-		printf("task %s resume\n", TEST_TASK2_NAME);
-		task_delay(100);
+		printf("task %s suspended\n", TEST_TASK2_NAME);
 		task_stop(test_task1_id);
-		task_delay(20000);
+		printf("task %s stoped\n", TEST_TASK1_NAME);
+		task_delay(2000);
+		task_resume(test_task2_id);
+		printf("task %s resumed\n", TEST_TASK2_NAME);
 		task_start(test_task1_id);
+		printf("task %s started\n", TEST_TASK1_NAME);
+		task_delay(2000);
 	}
 }
 

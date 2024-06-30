@@ -22,12 +22,13 @@ static struct stack_info stackinfo_get_unknown() {
 	return stack;
 }
 
-static bool stackinfo_on_stack(const struct stack_info *info, phys_addr_t sp) {
+static bool stackinfo_on_stack(const struct stack_info *info, phys_addr_t sp,
+							   phys_addr_t size) {
 	if (!info->low) {
 		return false;
 	}
 
-	if (sp < info->low || sp > info->high) {
+	if (sp < info->low || sp + size < sp || sp + size > info->high) {
 		return false;
 	}
 
@@ -35,11 +36,12 @@ static bool stackinfo_on_stack(const struct stack_info *info, phys_addr_t sp) {
 }
 
 static struct stack_info *
-unwind_find_next_stack(const struct unwind_state *state, phys_addr_t sp) {
+unwind_find_next_stack(const struct unwind_state *state, phys_addr_t sp,
+					   size_t size) {
 	for (int i = 0; i < state->stacks_num; i++) {
 		struct stack_info *info = &state->stacks[i];
 
-		if (stackinfo_on_stack(info, sp)) {
+		if (stackinfo_on_stack(info, sp, size)) {
 			return info;
 		}
 	}
@@ -51,12 +53,12 @@ static bool unwind_consume_stack(struct unwind_state *state, phys_addr_t sp,
 								 size_t size) {
 	struct stack_info *next;
 
-	if (stackinfo_on_stack(&state->stack, sp)) {
+	if (stackinfo_on_stack(&state->stack, sp, size)) {
 		state->stack.low = sp + size;
 		return true;
 	}
 
-	next = unwind_find_next_stack(state, sp);
+	next = unwind_find_next_stack(state, sp, size);
 	if (!next) {
 		return false;
 	}
@@ -70,8 +72,9 @@ static bool unwind_consume_stack(struct unwind_state *state, phys_addr_t sp,
 static bool unwind_next_frame_record(struct unwind_state *state) {
 	phys_addr_t fp = state->fp;
 
-	if (fp & 0x7)
+	if (fp & 0x7) {
 		return false;
+	}
 
 	if (!unwind_consume_stack(state, fp, 16)) {
 		return false;

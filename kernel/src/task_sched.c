@@ -248,6 +248,9 @@ void task_sched_init() {
 	write_tpidrro_el0((uint64_t)current_percpu_get());
 	current_percpu_get()->irq_stack_ptr = (void *)__interrupt_stack_end;
 	current_percpu_get()->irq_stack_size = 0x1000;
+	memset((void *)(current_percpu_get()->irq_stack_ptr -
+					current_percpu_get()->irq_stack_size),
+		   0, current_percpu_get()->irq_stack_size);
 
 	idle_task_create();
 	main_task_create();
