@@ -5,13 +5,14 @@
 #include <stdio.h>
 #include <stdarg.h>
 
-#define LOG_LEVEL_ERROR 0
-#define LOG_LEVEL_INFO 1
-#define LOG_LEVEL_DEBUG 2
+#define LOG_LEVEL_FATAL 0
+#define LOG_LEVEL_ERROR 1
+#define LOG_LEVEL_INFO 2
+#define LOG_LEVEL_DEBUG 3
 #define LOG_LOWEST_LEVEL LOG_LEVEL_DEBUG
 #define LOG_LEVEL_IS_INVALID(level)                                            \
-	((level < LOG_LEVEL_ERROR || level > LOG_LEVEL_DEBUG) ? true : false)
-static const char *level_strings[] = {"ERROR", "INFO", "DEBUG"};
+	((level < LOG_LEVEL_FATAL || level > LOG_LEVEL_DEBUG) ? true : false)
+static const char *level_strings[] = {"FATAL", "ERROR", "INFO", "DEBUG"};
 
 static int log_output(int level, const char *tag, const char *format, ...) {
 	va_list args;
@@ -33,11 +34,22 @@ static int log_output(int level, const char *tag, const char *format, ...) {
 	return ret;
 }
 
+#define log_fatal(tag, format, ...)                                            \
+	do {                                                                       \
+		log_output(LOG_LEVEL_FATAL, tag, format, __VA_ARGS__);                 \
+		forever();                                                             \
+	} while (0)
 #define log_err(tag, format, ...)                                              \
-	log_output(LOG_LEVEL_ERROR, tag, format, ##__VA_ARGS__)
+	do {                                                                       \
+		log_output(LOG_LEVEL_ERROR, tag, format, __VA_ARGS__);                 \
+	} while (0)
 #define log_info(tag, format, ...)                                             \
-	log_output(LOG_LEVEL_INFO, tag, format, ##__VA_ARGS__)
+	do {                                                                       \
+		log_output(LOG_LEVEL_INFO, tag, format, __VA_ARGS__);                  \
+	} while (0)
 #define log_debug(tag, format, ...)                                            \
-	log_output(LOG_LEVEL_DEBUG, tag, format, ##__VA_ARGS__)
+	do {                                                                       \
+		log_output(LOG_LEVEL_DEBUG, tag, format, __VA_ARGS__);                 \
+	} while (0)
 
 #endif

@@ -213,9 +213,10 @@ void task_unlocked_sched() {
 	}
 
 	if (spin_lock_is_locked(&sched_spinlock)) {
-		log_err(TASK_SCHED_TAG, "the sched_spinlock is locked\n");
 		spin_lock_dump(&sched_spinlock);
-		forever();
+		log_fatal(TASK_SCHED_TAG, "the sched lock %s is locked\n",
+				  sched_spinlock.name);
+		code_unreachable();
 	}
 
 	if (TASK_IS_LOCKED(current_task)) {

@@ -56,7 +56,7 @@ void spin_lock_init(struct spinlock *lock) { lock->rawlock = 0; }
 bool spin_lock_is_locked(struct spinlock *lock) { return lock->rawlock != 0; }
 
 void spin_lock_dump(struct spinlock *lock) {
-	log_info("SPIN_LOCK_TAG", "spin lock: %s, owner: %s, raw lock: %u\n",
+	log_info(SPIN_LOCK_TAG, "spin lock: %s, owner: %s, raw lock: %u\n",
 			 lock->name, lock->owner->name, lock->rawlock);
 
 	return;
