@@ -14,7 +14,7 @@
 #define LOG_LEVEL_IS_INVALID(level)                                            \
 	((level < LOG_LEVEL_FATAL || level > LOG_LEVEL_DEBUG) ? true : false)
 
-typedef int32_t (*output_func)(const char *s, int32_t len);
+typedef int32_t (*output_func)(const char *str, int32_t len);
 extern int32_t uart_puts(const char *str, int32_t len);
 extern int vsnprintf(char *buf, size_t size, const char *fmt, va_list args);
 static const char *level_strings[] = {"FATAL", "ERROR", "INFO", "DEBUG"};
