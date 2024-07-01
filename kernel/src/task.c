@@ -8,6 +8,7 @@
 #include <task_sched.h>
 #include <tick.h>
 #include <irq.h>
+#include <log.h>
 
 #define ALIGN(start, align) ((start + align - 1) & ~(align - 1))
 #define TASK_TO_ID(task) ((task_id_t)task)
@@ -462,6 +463,7 @@ errno_t task_delay(uint64_t ticks) {
 		timeout_queue_add(&task->timeout);
 	}
 
+	log_debug(TASK_TAG, "%s delay %d ticks\n", task->name, ticks);
 	task_locked_sched();
 	sched_spin_unlock(key);
 

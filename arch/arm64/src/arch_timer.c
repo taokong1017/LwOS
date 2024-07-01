@@ -56,6 +56,7 @@ void arch_timer_init() {
 								IRQ_TYPE_LEVEL);
 	if (!ret) {
 		log_err(ARCH_TIMER_TAG, "failed to connect interrupt\n");
+		return;
 	}
 	arch_irq_enable(TICK_IRQ_NUM);
 	arch_timer_set_irq_mask(false);
