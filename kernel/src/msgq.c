@@ -22,11 +22,11 @@
 
 /*
  * when put threee messages to buffer in the msgq, it will been layout as
- * follow:
+ * follows:
  * --------------------------------------------------------------------------
  * |-- the length of msg1 --|---------------- msg1 content -----------------|
  * |-- the length of msg2 --|---------------- msg2 content -----------------|
- * |-- the length of msg2 --|---------------- msg3 content -----------------|
+ * |-- the length of msg3 --|---------------- msg3 content -----------------|
  * --------------------------------------------------------------------------
  */
 #define msgq_buffer_size(msg_size) ((msg_size) + sizeof(uint32_t))
@@ -74,7 +74,9 @@ errno_t msgq_create(const char *name, uint32_t max_msgs, uint32_t max_msg_size,
 		return ERRNO_MSGQ_NO_MEMORY;
 	}
 
-	buffer = (char *)mem_alloc(max_msgs * msgq_buffer_size(max_msg_size));
+	// TO DO: mem_alloc产生对齐异常
+	buffer = (char *)mem_alloc_align(max_msgs * msgq_buffer_size(max_msg_size),
+									 TASK_STACK_SIZE_ALIGN);
 	if (!msgq) {
 		mem_free(msgq);
 		log_err(MSGQ_TAG, "malloc memory failed for creating buffer\n");
@@ -161,7 +163,8 @@ errno_t msgq_send(msgq_id_t id, const void *msg, uint32_t size,
 		msgq->msg_stime = current_ticks;
 		msgq_buffer = msgq->msg_buffer +
 					  msgq->msg_head * msgq_buffer_size(msgq->max_msg_size);
-		size = min(*msgq_buffer_len_addr(msgq_buffer), msgq->max_msg_size);
+		size = min(size, msgq->max_msg_size);
+		*msgq_buffer_len_addr(msgq_buffer) = size;
 		memcpy(msgq_buffer_msg_addr(msgq_buffer), msg, size);
 		msgq->msg_head = (msgq->msg_head + 1) % msgq->max_msgs;
 		task_wakeup_locked(&msgq->rec_queue);
@@ -172,6 +175,13 @@ errno_t msgq_send(msgq_id_t id, const void *msg, uint32_t size,
 		ret = task_wait_locked(&msgq->send_queue, timeout, true);
 		msgq->msg_ctime = MSGQ_INIT_TIME;
 		if (ret == OK) {
+			msgq->msg_used++;
+			msgq_buffer = msgq->msg_buffer +
+						  msgq->msg_head * msgq_buffer_size(msgq->max_msg_size);
+			size = min(size, msgq->max_msg_size);
+			*msgq_buffer_len_addr(msgq_buffer) = size;
+			memcpy(msgq_buffer_msg_addr(msgq_buffer), msg, size);
+			msgq->msg_head = (msgq->msg_head + 1) % msgq->max_msgs;
 			msgq->msg_ctime = current_ticks_get();
 		} else { /* only ERRNO_TASK_WAIT_TIMEOUT */
 			ret = ERRNO_MSGQ_TIMEOUT;
@@ -229,6 +239,12 @@ errno_t msgq_receive(msgq_id_t id, void *msg, uint32_t *size,
 		ret = task_wait_locked(&msgq->rec_queue, timeout, true);
 		msgq->msg_ctime = MSGQ_INIT_TIME;
 		if (ret == OK) {
+			msgq->msg_used--;
+			buffer = msgq->msg_buffer +
+					 msgq->msg_tail * msgq_buffer_size(msgq->max_msg_size);
+			*size = min(*size, *msgq_buffer_len_addr(buffer));
+			memcpy(msg, msgq_buffer_msg_addr(buffer), *size);
+			msgq->msg_tail = (msgq->msg_tail + 1) % msgq->max_msgs;
 			msgq->msg_ctime = current_ticks_get();
 		} else { /* only ERRNO_TASK_WAIT_TIMEOUT */
 			ret = ERRNO_MSGQ_TIMEOUT;

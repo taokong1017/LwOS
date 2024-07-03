@@ -4,14 +4,21 @@
 #include <string.h>
 #include <task_sched.h>
 #include <stack_trace.h>
+#include <msgq.h>
 
 #define TEST_TASK1_NAME "test_task1"
 #define TEST_TASK2_NAME "test_task2"
 #define TEST_TASK3_NAME "test_task3"
+#define TEST_TASK4_NAME "test_task4"
+#define TEST_MSGQ_NAME "test_msgq"
+#define TEST_MSGQ_NUM 5
+#define TEST_MSGQ_SIZE 32
 
 static task_id_t test_task1_id = 0;
 static task_id_t test_task2_id = 0;
 static task_id_t test_task3_id = 0;
+static task_id_t test_task4_id = 0;
+static msgq_id_t test_msgq_id = 0;
 
 static void test_task1_entry(void *arg0, void *arg1, void *arg2, void *arg3) {
 	(void)arg0;
@@ -126,6 +133,7 @@ static void test_task3_entry(void *arg0, void *arg1, void *arg2, void *arg3) {
 	(void)arg3;
 
 	uint32_t i = 0;
+	int32_t ret = 0;
 
 	for (;;) {
 		printf("task %s %d\n", TEST_TASK3_NAME, i++);
@@ -139,6 +147,8 @@ static void test_task3_entry(void *arg0, void *arg1, void *arg2, void *arg3) {
 		task_start(test_task1_id);
 		printf("task %s started\n", TEST_TASK1_NAME);
 		task_delay(2000);
+		ret = msgq_send(test_msgq_id, &i, sizeof(i), MSGQ_NO_WAIT);
+		printf("xxxxxxxxxxxxxxxxx send: %u, ret = %d\n", i, ret);
 	}
 }
 
@@ -169,6 +179,52 @@ static void create_test_task3() {
 	return;
 }
 
+static void test_task4_entry(void *arg0, void *arg1, void *arg2, void *arg3) {
+	(void)arg0;
+	(void)arg1;
+	(void)arg2;
+	(void)arg3;
+	char msg[TEST_MSGQ_SIZE] = {0};
+	uint32_t size = TEST_MSGQ_SIZE;
+	int32_t ret = 0;
+
+	for (;;) {
+		size = TEST_MSGQ_SIZE;
+		memset(msg, 0, TEST_MSGQ_SIZE);
+		ret = msgq_receive(test_msgq_id, &msg, &size, MSGQ_WAIT_FOREVER);
+		msg[TEST_MSGQ_SIZE - 1] = 0;
+		printf("yyyyyyyyyyyyyy task %s received msg: %u ret = %d\n",
+			   TEST_TASK4_NAME, *(uint32_t *)msg, ret);
+	}
+}
+
+static void create_test_task4() {
+	errno_t ret = OK;
+	char task_name[TASK_NAME_LEN] = {0};
+
+	strncpy(task_name, TEST_TASK4_NAME, TASK_NAME_LEN);
+	ret = task_create(&test_task4_id, task_name, test_task4_entry, NULL, NULL,
+					  NULL, NULL, TASK_STACK_DEFAULT_SIZE, TASK_FLAG_USER);
+	if (ret != OK) {
+		printf("create task %s failed\n", task_name);
+		return;
+	}
+
+	ret = task_prority_set(test_task4_id, 30 /* prioriy */);
+	if (ret != OK) {
+		printf("set task %s priority failed\n", task_name);
+		return;
+	}
+
+	ret = task_start(test_task4_id);
+	if (ret != OK) {
+		printf("start task %s failed\n", task_name);
+		return;
+	}
+
+	return;
+}
+
 void main_task_entry(void *arg0, void *arg1, void *arg2, void *arg3) {
 	(void)arg0;
 	(void)arg1;
@@ -176,9 +232,11 @@ void main_task_entry(void *arg0, void *arg1, void *arg2, void *arg3) {
 	(void)arg3;
 
 	printf("enter root task\n");
+	msgq_create(TEST_MSGQ_NAME, TEST_MSGQ_NUM, TEST_MSGQ_SIZE, &test_msgq_id);
 	create_test_task1();
 	create_test_task2();
 	create_test_task3();
+	create_test_task4();
 	task_suspend_self();
 	code_unreachable();
 }

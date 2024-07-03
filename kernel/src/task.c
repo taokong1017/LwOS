@@ -444,6 +444,10 @@ errno_t task_delay(uint64_t ticks) {
 		return ERRNO_TASK_IN_IRQ_STATUS;
 	}
 
+	if (ticks == TASK_WAIT_FOREVER) {
+		return ERRNO_TASK_INVALID_TIMEOUT;
+	}
+
 	if (task->flag & TASK_FLAG_SYSTEM) {
 		return ERRNO_TASK_OPERATE_INVALID;
 	}
@@ -518,16 +522,17 @@ errno_t task_wait_locked(struct wait_queue *wq, uint64_t ticks,
 		return ERRNO_TASK_NO_SCHEDLE;
 	}
 
-	if (!list_empty(&wq->wait_list)) {
-		sched_ready_queue_remove(task->cpu_id, task);
-		task->status = TASK_STATUS_PEND;
+	sched_ready_queue_remove(task->cpu_id, task);
+	task->status = TASK_STATUS_PEND;
+	if (ticks != TASK_WAIT_FOREVER) {
 		task->timeout.deadline_ticks = current_ticks_get() + ticks;
 		timeout_queue_add(&task->timeout);
-		task_locked_sched();
-		if (task->is_timeout) {
-			task->is_timeout = false;
-			return ERRNO_TASK_WAIT_TIMEOUT;
-		}
+	}
+	list_add_tail(&task->pend_list, &wq->wait_list);
+	task_locked_sched();
+	if (task->is_timeout) {
+		task->is_timeout = false;
+		return ERRNO_TASK_WAIT_TIMEOUT;
 	}
 
 	return OK;
@@ -541,7 +546,8 @@ errno_t task_wakeup_locked(struct wait_queue *wq) {
 	}
 
 	if (!list_empty(&wq->wait_list)) {
-		task = list_first_entry(&wq->wait_list, struct task, timeout);
+		task = list_first_entry(&wq->wait_list, struct task, pend_list);
+		list_del_init(wq->wait_list.next);
 		timeout_queue_del(&task->timeout);
 		task->status = TASK_STATUS_READY;
 		sched_ready_queue_add(task->cpu_id, task);
