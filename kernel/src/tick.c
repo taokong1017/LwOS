@@ -11,12 +11,12 @@ static uint64_t tick_counts[CONFIG_CPUS_MAX_NUM] = {0};
 
 void tick_announce() {
 	tick_counts[arch_cpu_id_get()]++;
-	timeout_queue_handle(current_ticks());
+	timeout_queue_handle(current_ticks_get());
 }
 
-uint64_t current_ticks() { return tick_counts[arch_cpu_id_get()]; }
+uint64_t current_ticks_get() { return tick_counts[arch_cpu_id_get()]; }
 
-uint64_t current_cycles() {
+uint64_t current_cycles_get() {
 	uint64_t cycles = 0;
 
 	cycles = arch_timer_count();
@@ -44,18 +44,18 @@ uint32_t tick2us(uint32_t tick) {
 
 void udelay(uint32_t us) {
 	uint64_t cycles = (uint64_t)us * arch_timer_freq_get() / US_PER_SECOND;
-	uint64_t deadline = current_cycles() + cycles;
+	uint64_t deadline = current_cycles_get() + cycles;
 
-	while (current_cycles() < deadline) {
+	while (current_cycles_get() < deadline) {
 		__asm__ volatile("nop");
 	}
 }
 
 void mdelay(uint32_t ms) {
 	uint64_t cycles = (uint64_t)ms * arch_timer_freq_get() / MS_PER_SECOND;
-	uint64_t deadline = current_cycles() + cycles;
+	uint64_t deadline = current_cycles_get() + cycles;
 
-	while (current_cycles() < deadline) {
+	while (current_cycles_get() < deadline) {
 		__asm__ volatile("nop");
 	}
 }

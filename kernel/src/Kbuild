@@ -8,5 +8,5 @@ obj-y := string.o \
 	memory.o \
 	spin_lock.o \
 	timeout.o \
-	msg_queue.o
+	msgq.o
 

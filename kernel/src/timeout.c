@@ -30,7 +30,7 @@ errno_t timeout_queue_add(struct timeout *timeout) {
 	}
 
 	queue = &current_percpu_get()->timer_queue.queue;
-	list_add(&timeout->node, queue);
+	list_add_tail(&timeout->node, queue);
 
 	return OK;
 }

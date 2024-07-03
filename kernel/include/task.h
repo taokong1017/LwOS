@@ -59,6 +59,8 @@
 #define ERRNO_TASK_OPERATE_INVALID ERRNO_OS_ERROR(MOD_ID_TASK, 0x0c)
 #define ERRNO_TASK_IS_LOCKED ERRNO_OS_ERROR(MOD_ID_TASK, 0x0d)
 #define ERRNO_TASK_CPU_AFFI_INAVLID ERRNO_OS_ERROR(MOD_ID_TASK, 0x0e)
+#define ERRNO_TASK_WAIT_TIMEOUT ERRNO_OS_ERROR(MOD_ID_TASK, 0x0f)
+#define ERRNO_TASK_NO_SCHEDLE ERRNO_OS_ERROR(MOD_ID_TASK, 0x10)
 
 /* task cpu affinity */
 #define TASK_CPU_DEFAULT_AFFI 0x00000001U
@@ -91,6 +93,7 @@ struct task {
 	uint64_t lock_cnt;
 	uint32_t cpu_id;
 	task_entry_func entry;
+	bool is_timeout;
 	void *args[4];
 	struct list_head task_list; /* ready queue */
 	struct list_head pend_list; /* pend queue */
@@ -115,5 +118,8 @@ errno_t task_cpu_affi_get(task_id_t task_id, uint32_t *cpu_affi);
 task_id_t task_self_id();
 void task_lock();
 void task_unlock();
+errno_t task_wait_locked(struct wait_queue *wq, uint64_t ticks,
+						 bool need_sched);
+errno_t task_wakeup_locked(struct wait_queue *wq);
 
 #endif

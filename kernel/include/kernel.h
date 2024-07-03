@@ -12,6 +12,7 @@
 #define DIV_ROUND_UP(n, d) (((n) + (d)-1) / (d))
 #define PRIQ_BITMAP_SIZE (DIV_ROUND_UP(TASK_PRIORITY_NUM, MASK_NBITS))
 #define WAIT_FOREVER -1
+#define NO_WAIT 0
 
 struct priority_mqueue {
 	struct list_head queues[TASK_PRIORITY_NUM];

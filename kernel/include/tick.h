@@ -9,8 +9,8 @@
 #define NS_PER_US 1000UL
 
 void tick_announce();
-uint64_t current_ticks();
-uint64_t current_cycles();
+uint64_t current_ticks_get();
+uint64_t current_cycles_get();
 uint32_t ms2tick(uint32_t ms);
 uint32_t tick2ms(uint32_t tick);
 uint32_t us2tick(uint32_t us);

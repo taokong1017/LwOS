@@ -30,6 +30,7 @@ void task_delay_timeout(struct timeout *timeout) {
 	struct task *task = container_of(timeout, struct task, timeout);
 	if (task->status == TASK_STATUS_PEND) {
 		task->status = TASK_STATUS_READY;
+		task->is_timeout = true;
 		sched_ready_queue_add(task->cpu_id, task);
 	} else {
 		task->status &= ~TASK_STATUS_PEND;
@@ -78,6 +79,7 @@ static void task_init(struct task *task, const char name[TASK_NAME_LEN],
 	task->cpu_id = 0;
 	task->flag = flag;
 	task->entry = entry;
+	task->is_timeout = false;
 	task->args[0] = arg0;
 	task->args[1] = arg1;
 	task->args[2] = arg2;
@@ -88,6 +90,7 @@ static void task_init(struct task *task, const char name[TASK_NAME_LEN],
 
 static void task_reset(struct task *task) {
 	task->status = TASK_STATUS_STOP;
+	task->is_timeout = false;
 	INIT_LIST_HEAD(&task->timeout.node);
 	arch_task_init(task->id);
 }
@@ -459,12 +462,13 @@ errno_t task_delay(uint64_t ticks) {
 	if (ticks > 0) {
 		sched_ready_queue_remove(task->cpu_id, task);
 		task->status = TASK_STATUS_PEND;
-		task->timeout.deadline_ticks = current_ticks() + ticks;
+		task->timeout.deadline_ticks = current_ticks_get() + ticks;
 		timeout_queue_add(&task->timeout);
 	}
 
 	log_debug(TASK_TAG, "%s delay %d ticks\n", task->name, ticks);
 	task_locked_sched();
+	task->is_timeout = false;
 	sched_spin_unlock(key);
 
 	return OK;
@@ -500,4 +504,49 @@ void task_unlock() {
 	arch_irq_restore(key);
 
 	return;
+}
+
+errno_t task_wait_locked(struct wait_queue *wq, uint64_t ticks,
+						 bool need_sched) {
+	struct task *task = current_task_get();
+
+	if (!wq) {
+		return ERRNO_TASK_PTR_NULL;
+	}
+
+	if (!need_sched) {
+		return ERRNO_TASK_NO_SCHEDLE;
+	}
+
+	if (!list_empty(&wq->wait_list)) {
+		sched_ready_queue_remove(task->cpu_id, task);
+		task->status = TASK_STATUS_PEND;
+		task->timeout.deadline_ticks = current_ticks_get() + ticks;
+		timeout_queue_add(&task->timeout);
+		task_locked_sched();
+		if (task->is_timeout) {
+			task->is_timeout = false;
+			return ERRNO_TASK_WAIT_TIMEOUT;
+		}
+	}
+
+	return OK;
+}
+
+errno_t task_wakeup_locked(struct wait_queue *wq) {
+	struct task *task = NULL;
+
+	if (!wq) {
+		return ERRNO_TASK_PTR_NULL;
+	}
+
+	if (!list_empty(&wq->wait_list)) {
+		task = list_first_entry(&wq->wait_list, struct task, timeout);
+		timeout_queue_del(&task->timeout);
+		task->status = TASK_STATUS_READY;
+		sched_ready_queue_add(task->cpu_id, task);
+		task_locked_sched();
+	}
+
+	return OK;
 }
