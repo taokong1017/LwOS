@@ -126,13 +126,27 @@ errno_t msgq_destroy(msgq_id_t id) {
 	return OK;
 }
 
+static void msgq_send_copy(struct msgq *msgq, const void *msg, uint32_t size) {
+	void *msgq_buffer = NULL;
+
+	msgq_buffer = msgq->msg_buffer +
+				  msgq->msg_head * msgq_buffer_size(msgq->max_msg_size);
+	size = min(size, msgq->max_msg_size);
+	*msgq_buffer_len_addr(msgq_buffer) = size;
+	memcpy(msgq_buffer_msg_addr(msgq_buffer), msg, size);
+
+	msgq->msg_used++;
+	msgq->msg_head = (msgq->msg_head + 1) % msgq->max_msgs;
+
+	return;
+}
+
 errno_t msgq_send(msgq_id_t id, const void *msg, uint32_t size,
 				  uint64_t timeout) {
 	uint64_t current_ticks = current_ticks_get();
 	struct msgq *msgq = id2msgq(id);
 	uint32_t key = 0;
 	errno_t ret = OK;
-	void *msgq_buffer = NULL;
 
 	if (id == MSGQ_INVALID_ID || !msgq) {
 		log_err(MSGQ_TAG, "the msgq id is invalid\n");
@@ -157,14 +171,8 @@ errno_t msgq_send(msgq_id_t id, const void *msg, uint32_t size,
 	key = sched_spin_lock();
 
 	if (msgq->msg_used < msgq->max_msgs) {
-		msgq->msg_used++;
 		msgq->msg_stime = current_ticks;
-		msgq_buffer = msgq->msg_buffer +
-					  msgq->msg_head * msgq_buffer_size(msgq->max_msg_size);
-		size = min(size, msgq->max_msg_size);
-		*msgq_buffer_len_addr(msgq_buffer) = size;
-		memcpy(msgq_buffer_msg_addr(msgq_buffer), msg, size);
-		msgq->msg_head = (msgq->msg_head + 1) % msgq->max_msgs;
+		msgq_send_copy(msgq, msg, size);
 		task_wakeup_locked(&msgq->rec_queue);
 	} else if (timeout == MSGQ_NO_WAIT) {
 		ret = ERRNO_MSGQ_QUEUE_FULL;
@@ -173,13 +181,7 @@ errno_t msgq_send(msgq_id_t id, const void *msg, uint32_t size,
 		ret = task_wait_locked(&msgq->send_queue, timeout, true);
 		msgq->msg_ctime = MSGQ_INIT_TIME;
 		if (ret == OK) {
-			msgq->msg_used++;
-			msgq_buffer = msgq->msg_buffer +
-						  msgq->msg_head * msgq_buffer_size(msgq->max_msg_size);
-			size = min(size, msgq->max_msg_size);
-			*msgq_buffer_len_addr(msgq_buffer) = size;
-			memcpy(msgq_buffer_msg_addr(msgq_buffer), msg, size);
-			msgq->msg_head = (msgq->msg_head + 1) % msgq->max_msgs;
+			msgq_send_copy(msgq, msg, size);
 			msgq->msg_ctime = current_ticks_get();
 		} else { /* only ERRNO_TASK_WAIT_TIMEOUT */
 			ret = ERRNO_MSGQ_TIMEOUT;
@@ -191,13 +193,26 @@ errno_t msgq_send(msgq_id_t id, const void *msg, uint32_t size,
 	return ret;
 }
 
+static void msgq_receive_copy(struct msgq *msgq, void *msg, uint32_t *size) {
+	void *msgq_buffer = NULL;
+
+	msgq_buffer = msgq->msg_buffer +
+				  msgq->msg_tail * msgq_buffer_size(msgq->max_msg_size);
+	*size = min(*size, *msgq_buffer_len_addr(msgq_buffer));
+	memcpy(msg, msgq_buffer_msg_addr(msgq_buffer), *size);
+
+	msgq->msg_used--;
+	msgq->msg_tail = (msgq->msg_tail + 1) % msgq->max_msgs;
+
+	return;
+}
+
 errno_t msgq_receive(msgq_id_t id, void *msg, uint32_t *size,
 					 uint64_t timeout) {
 	uint64_t current_ticks = current_ticks_get();
 	struct msgq *msgq = id2msgq(id);
 	uint32_t key = 0;
 	errno_t ret = OK;
-	void *buffer = NULL;
 
 	if (id == MSGQ_INVALID_ID || !msgq) {
 		log_err(MSGQ_TAG, "the msgq id is invalid\n");
@@ -222,13 +237,8 @@ errno_t msgq_receive(msgq_id_t id, void *msg, uint32_t *size,
 	key = sched_spin_lock();
 
 	if (msgq->msg_used > 0) {
-		msgq->msg_used--;
 		msgq->msg_rtime = current_ticks;
-		buffer = msgq->msg_buffer +
-				 msgq->msg_tail * msgq_buffer_size(msgq->max_msg_size);
-		*size = min(*size, *msgq_buffer_len_addr(buffer));
-		memcpy(msg, msgq_buffer_msg_addr(buffer), *size);
-		msgq->msg_tail = (msgq->msg_tail + 1) % msgq->max_msgs;
+		msgq_receive_copy(msgq, msg, size);
 		task_wakeup_locked(&msgq->send_queue);
 	} else if (timeout == MSGQ_NO_WAIT) {
 		ret = ERRNO_MSGQ_QUEUE_EMPTY;
@@ -237,12 +247,7 @@ errno_t msgq_receive(msgq_id_t id, void *msg, uint32_t *size,
 		ret = task_wait_locked(&msgq->rec_queue, timeout, true);
 		msgq->msg_ctime = MSGQ_INIT_TIME;
 		if (ret == OK) {
-			msgq->msg_used--;
-			buffer = msgq->msg_buffer +
-					 msgq->msg_tail * msgq_buffer_size(msgq->max_msg_size);
-			*size = min(*size, *msgq_buffer_len_addr(buffer));
-			memcpy(msg, msgq_buffer_msg_addr(buffer), *size);
-			msgq->msg_tail = (msgq->msg_tail + 1) % msgq->max_msgs;
+			msgq_receive_copy(msgq, msg, size);
 			msgq->msg_ctime = current_ticks_get();
 		} else { /* only ERRNO_TASK_WAIT_TIMEOUT */
 			ret = ERRNO_MSGQ_TIMEOUT;

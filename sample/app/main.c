@@ -149,6 +149,10 @@ static void test_task3_entry(void *arg0, void *arg1, void *arg2, void *arg3) {
 		task_delay(2000);
 		ret = msgq_send(test_msgq_id, &i, sizeof(i), MSGQ_NO_WAIT);
 		printf("xxxxxxxxxxxxxxxxx send: %u, ret = %d\n", i, ret);
+		ret = msgq_send(test_msgq_id, &i, sizeof(i), MSGQ_NO_WAIT);
+		printf("xxxxxxxxxxxxxxxxx send: %u, ret = %d\n", i, ret);
+		ret = msgq_send(test_msgq_id, &i, sizeof(i), MSGQ_NO_WAIT);
+		printf("xxxxxxxxxxxxxxxxx send: %u, ret = %d\n", i, ret);
 	}
 }
 
@@ -210,7 +214,7 @@ static void create_test_task4() {
 		return;
 	}
 
-	ret = task_prority_set(test_task4_id, 30 /* prioriy */);
+	ret = task_prority_set(test_task4_id, 2 /* prioriy */);
 	if (ret != OK) {
 		printf("set task %s priority failed\n", task_name);
 		return;
