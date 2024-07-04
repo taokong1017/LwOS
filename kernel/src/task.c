@@ -98,7 +98,6 @@ static void task_reset(struct task *task) {
 errno_t task_create(task_id_t *task_id, const char name[TASK_NAME_LEN],
 					task_entry_func entry, void *arg0, void *arg1, void *arg2,
 					void *arg3, uint32_t stack_size, uint32_t flag) {
-	uint32_t align_size = 0;
 	void *stack_limit = NULL;
 	void *stack_ptr = NULL;
 	struct task *task = NULL;
@@ -113,15 +112,16 @@ errno_t task_create(task_id_t *task_id, const char name[TASK_NAME_LEN],
 		return err;
 	}
 
-	align_size = ALIGN(stack_size, TASK_STACK_SIZE_ALIGN);
-	stack_limit = mem_alloc_align(align_size, TASK_STACK_ADDR_ALIGN);
-	stack_ptr = stack_limit + align_size;
-	task = (struct task *)mem_alloc(sizeof(struct task));
+	stack_limit = mem_alloc_align(stack_size, TASK_STACK_ALIGN);
+	stack_ptr = (void *)ALIGN((unsigned long)stack_limit + stack_size,
+							  TASK_STACK_ALIGN);
+	task =
+		(struct task *)mem_alloc_align(sizeof(struct task), TASK_STACK_ALIGN);
 	if (!stack_limit || !task) {
 		return ERRNO_TASK_NO_MEMORY;
 	}
 
-	task_init(task, name, entry, arg0, arg1, arg2, arg3, stack_ptr, align_size,
+	task_init(task, name, entry, arg0, arg1, arg2, arg3, stack_ptr, stack_size,
 			  flag);
 	arch_task_init(task->id);
 

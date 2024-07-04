@@ -13,7 +13,7 @@ void *mem_alloc(uint32_t size) {
 }
 
 void *mem_alloc_align(uint32_t size, uint32_t align) {
-	char *start = heap + used;
+	char *start = (char *)ALIGN((unsigned long)heap + used, align);
 	char *end = (char *)ALIGN((unsigned long)start + size, align);
 	used += end - start;
 	return start;

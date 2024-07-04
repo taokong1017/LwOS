@@ -39,8 +39,7 @@
 	(TASK_FLAG_SYSTEM | TASK_FLAG_KERNEL | TASK_FLAG_USER | TASK_FLAG_DETACHED)
 
 /* task stack size definition */
-#define TASK_STACK_SIZE_ALIGN 16U
-#define TASK_STACK_ADDR_ALIGN 8U
+#define TASK_STACK_ALIGN 0x10
 #define TASK_STACK_DEFAULT_SIZE 8192U
 
 /* task error code definition */

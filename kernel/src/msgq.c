@@ -74,9 +74,7 @@ errno_t msgq_create(const char *name, uint32_t max_msgs, uint32_t max_msg_size,
 		return ERRNO_MSGQ_NO_MEMORY;
 	}
 
-	// TO DO: mem_alloc产生对齐异常
-	buffer = (char *)mem_alloc_align(max_msgs * msgq_buffer_size(max_msg_size),
-									 TASK_STACK_SIZE_ALIGN);
+	buffer = (char *)mem_alloc(max_msgs * msgq_buffer_size(max_msg_size));
 	if (!msgq) {
 		mem_free(msgq);
 		log_err(MSGQ_TAG, "malloc memory failed for creating buffer\n");
