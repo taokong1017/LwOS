@@ -189,7 +189,7 @@ void main_task_create() {
 	arch_main_task_switch(task_id);
 }
 
-void task_locked_sched() {
+void task_sched_locked() {
 	struct task *current_task = current_task_get();
 	struct task *next_task = next_task_pick_up();
 
@@ -203,7 +203,7 @@ void task_locked_sched() {
 	task_switch(next_task, current_task);
 }
 
-void task_unlocked_sched() {
+void task_sched_unlocked() {
 	uint32_t key = 0;
 	struct task *current_task = current_task_get();
 	struct task *next_task = next_task_pick_up();

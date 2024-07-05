@@ -11,8 +11,6 @@
 #include <tick.h>
 
 #define MSGQ_TAG "MSGQ"
-#define MSGQ_MAX_NUM 1024
-#define MSGQ_MAX_MSG_SIZE 1024
 #define MSGQ_INIT_TIME -1
 #define MSGQ_INVALID_ID -1
 #define min(a, b) ((a) < (b) ? (a) : (b))

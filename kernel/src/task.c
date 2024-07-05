@@ -16,7 +16,7 @@
 #define TASK_TAG "Task"
 
 extern struct spinlock sched_spinlock;
-extern void task_unlocked_sched();
+extern void task_sched_unlocked();
 
 /*
  * when the delay task exceeds timeout, it will be added to ready
@@ -171,7 +171,7 @@ errno_t task_prority_set(task_id_t task_id, uint32_t prioriy) {
 		task->priority = prioriy;
 	}
 
-	task_locked_sched();
+	task_sched_locked();
 	sched_spin_unlock(key);
 
 	return OK;
@@ -270,7 +270,7 @@ errno_t task_start(task_id_t task_id) {
 
 	task->status = TASK_STATUS_READY;
 	sched_ready_queue_add(task->cpu_id, task);
-	task_locked_sched();
+	task_sched_locked();
 	sched_spin_unlock(key);
 
 	return OK;
@@ -384,7 +384,7 @@ errno_t task_resume(task_id_t task_id) {
 	task->status &= ~TASK_STATUS_SUSPEND;
 	task->status |= TASK_STATUS_READY;
 	sched_ready_queue_add(task->cpu_id, task);
-	task_locked_sched();
+	task_sched_locked();
 	sched_spin_unlock(key);
 
 	return OK;
@@ -427,7 +427,7 @@ errno_t task_suspend(task_id_t task_id) {
 
 	task->status |= TASK_STATUS_SUSPEND;
 	if (task == current_task) {
-		task_locked_sched();
+		task_sched_locked();
 	}
 	sched_spin_unlock(key);
 
@@ -471,7 +471,7 @@ errno_t task_delay(uint64_t ticks) {
 	}
 
 	log_debug(TASK_TAG, "%s delay %d ticks\n", task->name, ticks);
-	task_locked_sched();
+	task_sched_locked();
 	task->is_timeout = false;
 	sched_spin_unlock(key);
 
@@ -501,7 +501,7 @@ void task_unlock() {
 		task->lock_cnt--;
 		if (task->lock_cnt == 0) {
 			arch_irq_restore(key);
-			task_unlocked_sched();
+			task_sched_unlocked();
 			return;
 		}
 	}
@@ -529,7 +529,7 @@ errno_t task_wait_locked(struct wait_queue *wq, uint64_t ticks,
 		timeout_queue_add(&task->timeout);
 	}
 	list_add_tail(&task->pend_list, &wq->wait_list);
-	task_locked_sched();
+	task_sched_locked();
 	if (task->is_timeout) {
 		task->is_timeout = false;
 		return ERRNO_TASK_WAIT_TIMEOUT;
@@ -551,7 +551,7 @@ errno_t task_wakeup_locked(struct wait_queue *wq) {
 		timeout_queue_del(&task->timeout);
 		task->status = TASK_STATUS_READY;
 		sched_ready_queue_add(task->cpu_id, task);
-		task_locked_sched();
+		task_sched_locked();
 	}
 
 	return OK;

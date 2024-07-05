@@ -74,7 +74,7 @@ ready_sp:
 	/* reschedule task */
 	ldr x0, [sp], #8
 	mov sp, x0
-	bl task_unlocked_sched
+	bl task_sched_unlocked
 
 nested_exit:
 .endm
