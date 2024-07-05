@@ -60,7 +60,7 @@
 	ldr x2, [x0, #PER_CPU_OF_IRQ_STACK_PTR_OFFSET]
 	mov x1, sp
 	mov sp, x2
-	str x1, [sp, #-8]!
+	str x1, [sp, #-16]!
 
 ready_sp:
 	bl	\cfunc
@@ -72,7 +72,7 @@ ready_sp:
 	cbnz w2, nested_exit
 
 	/* reschedule task */
-	ldr x0, [sp], #8
+	ldr x0, [sp], #16
 	mov sp, x0
 	bl task_sched_unlocked
 

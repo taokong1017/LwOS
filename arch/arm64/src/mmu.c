@@ -197,9 +197,9 @@ void mmu_enable() {
 	/* Set translation table */
 	ttbr0 = (uint64_t)init_pg_dir;
 	write_ttbr0_el1(ttbr0);
+	isb();
 
 	/* Set system control */
-	isb();
 	sctlr = read_sctlr_el1();
 	sctlr |= CTLR_EL1_MMU_ON;
 	write_sctlr_el1(sctlr);

@@ -212,15 +212,15 @@ void task_sched_unlocked() {
 		return;
 	}
 
+	if (TASK_IS_LOCKED(current_task)) {
+		return;
+	}
+
 	if (spin_lock_is_locked(&sched_spinlock)) {
 		spin_lock_dump(&sched_spinlock);
 		log_fatal(TASK_SCHED_TAG, "%s: the sched lock %s is locked\n", __func__,
 				  sched_spinlock.name);
 		code_unreachable();
-	}
-
-	if (TASK_IS_LOCKED(current_task)) {
-		return;
 	}
 
 	key = sched_spin_lock();
@@ -248,7 +248,8 @@ void task_sched_init() {
 	INIT_LIST_HEAD(&current_percpu.timer_queue.queue);
 	write_tpidrro_el0((uint64_t)current_percpu_get());
 	current_percpu_get()->irq_stack_ptr = (void *)__interrupt_stack_end;
-	current_percpu_get()->irq_stack_size = 0x1000;
+	current_percpu_get()->irq_stack_size =
+		__interrupt_stack_end - __interrupt_stack_start;
 	memset((void *)(current_percpu_get()->irq_stack_ptr -
 					current_percpu_get()->irq_stack_size),
 		   0, current_percpu_get()->irq_stack_size);

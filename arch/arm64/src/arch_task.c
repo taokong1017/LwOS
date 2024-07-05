@@ -15,12 +15,10 @@ void arch_task_init(task_id_t task_id) {
 	esf = (struct arch_esf_context *)(task->stack_ptr -
 									  sizeof(struct arch_esf_context));
 	esf->x0 = (uint64_t)task_id;
-	esf->x1 = (uint64_t)task_entry_point;
 	esf->spsr = SPSR_MODE_EL1H | DAIF_FIQ_BIT;
 	esf->elr = (uint64_t)task_entry_point;
 
 	/* 其它任务，在任务切换后，通过异常退出流程进入 */
-	memset(&task->task_context, 0, sizeof(task->task_context));
 	task->task_context.callee_context.sp = (uint64_t)esf;
 	task->task_context.callee_context.x30 = (uint64_t)arch_exc_exit;
 }
