@@ -156,7 +156,7 @@ static void test_task3_entry(void *arg0, void *arg1, void *arg2, void *arg3) {
 		ret = msgq_send(test_msgq_id, &i, sizeof(i), MSGQ_NO_WAIT);
 		printf("msgq send: %u, ret = %d\n", i, ret);
 		ret = sem_give(test_sem_id);
-		printf("semphore give ret %d\n", i, ret);
+		printf("sem give: %u, ret = %d\n", i, ret);
 	}
 }
 
@@ -241,8 +241,8 @@ static void test_task5_entry(void *arg0, void *arg1, void *arg2, void *arg3) {
 	uint32_t i = 0;
 
 	for (;;) {
+		printf("task %s will take a semphore, i = %d\n", TEST_TASK5_NAME, i++);
 		sem_take(test_sem_id, SEM_WAIT_FOREVER);
-		printf("task %s take a semphore, i = %d\n", TEST_TASK5_NAME, i++);
 	}
 
 	return;
@@ -260,7 +260,7 @@ static void create_test_task5() {
 		return;
 	}
 
-	ret = task_prority_set(test_task5_id, 26 /* prioriy */);
+	ret = task_prority_set(test_task5_id, 1 /* prioriy */);
 	if (ret != OK) {
 		printf("set task %s priority failed\n", task_name);
 		return;

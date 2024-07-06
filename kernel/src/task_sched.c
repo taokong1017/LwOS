@@ -168,7 +168,7 @@ void idle_task_create() {
 				(void *)3, (void *)4, TASK_STACK_DEFAULT_SIZE,
 				TASK_DEFAULT_FLAG);
 	task = ID_TO_TASK(task_id);
-	task->priority = TASK_PRIORITY_LOWEST;
+	task->priority = TASK_PRIORITY_LOWEST - 1;
 	task->status = TASK_STATUS_READY;
 	sched_ready_queue_add(task->cpu_id, task);
 }
