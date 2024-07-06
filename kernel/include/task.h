@@ -18,9 +18,9 @@
 #define TASK_NAME_LEN 32
 
 /* task priority definition */
-#define TASK_PRIORITY_HIGHEST 31
+#define TASK_PRIORITY_HIGHEST 30
 #define TASK_PRIORITY_LOWEST 1
-#define TASK_PRIORITY_NUM (TASK_PRIORITY_HIGHEST - TASK_PRIORITY_LOWEST + 2)
+#define TASK_PRIORITY_NUM (TASK_PRIORITY_HIGHEST - TASK_PRIORITY_LOWEST + 3)
 
 /* task status definition */
 #define TASK_STATUS_STOP 0x0001U
@@ -92,8 +92,8 @@ struct task {
 	uint64_t lock_cnt;
 	uint32_t cpu_id;
 	task_entry_func entry;
-	bool is_timeout;
 	void *args[4];
+	bool is_timeout;
 	struct list_head task_list; /* ready queue */
 	struct list_head pend_list; /* pend queue */
 	struct timeout timeout;

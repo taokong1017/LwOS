@@ -27,6 +27,7 @@ enum MOUDLE_ID {
 	MOD_ID_TIMEOUT,
 	MOD_ID_MSGQ,
 	MOD_ID_SEM,
+	MOD_ID_MUTEX,
 };
 
 typedef uint32_t errno_t;

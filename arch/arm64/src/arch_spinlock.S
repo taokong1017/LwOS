@@ -1,4 +1,3 @@
-
 .globl arch_spin_lock
 .type arch_spin_lock, function
 .section .text, "ax"
