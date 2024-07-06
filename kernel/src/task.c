@@ -142,7 +142,7 @@ errno_t task_prority_set(task_id_t task_id, uint32_t prioriy) {
 	uint32_t key = 0;
 	struct task *task = ID_TO_TASK(task_id);
 
-	if (!task) {
+	if (!task || task->id != task_id) {
 		return ERRNO_TASK_ID_INVALID;
 	}
 
@@ -181,7 +181,7 @@ errno_t task_prority_get(task_id_t task_id, uint32_t *prioriy) {
 	struct task *task = ID_TO_TASK(task_id);
 	uint32_t key = 0;
 
-	if (!task) {
+	if (!task || task->id != task_id) {
 		return ERRNO_TASK_ID_INVALID;
 	}
 
@@ -204,7 +204,7 @@ errno_t task_cpu_affi_set(task_id_t task_id, uint32_t cpu_affi) {
 	struct task *task = ID_TO_TASK(task_id);
 	uint32_t key = 0;
 
-	if (!task) {
+	if (!task || task->id != task_id) {
 		return ERRNO_TASK_ID_INVALID;
 	}
 
@@ -233,7 +233,7 @@ errno_t task_cpu_affi_get(task_id_t task_id, uint32_t *cpu_affi) {
 		return ERRNO_TASK_PTR_NULL;
 	}
 
-	if (!task) {
+	if (!task || task->id != task_id) {
 		return ERRNO_TASK_ID_INVALID;
 	}
 
@@ -253,7 +253,7 @@ errno_t task_start(task_id_t task_id) {
 	struct task *task = ID_TO_TASK(task_id);
 	uint32_t key = 0;
 
-	if (!task) {
+	if (!task || task->id != task_id) {
 		return ERRNO_TASK_ID_INVALID;
 	}
 
@@ -297,7 +297,7 @@ errno_t task_stop(task_id_t task_id) {
 	struct task *task = ID_TO_TASK(task_id);
 	uint32_t key = 0;
 
-	if (!task) {
+	if (!task || task->id != task_id) {
 		return ERRNO_TASK_ID_INVALID;
 	}
 
@@ -355,7 +355,7 @@ errno_t task_resume(task_id_t task_id) {
 	struct task *task = ID_TO_TASK(task_id);
 	struct task *current_task = current_task_get();
 
-	if (!task) {
+	if (!task || task->id != task_id) {
 		return ERRNO_TASK_ID_INVALID;
 	}
 
@@ -395,7 +395,7 @@ errno_t task_suspend(task_id_t task_id) {
 	struct task *task = ID_TO_TASK(task_id);
 	struct task *current_task = current_task_get();
 
-	if (!task) {
+	if (!task || task->id != task_id) {
 		return ERRNO_TASK_ID_INVALID;
 	}
 

@@ -103,7 +103,7 @@ errno_t msgq_create(const char *name, uint32_t max_msgs, uint32_t max_msg_size,
 errno_t msgq_destroy(msgq_id_t id) {
 	struct msgq *msgq = id2msgq(id);
 
-	if (!msgq) {
+	if (!msgq || msgq->id != id) {
 		log_err(MSGQ_TAG, "the msgq id 0x%lx, is invalid\n", id);
 		return ERRNO_MSGQ_ID_IVALID;
 	}
@@ -146,7 +146,7 @@ errno_t msgq_send(msgq_id_t id, const void *msg, uint32_t size,
 	uint32_t key = 0;
 	errno_t ret = OK;
 
-	if (id == MSGQ_INVALID_ID || !msgq) {
+	if (!msgq || msgq->id != id) {
 		log_err(MSGQ_TAG, "the msgq id is invalid\n");
 		return ERRNO_MSGQ_ID_IVALID;
 	}
@@ -212,7 +212,7 @@ errno_t msgq_receive(msgq_id_t id, void *msg, uint32_t *size,
 	uint32_t key = 0;
 	errno_t ret = OK;
 
-	if (id == MSGQ_INVALID_ID || !msgq) {
+	if (!msgq || msgq->id != id) {
 		log_err(MSGQ_TAG, "the msgq id is invalid\n");
 		return ERRNO_MSGQ_ID_IVALID;
 	}
