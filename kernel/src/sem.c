@@ -33,7 +33,7 @@ errno_t sem_create(const char *name, uint32_t count, uint32_t max_count,
 		return ERRNO_SEM_PTR_NULL;
 	}
 
-	sem = (struct sem *)mem_alloc(sizeof(struct sem));
+	sem = (struct sem *)mem_alloc_align(sizeof(struct sem), MEM_DEFAULT_ALIGN);
 	if (!sem) {
 		log_err(SEM_TAG, "the memory is not enough\n");
 		return ERRNO_SEM_NO_MEMORY;
@@ -104,8 +104,7 @@ errno_t sem_give(sem_id_t id) {
 		}
 	} else {
 		task_wakeup_locked(&sem->wait_queue);
-		log_debug(SEM_TAG, "the sem %s is given to wakeup the waiting task\n",
-				  sem->name);
+		log_debug(SEM_TAG, "the sem %s wakeup an waiting task\n", sem->name);
 	}
 
 	sched_spin_unlock(key);

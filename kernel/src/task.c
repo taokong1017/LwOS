@@ -112,11 +112,11 @@ errno_t task_create(task_id_t *task_id, const char name[TASK_NAME_LEN],
 		return err;
 	}
 
-	stack_limit = mem_alloc_align(stack_size, TASK_STACK_ALIGN);
+	stack_limit = mem_alloc_align(stack_size, MEM_DEFAULT_ALIGN);
 	stack_ptr = (void *)ALIGN((unsigned long)stack_limit + stack_size,
-							  TASK_STACK_ALIGN);
+							  MEM_DEFAULT_ALIGN);
 	task =
-		(struct task *)mem_alloc_align(sizeof(struct task), TASK_STACK_ALIGN);
+		(struct task *)mem_alloc_align(sizeof(struct task), MEM_DEFAULT_ALIGN);
 	if (!stack_limit || !task) {
 		return ERRNO_TASK_NO_MEMORY;
 	}
