@@ -3,6 +3,8 @@
 
 #include <types.h>
 
+#define declare_reg_read(reg) uint64_t read_##reg(void);
+
 #define declare_reg_operation(reg)                                             \
 	uint64_t read_##reg(void);                                                 \
 	void write_##reg(uint64_t val);                                            \
@@ -14,12 +16,12 @@
 	declare_reg_operation(reg##_el3)
 
 /* define special register operations */
+declare_reg_read(cntpct_el0);
+declare_reg_read(mpidr_el1);
 declare_reg_operation(cntfrq_el0);
 declare_reg_operation(cntp_ctl_el0);
-declare_reg_operation(cntpct_el0);
 declare_reg_operation(cntp_cval_el0);
 declare_reg_operation(cntp_tval_el0);
-declare_reg_operation(mpidr_el1);
 declare_reg_operation(tpidrro_el0);
 declare_reg_operation(sp_el0);
 declare_el123_reg_operation(elr);

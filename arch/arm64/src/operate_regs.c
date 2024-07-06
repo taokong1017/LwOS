@@ -25,13 +25,16 @@
 	define_reg_operation(reg##_el2);                                           \
 	define_reg_operation(reg##_el3)
 
+#define define_reg_read(reg)                                                   \
+	uint64_t read_##reg(void) { return read_sysreg(reg); }
+
 /* define special register operations */
+define_reg_read(cntpct_el0);
+define_reg_read(mpidr_el1);
 define_reg_operation(cntfrq_el0);
 define_reg_operation(cntp_ctl_el0);
-define_reg_operation(cntpct_el0);
 define_reg_operation(cntp_cval_el0);
 define_reg_operation(cntp_tval_el0);
-define_reg_operation(mpidr_el1);
 define_reg_operation(csselr_el1);
 define_reg_operation(hcr_el2);
 define_reg_operation(tpidrro_el0);

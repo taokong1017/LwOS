@@ -188,8 +188,13 @@ void arch_stack_walk(stack_trace_consume_func consume_entry, void *cookie,
 
 static bool show_Linker(void *cookie, phys_addr_t pc) {
 	uint32_t *level = (uint32_t *)cookie;
-	printf("  %u: 0x%016llx\n", (*level)++, pc);
-	return true;
+
+	if (pc) {
+		printf("  %u: 0x%016llx\n", (*level)++, pc);
+		return true;
+	} else {
+		return false;
+	}
 }
 
 void arch_stack_default_walk(char *tag, struct task *task,
