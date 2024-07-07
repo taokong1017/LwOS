@@ -116,7 +116,7 @@ errno_t mutex_take(mutex_id_t id, uint32_t timeout) {
 	/* other task takes the mutex */
 	if (timeout == MUTEX_NO_WAIT) {
 		log_err(MUTEX_TAG, "the mutex %s is locked by task %s\n", mutex->name,
-				cur_task->name);
+				mutex->owner->name);
 		sched_spin_unlock(key);
 		return ERRNO_MUTEX_IS_BUSY;
 	}
@@ -145,7 +145,7 @@ errno_t mutex_take(mutex_id_t id, uint32_t timeout) {
 	}
 
 	/* current task is wakeup and take a mutex */
-	if (mutex->owner) {
+	if (mutex->owner /* current task */) {
 		/* get the highest priority of tasks in the wait queue, and set it to
 		 * mutex owner */
 		list_for_each_entry(pos, &mutex->wait_queue.wait_list, pend_list) {
@@ -200,7 +200,13 @@ errno_t mutex_give(mutex_id_t id) {
 		return ERRNO_MUTEX_OHTER_OWNER;
 	}
 
-	if (mutex->lock_count > 1) {
+	if (TASK_SCHED_LOCKED(cur_task)) {
+		log_debug(MUTEX_TAG, "the task %s is locked\n", cur_task->name);
+		sched_spin_unlock(key);
+		return ERRNO_MUTEX_IS_LOCKED;
+	}
+
+	if (mutex->lock_count > 1U) {
 		mutex->lock_count--;
 		log_debug(MUTEX_TAG, "lock count of mutex %s is %u\n", mutex->name,
 				  mutex->lock_count);
@@ -210,9 +216,7 @@ errno_t mutex_give(mutex_id_t id) {
 
 	/* restore the priority of mutex owner, and needs to adjust queue because
 	 * the priority is lowered */
-	sched_ready_queue_remove(owner->cpu_id, owner);
-	owner->priority = mutex->priority;
-	sched_ready_queue_add(owner->cpu_id, owner);
+	mutex_owner_priority_set(owner /* current task */, mutex->priority);
 
 	/* wakeup the first task waiting for the mutex */
 	if (!list_empty(&mutex->wait_queue.wait_list)) {
@@ -221,8 +225,9 @@ errno_t mutex_give(mutex_id_t id) {
 		mutex->lock_count = 1;
 		mutex->priority = mutex->owner->priority;
 		task_wakeup_locked(&mutex->wait_queue);
+	} else {
+		task_sched_locked();
 	}
-
 	sched_spin_unlock(key);
 
 	return OK;
