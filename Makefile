@@ -89,13 +89,15 @@ dbg:
 
 menuconfig:
 	$(Q)python3  $(CONFIG_DIR)/usr_config.py
+	$(Q)make clean
 
-defconfig:
+defconfig: 
 	$(Q)if [ -e $(CONFIG_DIR)/$(CONFIG) ]; then \
 		python3 $(CONFIG_DIR)/usr_config.py defconfig $(CONFIG_DIR)/$(CONFIG); \
 	else	\
 		echo "*** $(CONFIG_DIR)/$(CONFIG) does not exist ***"; \
 	fi
+	$(Q)make clean
 
 clean:
 	$(Q)$(RM) -rf $(BASE_DIR)/sample/linker/lwos.lds $(BASE_DIR)/sample/linker/.lwos.lds*
