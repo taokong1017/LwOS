@@ -10,5 +10,6 @@ obj-y := string.o \
 	timeout.o \
 	msgq.o \
 	sem.o \
-	mutex.o
+	mutex.o \
+	log.o
 
