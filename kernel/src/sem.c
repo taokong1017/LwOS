@@ -54,7 +54,7 @@ errno_t sem_take(sem_id_t id, uint64_t timeout) {
 	uint32_t key = 0;
 	errno_t ret = OK;
 
-	if (id != sem->id) {
+	if (!sem || id != sem->id) {
 		log_err(SEM_TAG, "the sem id %ld is invalid\n", id);
 		return ERRNO_SEM_ID_INVALID;
 	}
@@ -86,7 +86,7 @@ errno_t sem_give(sem_id_t id) {
 	struct sem *sem = id2sem(id);
 	uint32_t key = 0;
 
-	if (id != sem->id) {
+	if (!sem || id != sem->id) {
 		log_err(SEM_TAG, "the sem id %ld is invalid\n", id);
 		return ERRNO_SEM_ID_INVALID;
 	}
@@ -115,7 +115,7 @@ errno_t sem_give(sem_id_t id) {
 errno_t sem_destroy(sem_id_t id) {
 	struct sem *sem = id2sem(id);
 
-	if (id != sem->id) {
+	if (!sem || id != sem->id) {
 		log_err(SEM_TAG, "the sem id %ld is invalid\n", id);
 		return ERRNO_SEM_ID_INVALID;
 	}

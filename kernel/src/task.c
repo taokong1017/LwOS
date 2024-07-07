@@ -13,7 +13,7 @@
 #define ALIGN(start, align) ((start + align - 1) & ~(align - 1))
 #define TASK_TO_ID(task) ((task_id_t)task)
 #define TASK_SCHED_LOCKED(task) (task->lock_cnt > 1)
-#define TASK_TAG "Task"
+#define TASK_TAG "TASK"
 
 extern struct spinlock sched_spinlock;
 extern void task_sched_unlocked();
@@ -115,9 +115,17 @@ errno_t task_create(task_id_t *task_id, const char name[TASK_NAME_LEN],
 	stack_limit = mem_alloc_align(stack_size, MEM_DEFAULT_ALIGN);
 	stack_ptr = (void *)ALIGN((unsigned long)stack_limit + stack_size,
 							  MEM_DEFAULT_ALIGN);
+	if (!stack_limit) {
+		log_fatal(TASK_TAG, "allocate stack of task %s failed without memory\n",
+				  name);
+		return ERRNO_TASK_NO_MEMORY;
+	}
+
 	task =
 		(struct task *)mem_alloc_align(sizeof(struct task), MEM_DEFAULT_ALIGN);
-	if (!stack_limit || !task) {
+	if (!task) {
+		mem_free(stack_limit);
+		log_fatal(TASK_TAG, "allocate task %s failed without memory\n", name);
 		return ERRNO_TASK_NO_MEMORY;
 	}
 
