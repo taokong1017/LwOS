@@ -195,6 +195,9 @@ void task_sched_locked() {
 
 	if (current_task == next_task) {
 		return;
+	} else {
+		log_debug(TASK_SCHED_TAG, "current task is %s, next task is %s\n",
+				  current_task->name, next_task->name);
 	}
 
 	current_task->status &= ~TASK_STATUS_RUNNING;

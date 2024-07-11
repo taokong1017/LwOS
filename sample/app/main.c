@@ -6,25 +6,30 @@
 #include <stack_trace.h>
 #include <msgq.h>
 #include <sem.h>
+#include <mutex.h>
 
 #define TEST_TASK1_NAME "test_task1"
 #define TEST_TASK2_NAME "test_task2"
 #define TEST_TASK3_NAME "test_task3"
 #define TEST_TASK4_NAME "test_task4"
 #define TEST_TASK5_NAME "test_task5"
+#define TEST_TASK6_NAME "test_task6"
 #define TEST_MSGQ_NAME "test_msgq"
 #define TEST_MSGQ_NUM 5
 #define TEST_MSGQ_SIZE 32
 #define TEST_SEM_NAME "test_sem"
 #define TEST_SEM_MAX_NUM 5
+#define TEST_MUTEX_NAME "test_mutex"
 
 static task_id_t test_task1_id = 0;
 static task_id_t test_task2_id = 0;
 static task_id_t test_task3_id = 0;
 static task_id_t test_task4_id = 0;
 static task_id_t test_task5_id = 0;
+static task_id_t test_task6_id = 0;
 static msgq_id_t test_msgq_id = 0;
 static sem_id_t test_sem_id = 0;
+static mutex_id_t test_mutex_id = 0;
 
 static void test_task1_entry(void *arg0, void *arg1, void *arg2, void *arg3) {
 	(void)arg0;
@@ -157,6 +162,13 @@ static void test_task3_entry(void *arg0, void *arg1, void *arg2, void *arg3) {
 		printf("msgq send: %u, ret = %d\n", i, ret);
 		ret = sem_give(test_sem_id);
 		printf("sem give: %u, ret = %d\n", i, ret);
+		printf("task %s will take a mutex\n", TEST_TASK3_NAME);
+		ret = mutex_take(test_mutex_id, SEM_WAIT_FOREVER);
+		printf("task %s has token a mutex, ret = %d\n", TEST_TASK3_NAME, ret);
+		task_delay(30);
+		printf("task %s will give a mutex\n", TEST_TASK3_NAME);
+		ret = mutex_give(test_mutex_id);
+		printf("task %s has give a mutex, ret = %d\n", TEST_TASK3_NAME, ret);
 	}
 }
 
@@ -275,6 +287,57 @@ static void create_test_task5() {
 	return;
 }
 
+static void test_task6_entry(void *arg0, void *arg1, void *arg2, void *arg3) {
+	(void)arg0;
+	(void)arg1;
+	(void)arg2;
+	(void)arg3;
+	uint32_t i = 0;
+	errno_t ret = OK;
+
+	for (;;) {
+		printf("task %s i = %d\n", TEST_TASK6_NAME, i++);
+		printf("task %s will take a mutex\n", TEST_TASK6_NAME);
+		mutex_take(test_mutex_id, SEM_WAIT_FOREVER);
+		ret = mutex_take(test_mutex_id, SEM_WAIT_FOREVER);
+		printf("task %s has token a mutex, ret = %d\n", TEST_TASK6_NAME, ret);
+		task_delay(10);
+		printf("task %s will give a mutex\n", TEST_TASK6_NAME);
+		mutex_give(test_mutex_id);
+		ret = mutex_give(test_mutex_id);
+		printf("task %s has give a mutex, ret = %d\n", TEST_TASK6_NAME, ret);
+	}
+
+	return;
+}
+
+static void create_test_task6() {
+	errno_t ret = OK;
+	char task_name[TASK_NAME_LEN] = {0};
+
+	strncpy(task_name, TEST_TASK6_NAME, TASK_NAME_LEN);
+	ret = task_create(&test_task6_id, task_name, test_task6_entry, NULL, NULL,
+					  NULL, NULL, TASK_STACK_DEFAULT_SIZE, TASK_FLAG_USER);
+	if (ret != OK) {
+		printf("create task %s failed\n", task_name);
+		return;
+	}
+
+	ret = task_prority_set(test_task6_id, 3 /* prioriy */);
+	if (ret != OK) {
+		printf("set task %s priority failed\n", task_name);
+		return;
+	}
+
+	ret = task_start(test_task6_id);
+	if (ret != OK) {
+		printf("start task %s failed\n", task_name);
+		return;
+	}
+
+	return;
+}
+
 void main_task_entry(void *arg0, void *arg1, void *arg2, void *arg3) {
 	(void)arg0;
 	(void)arg1;
@@ -284,11 +347,13 @@ void main_task_entry(void *arg0, void *arg1, void *arg2, void *arg3) {
 	printf("enter root task\n");
 	msgq_create(TEST_MSGQ_NAME, TEST_MSGQ_NUM, TEST_MSGQ_SIZE, &test_msgq_id);
 	sem_create(TEST_SEM_NAME, 0, TEST_SEM_MAX_NUM, &test_sem_id);
+	mutex_create(TEST_MUTEX_NAME, &test_mutex_id);
 	create_test_task1();
 	create_test_task2();
 	create_test_task3();
 	create_test_task4();
 	create_test_task5();
+	create_test_task6();
 	task_suspend_self();
 	code_unreachable();
 }

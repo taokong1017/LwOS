@@ -67,7 +67,8 @@ errno_t mutex_destroy(mutex_id_t id) {
 }
 
 static void mutex_owner_priority_set(struct task *task, uint32_t priority) {
-	if (task->status == TASK_STATUS_READY) {
+	if (task->status == TASK_STATUS_READY ||
+		task->status == TASK_STATUS_RUNNING) {
 		sched_ready_queue_remove(task->cpu_id, task);
 		task->priority = priority;
 		sched_ready_queue_add(task->cpu_id, task);
@@ -80,9 +81,7 @@ errno_t mutex_take(mutex_id_t id, uint32_t timeout) {
 	struct mutex *mutex = id2mutex(id);
 	uint32_t key = 0;
 	struct task *cur_task = NULL;
-	struct task *pos = NULL;
 	uint32_t cur_prio = 0;
-	uint32_t priority = 0;
 
 	if (!mutex || mutex->id != id) {
 		log_err(MUTEX_TAG, "the id is null pointer\n");
@@ -132,34 +131,21 @@ errno_t mutex_take(mutex_id_t id, uint32_t timeout) {
 		mutex_owner_priority_set(mutex->owner, cur_prio);
 		log_debug(
 			MUTEX_TAG,
-			"raise the priority of the task %s to %u, and current task is %s",
+			"raise the priority of the task %s to %u, and current task is %s\n",
 			mutex->owner->name, cur_prio, cur_task->name);
 	}
 
+	log_debug(MUTEX_TAG, "task %s waits for mutex %s\n", cur_task->name,
+			  mutex->name);
 	/* current task is wakeup with timeout */
 	if (task_wait_locked(&mutex->wait_queue, timeout, true)) {
-		log_debug(MUTEX_TAG, "the task %s is wakeup with timeout\n",
+		log_debug(MUTEX_TAG, "task %s is wakeup with timeout\n",
 				  cur_task->name);
 		sched_spin_unlock(key);
 		return ERRNO_MUTEX_TIMEOUT;
 	}
 
-	/* current task is wakeup and take a mutex */
-	if (mutex->owner /* current task */) {
-		/* get the highest priority of tasks in the wait queue, and set it to
-		 * mutex owner */
-		list_for_each_entry(pos, &mutex->wait_queue.wait_list, pend_list) {
-			if (pos->priority > priority) {
-				priority = pos->priority;
-			}
-		}
-		mutex_owner_priority_set(mutex->owner, priority);
-		log_debug(
-			MUTEX_TAG,
-			"raise the priority of the task %s to %u, and current task is %s",
-			mutex->owner->name, priority, cur_task->name);
-	}
-
+	log_debug(MUTEX_TAG, "task %s is wakeup!\n", cur_task->name);
 	sched_spin_unlock(key);
 
 	return OK;
@@ -214,20 +200,29 @@ errno_t mutex_give(mutex_id_t id) {
 		return OK;
 	}
 
-	/* restore the priority of mutex owner, and needs to adjust queue because
-	 * the priority is lowered */
-	mutex_owner_priority_set(owner /* current task */, mutex->priority);
-
-	/* wakeup the first task waiting for the mutex */
-	if (!list_empty(&mutex->wait_queue.wait_list)) {
-		mutex->owner = list_first_entry(&mutex->wait_queue.wait_list,
-										struct task, pend_list);
-		mutex->lock_count = 1;
-		mutex->priority = mutex->owner->priority;
-		task_wakeup_locked(&mutex->wait_queue);
-	} else {
-		task_sched_locked();
+	if (owner->priority > mutex->priority) {
+		log_debug(MUTEX_TAG,
+				  "set mutex owner %s(pri:%u status: %u) priority to %u\n",
+				  owner->name, owner->priority, owner->status, mutex->priority);
+		mutex_owner_priority_set(owner, mutex->priority);
 	}
+
+	if (list_empty(&mutex->wait_queue.wait_list)) {
+		mutex->lock_count = 0;
+		mutex->owner = NULL;
+		mutex->priority = 0;
+		sched_spin_unlock(key);
+		return OK;
+	}
+
+	mutex->owner =
+		list_first_entry(&mutex->wait_queue.wait_list, struct task, pend_list);
+	mutex->lock_count = 1;
+	mutex->priority = mutex->owner->priority;
+	log_debug(MUTEX_TAG, "wakeup mutex owner %s(pri:%u) by task %s(pri:%u)\n",
+			  mutex->owner->name, mutex->priority, cur_task->name,
+			  cur_task->priority);
+	task_wakeup_locked(&mutex->wait_queue);
 	sched_spin_unlock(key);
 
 	return OK;
