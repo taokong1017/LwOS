@@ -4,6 +4,7 @@
 #include <types.h>
 #include <errno.h>
 #include <task.h>
+#include <kernel.h>
 
 #define MUTEX_INVALID_ID -1
 #define MUTEX_NAME_LEN 32
@@ -35,6 +36,7 @@ struct mutex {
 	struct wait_queue wait_queue; /* pending queue */
 };
 
+errno_t mutex_init(struct mutex *mutex, const char *name);
 errno_t mutex_create(const char *name, mutex_id_t *id);
 errno_t mutex_destroy(mutex_id_t id);
 errno_t mutex_take(mutex_id_t id, uint32_t timeout);

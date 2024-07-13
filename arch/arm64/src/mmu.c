@@ -1,7 +1,7 @@
 
 #include <types.h>
 #include <pgtable.h>
-#include <memory.h>
+#include <mem.h>
 #include <pgtable_types.h>
 #include <pgtable_prot.h>
 #include <operate_regs.h>

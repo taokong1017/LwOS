@@ -1,5 +1,5 @@
 #include <mutex.h>
-#include <memory.h>
+#include <mem.h>
 #include <log.h>
 #include <string.h>
 #include <task_sched.h>
@@ -8,6 +8,27 @@
 #define mutex2id(mutex) ((mutex_id_t)mutex)
 #define id2mutex(id) ((struct mutex *)id)
 #define TASK_SCHED_LOCKED(task) (task->lock_cnt > 1)
+
+errno_t mutex_init(struct mutex *mutex, const char *name) {
+	if (!mutex) {
+		log_err(MUTEX_TAG, "the mutex is null pointer\n");
+		return ERRNO_MUTEX_PTR_NULL;
+	}
+
+	if (!name) {
+		log_err(MUTEX_TAG, "the name is empty\n");
+		return ERRNO_MUTEX_NAME_EMPTY;
+	}
+
+	mutex->id = mutex2id(mutex);
+	strncpy(mutex->name, name, MUTEX_NAME_LEN);
+	mutex->owner = NULL;
+	mutex->lock_count = 0;
+	mutex->priority = 0;
+	INIT_LIST_HEAD(&mutex->wait_queue.wait_list);
+
+	return OK;
+}
 
 errno_t mutex_create(const char *name, mutex_id_t *id) {
 	struct mutex *mutex = NULL;
@@ -22,20 +43,14 @@ errno_t mutex_create(const char *name, mutex_id_t *id) {
 		return ERRNO_MUTEX_PTR_NULL;
 	}
 
-	mutex = (struct mutex *)mem_alloc_align(sizeof(struct mutex),
-											MEM_DEFAULT_ALIGN);
+	mutex = (struct mutex *)mem_malloc(sizeof(struct mutex));
 	if (!mutex) {
 		log_fatal(MUTEX_TAG, "allocate the mutex %s failed without memory\n",
 				  name);
 		return ERRNO_MUTEX_NO_MEMORY;
 	}
 
-	mutex->id = mutex2id(mutex);
-	strncpy(mutex->name, name, MUTEX_NAME_LEN);
-	mutex->owner = NULL;
-	mutex->lock_count = 0;
-	mutex->priority = 0;
-	INIT_LIST_HEAD(&mutex->wait_queue.wait_list);
+	mutex_init(mutex, name);
 	*id = mutex->id;
 
 	return OK;

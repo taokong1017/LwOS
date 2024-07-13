@@ -1,6 +1,6 @@
 #include <string.h>
 #include <sem.h>
-#include <memory.h>
+#include <mem.h>
 #include <log.h>
 #include <task_sched.h>
 
@@ -33,7 +33,7 @@ errno_t sem_create(const char *name, uint32_t count, uint32_t max_count,
 		return ERRNO_SEM_PTR_NULL;
 	}
 
-	sem = (struct sem *)mem_alloc_align(sizeof(struct sem), MEM_DEFAULT_ALIGN);
+	sem = (struct sem *)mem_malloc(sizeof(struct sem));
 	if (!sem) {
 		log_err(SEM_TAG, "the memory is not enough\n");
 		return ERRNO_SEM_NO_MEMORY;

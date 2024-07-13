@@ -3,7 +3,7 @@
 #include <task.h>
 #include <task_sched.h>
 #include <msgq.h>
-#include <memory.h>
+#include <mem.h>
 #include <string.h>
 #include <menuconfig.h>
 #include <list.h>
@@ -66,15 +66,13 @@ errno_t msgq_create(const char *name, uint32_t max_msgs, uint32_t max_msg_size,
 		return ERRNO_MSGQ_PTR_NULL;
 	}
 
-	msgq =
-		(struct msgq *)mem_alloc_align(sizeof(struct msgq), MEM_DEFAULT_ALIGN);
+	msgq = (struct msgq *)mem_malloc(sizeof(struct msgq));
 	if (!msgq) {
 		log_err(MSGQ_TAG, "malloc memory failed for creating msgq\n");
 		return ERRNO_MSGQ_NO_MEMORY;
 	}
 
-	buffer = (char *)mem_alloc_align(max_msgs * msgq_buffer_size(max_msg_size),
-									 MEM_DEFAULT_ALIGN);
+	buffer = (char *)mem_malloc(max_msgs * msgq_buffer_size(max_msg_size));
 	if (!msgq) {
 		mem_free(msgq);
 		log_err(MSGQ_TAG, "malloc memory failed for creating buffer\n");

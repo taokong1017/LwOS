@@ -1,7 +1,7 @@
 #include <types.h>
 #include <task.h>
 #include <errno.h>
-#include <memory.h>
+#include <mem.h>
 #include <string.h>
 #include <arch_task.h>
 #include <arch_spinlock.h>
@@ -112,17 +112,15 @@ errno_t task_create(task_id_t *task_id, const char name[TASK_NAME_LEN],
 		return err;
 	}
 
-	stack_limit = mem_alloc_align(stack_size, MEM_DEFAULT_ALIGN);
-	stack_ptr = (void *)ALIGN((unsigned long)stack_limit + stack_size,
-							  MEM_DEFAULT_ALIGN);
+	stack_limit = mem_malloc(stack_size);
+	stack_ptr = (void *)((uintptr_t)stack_limit + stack_size);
 	if (!stack_limit) {
 		log_fatal(TASK_TAG, "allocate stack of task %s failed without memory\n",
 				  name);
 		return ERRNO_TASK_NO_MEMORY;
 	}
 
-	task =
-		(struct task *)mem_alloc_align(sizeof(struct task), MEM_DEFAULT_ALIGN);
+	task = (struct task *)mem_malloc(sizeof(struct task));
 	if (!task) {
 		mem_free(stack_limit);
 		log_fatal(TASK_TAG, "allocate task %s failed without memory\n", name);
