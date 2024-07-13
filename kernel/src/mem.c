@@ -93,7 +93,7 @@ static int32_t ls_bit(int32_t i) {
 
 static int32_t ms_bit(int32_t i) {
 	uint32_t a = 0;
-	uint32_t x = (unsigned int)i;
+	uint32_t x = (uint32_t)i;
 
 	a = x <= 0xffff ? (x <= 0xff ? 0 : 8) : (x <= 0xffffff ? 16 : 24);
 	return table[x >> a] + a;
@@ -310,7 +310,7 @@ errno_t mem_init(void *mem, uint32_t size) {
 	tlsf->used_size = size - (b->size & BLOCK_SIZE);
 	tlsf->max_size = tlsf->used_size;
 
-	return (b->size & BLOCK_SIZE);
+	return OK;
 }
 
 static void *malloc_ex(uint32_t size, void *mem_pool) {
