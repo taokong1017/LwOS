@@ -11,5 +11,7 @@ obj-y := string.o \
 	msgq.o \
 	sem.o \
 	mutex.o \
-	log.o
+	log.o \
+	percpu.o \
+	kernel.o
 

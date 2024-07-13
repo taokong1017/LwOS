@@ -11,7 +11,6 @@
 #define ROOT_TASK_NAME "main_task"
 #define TASK_SCHED_TAG "TASK_SCHED"
 #define TASK_IS_LOCKED(task) (task->lock_cnt > 0)
-#define current_percpu kernel.percpus[arch_cpu_id_get()]
 
 SPIN_LOCK_DEFINE(sched_spinlock);
 extern char __interrupt_stack_start[];
@@ -23,8 +22,6 @@ struct prio_info {
 	uint32_t idx;
 	uint32_t bit;
 };
-
-static struct kernel kernel;
 
 static struct prio_info prio_info_get(uint32_t priority) {
 	struct prio_info ret;
@@ -98,11 +95,7 @@ struct task *prio_mq_best(struct priority_mqueue *prio_mq) {
 }
 
 struct task *current_task_get() {
-	return current_percpu.current_task;
-}
-
-struct per_cpu *current_percpu_get() {
-	return &current_percpu;
+	return current_percpu_get()->current_task;
 }
 
 uint32_t sched_spin_lock() {
@@ -117,36 +110,27 @@ void sched_spin_unlock(uint32_t key) {
 }
 
 void sched_ready_queue_remove(uint32_t cpu_id, struct task *task) {
-	prio_mq_remove(&kernel.percpus[cpu_id].ready_queue.run_queue, task);
+	prio_mq_remove(&percpu_get(cpu_id)->ready_queue.run_queue, task);
 }
 
 void sched_ready_queue_add(uint32_t cpu_id, struct task *task) {
-	prio_mq_add(&kernel.percpus[cpu_id].ready_queue.run_queue, task);
+	prio_mq_add(&percpu_get(cpu_id)->ready_queue.run_queue, task);
 }
 
-bool is_in_irq() { return current_percpu.irq_nested_cnt > 0 ? true : false; }
+bool is_in_irq() {
+	return current_percpu_get()->irq_nested_cnt > 0 ? true : false;
+}
 
 static void current_task_update(struct task *task) {
-	current_percpu.current_task = task;
+	current_percpu_get()->current_task = task;
 }
 
 static struct task *next_task_pick_up() {
-	return prio_mq_best(&current_percpu.ready_queue.run_queue);
+	return prio_mq_best(&current_percpu_get()->ready_queue.run_queue);
 }
 
 static void task_switch(struct task *new, struct task *old) {
 	arch_task_context_switch(&new->task_context, &old->task_context);
-}
-
-struct stack_info irq_stack_info(struct task *task) {
-	uint32_t cpu_id = task->cpu_id;
-	struct stack_info irq_stack;
-
-	irq_stack.high = (phys_addr_t)kernel.percpus[cpu_id].irq_stack_ptr;
-	irq_stack.low = (phys_addr_t)kernel.percpus[cpu_id].irq_stack_ptr -
-					kernel.percpus[cpu_id].irq_stack_size;
-
-	return irq_stack;
 }
 
 static void idle_task_entry(void *arg0, void *arg1, void *arg2, void *arg3) {
@@ -243,12 +227,13 @@ void task_sched_unlocked() {
 
 void task_sched_init() {
 	int32_t i = 0;
+	struct per_cpu *percpu = current_percpu_get();
 
-	memset((void *)&current_percpu, 0, sizeof(struct per_cpu));
+	memset((void *)percpu, 0, sizeof(struct per_cpu));
 	for (i = 0; i < TASK_PRIORITY_NUM; i++) {
-		INIT_LIST_HEAD(&current_percpu.ready_queue.run_queue.queues[i]);
+		INIT_LIST_HEAD(&percpu->ready_queue.run_queue.queues[i]);
 	}
-	INIT_LIST_HEAD(&current_percpu.timer_queue.queue);
+	INIT_LIST_HEAD(&percpu->timer_queue.queue);
 	write_tpidrro_el0((uint64_t)current_percpu_get());
 	current_percpu_get()->irq_stack_ptr = (void *)__interrupt_stack_end;
 	current_percpu_get()->irq_stack_size =

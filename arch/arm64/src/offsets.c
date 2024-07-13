@@ -2,6 +2,7 @@
 #include <arch_task.h>
 #include <task.h>
 #include <kernel.h>
+#include <percpu.h>
 
 GEN_ABS_SYM_BEGIN(ARM64_TASK_SYMBOLE)
 GEN_NAMED_OFFSET_SYM(struct task, entry, TASK_OF_ENTRY);

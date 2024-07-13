@@ -8,6 +8,7 @@
 #include <task_sched.h>
 #include <stack_trace.h>
 #include <stdio.h>
+#include <percpu.h>
 
 #define array_size(x) (sizeof(x) / sizeof((x)[0]))
 
@@ -145,7 +146,7 @@ static void unwind_stack_walk(unwind_consume_func consume_state, void *cookie,
 
 	struct stack_info stacks[] = {
 		task_stack_info(task == NULL ? current_task : task),
-		irq_stack_info(task == NULL ? current_task : task),
+		irq_stack_info(task == NULL ? current_task->cpu_id : task->cpu_id),
 	};
 	struct unwind_state state = {
 		.stacks = stacks,
