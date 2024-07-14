@@ -9,6 +9,6 @@ struct per_cpu *current_percpu_get() {
 	return &current_percpu;
 }
 
-struct per_cpu *percpu_get(int cpu_id) {
+struct per_cpu *percpu_get(uint32_t cpu_id) {
 	return &kernel.percpus[cpu_id];
 }

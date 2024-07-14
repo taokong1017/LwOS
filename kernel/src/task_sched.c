@@ -13,8 +13,6 @@
 #define TASK_IS_LOCKED(task) (task->lock_cnt > 0)
 
 SPIN_LOCK_DEFINE(sched_spinlock);
-extern char __interrupt_stack_start[];
-extern char __interrupt_stack_end[];
 extern void main_task_entry(void *arg0, void *arg1, void *arg2, void *arg3);
 
 struct prio_info {
@@ -226,22 +224,6 @@ void task_sched_unlocked() {
 }
 
 void task_sched_init() {
-	int32_t i = 0;
-	struct per_cpu *percpu = current_percpu_get();
-
-	memset((void *)percpu, 0, sizeof(struct per_cpu));
-	for (i = 0; i < TASK_PRIORITY_NUM; i++) {
-		INIT_LIST_HEAD(&percpu->ready_queue.run_queue.queues[i]);
-	}
-	INIT_LIST_HEAD(&percpu->timer_queue.queue);
-	write_tpidrro_el0((uint64_t)current_percpu_get());
-	current_percpu_get()->irq_stack_ptr = (void *)__interrupt_stack_end;
-	current_percpu_get()->irq_stack_size =
-		__interrupt_stack_end - __interrupt_stack_start;
-	memset((void *)(current_percpu_get()->irq_stack_ptr -
-					current_percpu_get()->irq_stack_size),
-		   0, current_percpu_get()->irq_stack_size);
-
 	idle_task_create();
 	main_task_create();
 	code_unreachable();

@@ -6,7 +6,7 @@
 #include <menuconfig.h>
 
 #define ARCH_TIMER_TAG "ARCH_TIMER"
-#define CYC_PER_TICK (arch_timer_freq_get() / CONFIG_TICK_PER_SECOND)
+#define CYC_PER_TICK (arch_timer_freq_get() / CONFIG_TICKS_PER_SECOND)
 
 uint64_t arch_timer_freq_get() { return read_cntfrq_el0(); }
 

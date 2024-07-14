@@ -6,12 +6,19 @@ config CONFIG_SMP
 	help
 		this option enables kernel smp to use multiple CPUs.
 
-config CONFIG_TICK_PER_SECOND
+config CONFIG_TICKS_PER_SECOND
 	int "Tick Value Per Second"
 	default 1000
 	range 1 10000
 	help
 	  This represents the tick value per second.
+
+config CONFIG_KERNEL_STACK_SIZE
+	int "Kernel Stack Size"
+	default 8192
+	range 4096 8192
+	help
+	  This represents the kernel stack size for primary core initialization.
 
 menu "Message Queue"
 
@@ -28,6 +35,17 @@ config CONFIG_MSGQ_MAX_SIZE
 	range 1 1024
 	help
 	  This represents the maximum message size.
+
+endmenu
+
+menu "Interrupt"
+
+config CONFIG_INTERRUPT_STACK_SIZE
+	int "Interrupt Stack Size"
+	default 8192
+	range 4096 8192
+	help
+	  This represents the interrupt stack size for every cpu.
 
 endmenu
 

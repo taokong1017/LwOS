@@ -1,6 +1,8 @@
 OUTPUT_FORMAT("elf64-littleaarch64")
 OUTPUT_ARCH(aarch64)
 
+#include <menuconfig.h>
+
 SECTIONS
 {
 	. = 0x40000000;
@@ -52,11 +54,11 @@ SECTIONS
 
 	. = ALIGN(0x1000);
 	__kernel_stack_start = .;
-	. += 0x2000;
+	. += CONFIG_KERNEL_STACK_SIZE;
 	__kernel_stack_end = .;
 
 	. = ALIGN(0x1000);
 	__interrupt_stack_start = .;
-	. += 0x2000;
+	. += (CONFIG_INTERRUPT_STACK_SIZE * CONFIG_CPUS_MAX_NUM);
 	__interrupt_stack_end = .;
 }

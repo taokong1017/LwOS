@@ -32,5 +32,6 @@ struct per_cpu {
 };
 
 struct stack_info irq_stack_info(uint32_t cpu_id);
+void percpu_init(uint32_t cpu_id);
 
 #endif

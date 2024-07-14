@@ -25,21 +25,21 @@ uint64_t current_cycles_get() {
 }
 
 uint32_t ms2tick(uint32_t ms) {
-	return (uint32_t)(((uint64_t)ms * CONFIG_TICK_PER_SECOND) / MS_PER_SECOND);
+	return (uint32_t)(((uint64_t)ms * CONFIG_TICKS_PER_SECOND) / MS_PER_SECOND);
 }
 
 uint32_t tick2ms(uint32_t tick) {
 	return (uint32_t)(((uint64_t)tick * MS_PER_SECOND) /
-					  CONFIG_TICK_PER_SECOND);
+					  CONFIG_TICKS_PER_SECOND);
 }
 
 uint32_t us2tick(uint32_t us) {
-	return (uint32_t)(((uint64_t)us * CONFIG_TICK_PER_SECOND) / US_PER_SECOND);
+	return (uint32_t)(((uint64_t)us * CONFIG_TICKS_PER_SECOND) / US_PER_SECOND);
 }
 
 uint32_t tick2us(uint32_t tick) {
 	return (uint32_t)(((uint64_t)tick * US_PER_SECOND) /
-					  CONFIG_TICK_PER_SECOND);
+					  CONFIG_TICKS_PER_SECOND);
 }
 
 void udelay(uint32_t us) {

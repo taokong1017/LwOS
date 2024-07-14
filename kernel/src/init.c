@@ -19,6 +19,7 @@ void kernel_start() {
 
 	arm_gic_init();
 	arch_timer_init();
+	percpu_init(0);
 	task_sched_init();
 	code_unreachable();
 }
