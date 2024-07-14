@@ -4,6 +4,7 @@
 #include <types.h>
 #include <errno.h>
 #include <timeout.h>
+#include <kernel.h>
 
 #define TIMER_NAME_LEN 32
 #define TIMER_INVALID_ID -1

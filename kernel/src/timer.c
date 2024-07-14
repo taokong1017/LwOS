@@ -44,7 +44,6 @@ static void timer_timeout_handler(struct timeout *timeout) {
 
 	if (timer->type == TIMER_TYPE_ONE_SHOT) {
 		timer->status = TIMER_STATUS_STOPPED;
-		timeout_queue_del(&timer->timeout);
 	}
 
 	if (call_back) {
@@ -53,6 +52,7 @@ static void timer_timeout_handler(struct timeout *timeout) {
 
 	if (timer->type == TIMER_TYPE_PERIODIC) {
 		timer->timeout.deadline_ticks += timer->ticks;
+		timeout_queue_add(&timer->timeout);
 	}
 }
 
@@ -79,6 +79,7 @@ errno_t timer_create(const char *name, enum timer_type type, uint64_t ticks,
 	timer->cb = cb;
 	timer->arg = arg;
 	timer->timeout.func = timer_timeout_handler;
+	INIT_LIST_HEAD(&timer->timeout.node);
 	*id = timer->id;
 
 	return OK;
@@ -97,7 +98,7 @@ errno_t timer_start(timer_id_t id) {
 		timeout_queue_del(&timer->timeout);
 	}
 
-	if (timer->ticks == 0) {
+	if (timer->ticks == TIMER_WAIT_FOREVER) {
 		log_err(TIMER_TAG, "ticks is 0\n");
 		return ERRNO_TIMER_INVALID_INTERVAL;
 	}

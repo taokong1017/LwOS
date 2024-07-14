@@ -7,6 +7,7 @@
 #include <msgq.h>
 #include <sem.h>
 #include <mutex.h>
+#include <timer.h>
 
 #define TEST_TASK1_NAME "test_task1"
 #define TEST_TASK2_NAME "test_task2"
@@ -20,6 +21,7 @@
 #define TEST_SEM_NAME "test_sem"
 #define TEST_SEM_MAX_NUM 5
 #define TEST_MUTEX_NAME "test_mutex"
+#define TEST_TIMER_NAME "test_timer"
 
 static task_id_t test_task1_id = 0;
 static task_id_t test_task2_id = 0;
@@ -30,6 +32,7 @@ static task_id_t test_task6_id = 0;
 static msgq_id_t test_msgq_id = 0;
 static sem_id_t test_sem_id = 0;
 static mutex_id_t test_mutex_id = 0;
+static timer_id_t test_timer_id = 0;
 
 static void test_task1_entry(void *arg0, void *arg1, void *arg2, void *arg3) {
 	(void)arg0;
@@ -338,6 +341,11 @@ static void create_test_task6() {
 	return;
 }
 
+void test_timeout_cb(void *arg) {
+	(void)arg;
+	printf("enter timer handler\n");
+}
+
 void main_task_entry(void *arg0, void *arg1, void *arg2, void *arg3) {
 	(void)arg0;
 	(void)arg1;
@@ -348,6 +356,9 @@ void main_task_entry(void *arg0, void *arg1, void *arg2, void *arg3) {
 	msgq_create(TEST_MSGQ_NAME, TEST_MSGQ_NUM, TEST_MSGQ_SIZE, &test_msgq_id);
 	sem_create(TEST_SEM_NAME, 0, TEST_SEM_MAX_NUM, &test_sem_id);
 	mutex_create(TEST_MUTEX_NAME, &test_mutex_id);
+	timer_create(TEST_TIMER_NAME, TIMER_TYPE_PERIODIC, 10, test_timeout_cb,
+				 NULL, &test_timer_id);
+	timer_start(test_timer_id);
 	create_test_task1();
 	create_test_task2();
 	create_test_task3();
