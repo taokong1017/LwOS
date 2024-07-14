@@ -41,6 +41,7 @@ errno_t sem_create(const char *name, uint32_t count, uint32_t max_count,
 
 	sem->id = sem2id(sem);
 	strncpy(sem->name, name, SEM_NAME_LEN);
+	sem->name[SEM_NAME_LEN - 1] = '\0';
 	sem->cur_count = count;
 	sem->max_count = max_count;
 	INIT_LIST_HEAD(&sem->wait_queue.wait_list);

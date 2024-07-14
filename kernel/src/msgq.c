@@ -80,6 +80,7 @@ errno_t msgq_create(const char *name, uint32_t max_msgs, uint32_t max_msg_size,
 	}
 
 	strncpy((void *)msgq->name, (void *)name, MSGQ_NAME_LEN);
+	msgq->name[MSGQ_NAME_LEN - 1] = '\0';
 	msgq->msg_stime = MSGQ_INIT_TIME;
 	msgq->msg_rtime = MSGQ_INIT_TIME;
 	msgq->msg_ctime = MSGQ_INIT_TIME;

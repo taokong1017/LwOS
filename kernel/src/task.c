@@ -37,8 +37,7 @@ void task_delay_timeout(struct timeout *timeout) {
 	}
 }
 
-static errno_t task_params_check(task_id_t *task_id,
-								 const char name[TASK_NAME_LEN],
+static errno_t task_params_check(task_id_t *task_id, const char *name,
 								 task_entry_func entry, void *arg0, void *arg1,
 								 void *arg2, void *arg3, uint32_t stack_size,
 								 uint32_t flag) {
@@ -65,13 +64,14 @@ static errno_t task_params_check(task_id_t *task_id,
 	return OK;
 }
 
-static void task_init(struct task *task, const char name[TASK_NAME_LEN],
+static void task_init(struct task *task, const char *name,
 					  task_entry_func entry, void *arg0, void *arg1, void *arg2,
 					  void *arg3, void *stack_ptr, uint32_t stack_size,
 					  uint32_t flag) {
 	memset(task, 0, sizeof(struct task));
 	task->id = TASK_TO_ID(task);
-	memcpy(task->name, name, TASK_NAME_LEN);
+	strncpy(task->name, name, TASK_NAME_LEN);
+	task->name[TASK_NAME_LEN - 1] = '\0';
 	task->status = TASK_STATUS_STOP;
 	task->stack_ptr = stack_ptr;
 	task->stack_size = stack_size;
@@ -95,9 +95,9 @@ static void task_reset(struct task *task) {
 	arch_task_init(task->id);
 }
 
-errno_t task_create(task_id_t *task_id, const char name[TASK_NAME_LEN],
-					task_entry_func entry, void *arg0, void *arg1, void *arg2,
-					void *arg3, uint32_t stack_size, uint32_t flag) {
+errno_t task_create(task_id_t *task_id, const char *name, task_entry_func entry,
+					void *arg0, void *arg1, void *arg2, void *arg3,
+					uint32_t stack_size, uint32_t flag) {
 	void *stack_limit = NULL;
 	void *stack_ptr = NULL;
 	struct task *task = NULL;

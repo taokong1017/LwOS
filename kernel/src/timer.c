@@ -73,6 +73,7 @@ errno_t timer_create(const char *name, enum timer_type type, uint64_t ticks,
 
 	timer->id = (timer_id_t)timer;
 	strncpy(timer->name, name, TIMER_NAME_LEN);
+	timer->name[TIMER_NAME_LEN - 1] = '\0';
 	timer->status = TIMER_STATUS_CREATED;
 	timer->type = type;
 	timer->ticks = ticks;

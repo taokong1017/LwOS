@@ -100,9 +100,9 @@ struct task {
 	struct arch_task_context task_context;
 };
 
-errno_t task_create(task_id_t *task_id, const char name[TASK_NAME_LEN],
-					task_entry_func entry, void *arg0, void *arg1, void *arg2,
-					void *arg3, uint32_t stack_size, uint32_t flag);
+errno_t task_create(task_id_t *task_id, const char *name, task_entry_func entry,
+					void *arg0, void *arg1, void *arg2, void *arg3,
+					uint32_t stack_size, uint32_t flag);
 errno_t task_start(task_id_t task_id);
 errno_t task_stop(task_id_t task_id);
 errno_t task_stop_self();

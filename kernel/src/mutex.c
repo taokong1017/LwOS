@@ -22,6 +22,7 @@ errno_t mutex_init(struct mutex *mutex, const char *name) {
 
 	mutex->id = mutex2id(mutex);
 	strncpy(mutex->name, name, MUTEX_NAME_LEN);
+	mutex->name[MUTEX_NAME_LEN - 1] = '\0';
 	mutex->owner = NULL;
 	mutex->lock_count = 0;
 	mutex->priority = 0;
