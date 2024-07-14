@@ -21,7 +21,7 @@
 	(ERRTYPE_NORMAL | ERRNO_OS_ID | ((uint32_t)(mID) << 8) |                   \
 	 ((uint32_t)(errno)))
 
-enum MOUDLE_ID {
+enum module_id {
 	MOD_ID_TASK = 0x1,
 	MOD_ID_SPINLOCK,
 	MOD_ID_TIMEOUT,
@@ -29,6 +29,7 @@ enum MOUDLE_ID {
 	MOD_ID_SEM,
 	MOD_ID_MUTEX,
 	MOD_ID_MEM,
+	MOD_ID_TIMER
 };
 
 typedef uint32_t errno_t;

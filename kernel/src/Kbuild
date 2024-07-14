@@ -13,5 +13,6 @@ obj-y := string.o \
 	mutex.o \
 	log.o \
 	percpu.o \
-	kernel.o
+	kernel.o \
+	timer.o
 
