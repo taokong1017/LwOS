@@ -16,36 +16,36 @@ typedef struct {
 	pteval_t pte;
 } pte_t;
 #define pte_val(x) ((x).pte)
-#define __pte(x) ((pte_t){(x)})
+#define pte(x) ((pte_t){(x)})
 
 typedef struct {
 	pmdval_t pmd;
 } pmd_t;
 #define pmd_val(x) ((x).pmd)
-#define __pmd(x) ((pmd_t){(x)})
+#define pmd(x) ((pmd_t){(x)})
 
 typedef struct {
 	pudval_t pud;
 } pud_t;
 #define pud_val(x) ((x).pud)
-#define __pud(x) ((pud_t){(x)})
+#define pud(x) ((pud_t){(x)})
 
 typedef struct {
 	p4dval_t p4d;
 } p4d_t;
 #define p4d_val(x) ((x).p4d)
-#define __p4d(x) ((p4d_t){(x)})
+#define p4d(x) ((p4d_t){(x)})
 
 typedef struct {
 	pgdval_t pgd;
 } pgd_t;
 #define pgd_val(x) ((x).pgd)
-#define __pgd(x) ((pgd_t){(x)})
+#define pgd(x) ((pgd_t){(x)})
 
 typedef struct {
 	pteval_t pgprot;
 } pgprot_t;
 #define pgprot_val(x) ((x).pgprot)
-#define __pgprot(x) ((pgprot_t){(x)})
+#define pgprot(x) ((pgprot_t){(x)})
 
 #endif

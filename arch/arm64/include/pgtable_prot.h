@@ -49,34 +49,23 @@
 #define PROT_SECT_NORMAL_EXEC                                                  \
 	(PROT_SECT_DEFAULT | PMD_SECT_UXN | PMD_ATTRINDX(MT_NORMAL))
 
-#define _PAGE_DEFAULT (_PROT_DEFAULT | PTE_ATTRINDX(MT_NORMAL))
+#define PAGE_DEFAULT (_PROT_DEFAULT | PTE_ATTRINDX(MT_NORMAL))
 
-#define _PAGE_KERNEL (PROT_NORMAL)
-#define _PAGE_KERNEL_RO ((PROT_NORMAL & ~PTE_WRITE) | PTE_RDONLY)
-#define _PAGE_KERNEL_ROX ((PROT_NORMAL & ~(PTE_WRITE | PTE_PXN)) | PTE_RDONLY)
-#define _PAGE_KERNEL_EXEC (PROT_NORMAL & ~PTE_PXN)
-#define _PAGE_KERNEL_EXEC_CONT ((PROT_NORMAL & ~PTE_PXN) | PTE_CONT)
+#define PAGE_KERNEL (PROT_NORMAL)
+#define PAGE_KERNEL_RO ((PROT_NORMAL & ~PTE_WRITE) | PTE_RDONLY)
+#define PAGE_KERNEL_ROX ((PROT_NORMAL & ~(PTE_WRITE | PTE_PXN)) | PTE_RDONLY)
+#define PAGE_KERNEL_EXEC (PROT_NORMAL & ~PTE_PXN)
+#define PAGE_KERNEL_EXEC_CONT ((PROT_NORMAL & ~PTE_PXN) | PTE_CONT)
 
-#define _PAGE_SHARED                                                           \
-	(_PAGE_DEFAULT | PTE_USER | PTE_RDONLY | PTE_NG | PTE_PXN | PTE_UXN |      \
+#define PAGE_SHARED                                                            \
+	(PAGE_DEFAULT | PTE_USER | PTE_RDONLY | PTE_NG | PTE_PXN | PTE_UXN |       \
 	 PTE_WRITE)
-#define _PAGE_SHARED_EXEC                                                      \
-	(_PAGE_DEFAULT | PTE_USER | PTE_RDONLY | PTE_NG | PTE_PXN | PTE_WRITE)
-#define _PAGE_READONLY                                                         \
-	(_PAGE_DEFAULT | PTE_USER | PTE_RDONLY | PTE_NG | PTE_PXN | PTE_UXN)
-#define _PAGE_READONLY_EXEC                                                    \
-	(_PAGE_DEFAULT | PTE_USER | PTE_RDONLY | PTE_NG | PTE_PXN)
-#define _PAGE_EXECONLY (_PAGE_DEFAULT | PTE_RDONLY | PTE_NG | PTE_PXN)
-
-#ifndef __ASSEMBLY__
-
-#include <pgtable_hwdef.h>
-
-#define PAGE_KERNEL __pgprot(_PAGE_KERNEL)
-#define PAGE_KERNEL_RO __pgprot(_PAGE_KERNEL_RO)
-#define PAGE_KERNEL_ROX __pgprot(_PAGE_KERNEL_ROX)
-#define PAGE_KERNEL_EXEC __pgprot(_PAGE_KERNEL_EXEC)
-#define PAGE_KERNEL_EXEC_CONT __pgprot(_PAGE_KERNEL_EXEC_CONT)
-#endif
+#define PAGE_SHARED_EXEC                                                       \
+	(PAGE_DEFAULT | PTE_USER | PTE_RDONLY | PTE_NG | PTE_PXN | PTE_WRITE)
+#define PAGE_READONLY                                                          \
+	(PAGE_DEFAULT | PTE_USER | PTE_RDONLY | PTE_NG | PTE_PXN | PTE_UXN)
+#define PAGE_READONLY_EXEC                                                     \
+	(PAGE_DEFAULT | PTE_USER | PTE_RDONLY | PTE_NG | PTE_PXN)
+#define PAGE_EXECONLY (_PAGE_DEFAULT | PTE_RDONLY | PTE_NG | PTE_PXN)
 
 #endif

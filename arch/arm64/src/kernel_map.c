@@ -39,15 +39,15 @@ void map_range(uint64_t *pte, uint64_t start, uint64_t end, uint64_t pa,
 			 * table mapping if necessary and recurse.
 			 */
 			if (pte_none(*tbl)) {
-				*tbl = __pte(__phys_to_pte_val(*pte) | PMD_TYPE_TABLE |
-							 PMD_TABLE_UXN);
+				*tbl =
+					pte(phys_to_pte_val(*pte) | PMD_TYPE_TABLE | PMD_TABLE_UXN);
 				*pte += PTRS_PER_PTE * sizeof(pte_t);
 			}
 			map_range(pte, start, next, pa, prot, level + 1,
-					  (pte_t *)(__pte_to_phys(*tbl) + va_offset), may_use_cont,
+					  (pte_t *)(pte_to_phys(*tbl) + va_offset), may_use_cont,
 					  va_offset);
 		} else {
-			*tbl = __pte(__phys_to_pte_val(pa) | protval);
+			*tbl = pte(phys_to_pte_val(pa) | protval);
 		}
 		pa += next - start;
 		start = next;
@@ -79,9 +79,9 @@ extern char __interrupt_stack_end[];
 
 void early_kernel_map() {
 	uint64_t pgdp = (uint64_t)init_pg_dir + PAGE_SIZE;
-	pgprot_t text_prot = PAGE_KERNEL_ROX;
-	pgprot_t rodata_prot = PAGE_KERNEL_RO;
-	pgprot_t data_prot = PAGE_KERNEL;
+	pgprot_t text_prot = pgprot(PAGE_KERNEL_ROX);
+	pgprot_t rodata_prot = pgprot(PAGE_KERNEL_RO);
+	pgprot_t data_prot = pgprot(PAGE_KERNEL);
 
 	/* use 1:1 relation to map text section, rodata section and data section */
 	map_segment(init_pg_dir, &pgdp, 0, __text_start, __text_end, text_prot,

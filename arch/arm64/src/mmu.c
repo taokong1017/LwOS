@@ -13,39 +13,6 @@
 
 extern pgd_t init_pg_dir[];
 
-bool pgattr_change_is_safe(uint64_t old, uint64_t new) {
-	/*
-	 * The following mapping attributes may be updated in live
-	 * kernel mappings without the need for break-before-make.
-	 */
-	pteval_t mask = PTE_PXN | PTE_RDONLY | PTE_WRITE | PTE_NG;
-
-	/* creating or taking down mappings is always safe */
-	if (!pte_valid(__pte(old)) || !pte_valid(__pte(new)))
-		return true;
-
-	/* A live entry's pfn should not change */
-	if (pte_pfn(__pte(old)) != pte_pfn(__pte(new)))
-		return false;
-
-	/* Transitioning from Non-Global to Global is unsafe */
-	if (old & ~new &PTE_NG)
-		return false;
-
-	/*
-	 * Changing the memory type between Normal and Normal-Tagged is safe
-	 * since Tagged is considered a permission attribute from the
-	 * mismatched attribute aliases perspective.
-	 */
-	if (((old & PTE_ATTRINDX_MASK) == PTE_ATTRINDX(MT_NORMAL) ||
-		 (old & PTE_ATTRINDX_MASK) == PTE_ATTRINDX(MT_NORMAL_TAGGED)) &&
-		((new &PTE_ATTRINDX_MASK) == PTE_ATTRINDX(MT_NORMAL) ||
-		 (new &PTE_ATTRINDX_MASK) == PTE_ATTRINDX(MT_NORMAL_TAGGED)))
-		mask |= PTE_ATTRINDX_MASK;
-
-	return ((old ^ new) & ~mask) == 0;
-}
-
 static void alloc_init_pte(pmd_t *pmdp, unsigned long addr, unsigned long end,
 						   phys_addr_t phys, pgprot_t prot,
 						   phys_addr_t (*pgtable_alloc)(int), int flags) {
@@ -60,18 +27,12 @@ static void alloc_init_pte(pmd_t *pmdp, unsigned long addr, unsigned long end,
 			pmdval |= PMD_TABLE_PXN;
 		}
 		pte_phys = pgtable_alloc(PAGE_SHIFT);
-		__pmd_populate(pmdp, pte_phys, pmdval);
+		pmd_populate(pmdp, pte_phys, pmdval);
 	}
 
 	ptep = (pte_t *)pte_offset_phys(pmdp, addr);
 	do {
-		pte_t old_pte = __ptep_get(ptep);
-		__set_pte(ptep, pfn_pte(__phys_to_pfn(phys), prot));
-
-		if (!pgattr_change_is_safe(pte_val(old_pte),
-								   pte_val(__ptep_get(ptep)))) {
-			// TODO: handle this case
-		}
+		set_pte(ptep, pfn_pte(phys_to_pfn(phys), prot));
 		phys += PAGE_SIZE;
 	} while (ptep++, addr += PAGE_SIZE, addr != end);
 }
@@ -91,7 +52,7 @@ static void alloc_init_pmd(pud_t *pudp, unsigned long addr, unsigned long end,
 			pudval |= PUD_TABLE_PXN;
 		}
 		pmd_phys = pgtable_alloc(PMD_SHIFT);
-		__pud_populate(pudp, pmd_phys, pudval);
+		pud_populate(pudp, pmd_phys, pudval);
 	}
 
 	pmdp = (pmd_t *)pmd_offset_phys(pudp, addr);
@@ -118,7 +79,7 @@ static void alloc_init_pud(p4d_t *p4dp, unsigned long addr, unsigned long end,
 		}
 
 		pud_phys = pgtable_alloc(PUD_SHIFT);
-		__p4d_populate(p4dp, pud_phys, p4dval);
+		p4d_populate(p4dp, pud_phys, p4dval);
 	}
 
 	pudp = (pud_t *)pud_offset_phys(p4dp, addr);
@@ -145,7 +106,7 @@ static void alloc_init_p4d(pgd_t *pgdp, unsigned long addr, unsigned long end,
 		}
 
 		p4d_phys = pgtable_alloc(P4D_SHIFT);
-		__pgd_populate(pgdp, p4d_phys, pgdval);
+		pgd_populate(pgdp, p4d_phys, pgdval);
 	}
 
 	p4dp = (p4d_t *)p4d_offset_phys(pgdp, addr);
