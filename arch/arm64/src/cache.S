@@ -1,5 +1,6 @@
 .macro dcache_line_size, reg, tmp
-	mrs  \reg, ctr_el0        // read CTR
+	mrs  \tmp, ctr_el0        // read CTR
+	nop
 	ubfm \tmp, \tmp, #16, #19 // cache line size encoding
 	mov  \reg, #4             // bytes per word
 	lsl  \reg, \reg, \tmp     // actual cache line size
@@ -9,7 +10,11 @@
 	sub \tmp,   \linesz, #1
 	bic \start, \start,  \tmp
 .Ldcache_op\@:
-	dc  \op,    \start
+	.ifc \op, cvap
+	sys 3, c7, c12, 1, \start    // dc cvap
+	.else
+	dc  \op, \start
+	.endif
 	add \start, \start, \linesz
 	cmp \start, \end
 	b.lo .Ldcache_op\@
@@ -17,7 +22,8 @@
 .endm
 
 .macro icache_line_size, reg, tmp
-	mrs \reg, ctr_el0        // read CTR
+	mrs \tmp, ctr_el0        // read CTR
+	nop
 	and \tmp, \tmp, #0xf     // cache line size encoding
 	mov \reg, #4             // bytes per word
 	lsl \reg, \reg, \tmp     // actual cache line size
@@ -85,6 +91,7 @@ dcache_clean_poc:
 .type dcache_clean_inval_poc, function
 .section .text, "ax"
 dcache_clean_inval_poc:
+	dcache_line_size x2, x3
 	dcache_by_line_op civac, sy, x0, x1, x2, x3
 	ret
 
@@ -97,6 +104,8 @@ dcache_clean_inval_poc:
 .section .text, "ax"
 dcache_clean_pop:
 	b dcache_clean_poc
+	dcache_line_size x2, x3
+	dcache_by_line_op cvap, sy, x0, x1, x2, x3
 	ret
 
 /*
