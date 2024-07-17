@@ -13,7 +13,7 @@
 
 extern pgd_t init_pg_dir[];
 
-static void alloc_init_pte(pmd_t *pmdp, unsigned long addr, unsigned long end,
+static void alloc_init_pte(pmd_t *pmdp, virt_addr_t addr, virt_addr_t end,
 						   phys_addr_t phys, pgprot_t prot,
 						   phys_addr_t (*pgtable_alloc)(int), int flags) {
 	pmd_t pmd = read_once(*pmdp);
@@ -37,10 +37,10 @@ static void alloc_init_pte(pmd_t *pmdp, unsigned long addr, unsigned long end,
 	} while (ptep++, addr += PAGE_SIZE, addr != end);
 }
 
-static void alloc_init_pmd(pud_t *pudp, unsigned long addr, unsigned long end,
+static void alloc_init_pmd(pud_t *pudp, virt_addr_t addr, virt_addr_t end,
 						   phys_addr_t phys, pgprot_t prot,
 						   phys_addr_t (*pgtable_alloc)(int), int flags) {
-	unsigned long next;
+	virt_addr_t next;
 	pud_t pud = read_once(*pudp);
 	pmd_t *pmdp;
 
@@ -63,10 +63,10 @@ static void alloc_init_pmd(pud_t *pudp, unsigned long addr, unsigned long end,
 	} while (pmdp++, addr = next, addr != end);
 }
 
-static void alloc_init_pud(p4d_t *p4dp, unsigned long addr, unsigned long end,
+static void alloc_init_pud(p4d_t *p4dp, virt_addr_t addr, virt_addr_t end,
 						   phys_addr_t phys, pgprot_t prot,
 						   phys_addr_t (*pgtable_alloc)(int), int flags) {
-	unsigned long next;
+	virt_addr_t next;
 	p4d_t p4d = read_once(*p4dp);
 	pud_t *pudp;
 
@@ -90,10 +90,10 @@ static void alloc_init_pud(p4d_t *p4dp, unsigned long addr, unsigned long end,
 	} while (pudp++, addr = next, addr != end);
 }
 
-static void alloc_init_p4d(pgd_t *pgdp, unsigned long addr, unsigned long end,
+static void alloc_init_p4d(pgd_t *pgdp, virt_addr_t addr, virt_addr_t end,
 						   phys_addr_t phys, pgprot_t prot,
 						   phys_addr_t (*pgtable_alloc)(int), int flags) {
-	unsigned long next;
+	virt_addr_t next;
 	pgd_t pgd = read_once(*pgdp);
 	p4d_t *p4dp;
 
@@ -117,10 +117,10 @@ static void alloc_init_p4d(pgd_t *pgdp, unsigned long addr, unsigned long end,
 	} while (p4dp++, addr = next, addr != end);
 }
 
-void create_pgd_mapping(pgd_t *pgdir, phys_addr_t phys, unsigned long virt,
+void create_pgd_mapping(pgd_t *pgdir, phys_addr_t phys, virt_addr_t virt,
 						phys_addr_t size, pgprot_t prot,
 						phys_addr_t (*pgtable_alloc)(int), int flags) {
-	unsigned long addr, end, next;
+	virt_addr_t addr, end, next;
 	pgd_t *pgdp = pgd_offset_pgd(pgdir, virt);
 
 	/*

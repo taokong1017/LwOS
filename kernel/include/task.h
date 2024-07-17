@@ -69,8 +69,8 @@
 #define task_saved_lr(task) (task->task_context.callee_context.x30)
 #define task_stack_info(task)                                                  \
 	((struct stack_info){                                                      \
-		((phys_addr_t)((task)->stack_ptr) - (phys_addr_t)(task)->stack_size),  \
-		(phys_addr_t)((task)->stack_ptr)})
+		((virt_addr_t)((task)->stack_ptr) - (virt_addr_t)(task)->stack_size),  \
+		(virt_addr_t)((task)->stack_ptr)})
 
 /* task entry definition */
 typedef void (*task_entry_func)(void *arg0, void *arg1, void *arg2, void *arg3);

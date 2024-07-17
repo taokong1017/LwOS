@@ -23,8 +23,8 @@ static struct stack_info stackinfo_get_unknown() {
 	return stack;
 }
 
-static bool stackinfo_on_stack(const struct stack_info *info, phys_addr_t sp,
-							   phys_addr_t size) {
+static bool stackinfo_on_stack(const struct stack_info *info, virt_addr_t sp,
+							   size_t size) {
 	if (!info->low) {
 		return false;
 	}
@@ -37,7 +37,7 @@ static bool stackinfo_on_stack(const struct stack_info *info, phys_addr_t sp,
 }
 
 static struct stack_info *
-unwind_find_next_stack(const struct unwind_state *state, phys_addr_t sp,
+unwind_find_next_stack(const struct unwind_state *state, virt_addr_t sp,
 					   size_t size) {
 	for (int i = 0; i < state->stacks_num; i++) {
 		struct stack_info *info = &state->stacks[i];
@@ -50,7 +50,7 @@ unwind_find_next_stack(const struct unwind_state *state, phys_addr_t sp,
 	return NULL;
 }
 
-static bool unwind_consume_stack(struct unwind_state *state, phys_addr_t sp,
+static bool unwind_consume_stack(struct unwind_state *state, virt_addr_t sp,
 								 size_t size) {
 	struct stack_info *next;
 
@@ -71,7 +71,7 @@ static bool unwind_consume_stack(struct unwind_state *state, phys_addr_t sp,
 }
 
 static bool unwind_next_frame_record(struct unwind_state *state) {
-	phys_addr_t fp = state->fp;
+	virt_addr_t fp = state->fp;
 
 	if (fp & 0x7) {
 		return false;
@@ -82,8 +82,8 @@ static bool unwind_next_frame_record(struct unwind_state *state) {
 	}
 
 	/* Jump to last stackframe */
-	state->fp = read_once(*(phys_addr_t *)(fp));
-	state->pc = read_once(*(phys_addr_t *)(fp + 8));
+	state->fp = read_once(*(virt_addr_t *)(fp));
+	state->pc = read_once(*(virt_addr_t *)(fp + 8));
 
 	return true;
 }
@@ -99,8 +99,8 @@ static void unwind_init_from_caller(struct unwind_state *state) {
 	uint64_t fp = 0;
 
 	__asm__ __volatile__("mov %0, x29" : "=r"(fp)::"memory");
-	state->fp = (phys_addr_t)fp;
-	state->pc = (phys_addr_t)current_pc_get();
+	state->fp = (virt_addr_t)fp;
+	state->pc = (virt_addr_t)current_pc_get();
 	state->stack = stackinfo_get_unknown();
 }
 
@@ -115,8 +115,8 @@ static void unwind_init_from_irq(struct unwind_state *state) {
 	uint64_t fp = 0;
 
 	__asm__ __volatile__("mov %0, x29" : "=r"(fp)::"memory");
-	state->fp = (phys_addr_t)fp;
-	state->pc = (phys_addr_t)current_pc_get();
+	state->fp = (virt_addr_t)fp;
+	state->pc = (virt_addr_t)current_pc_get();
 	state->stack = stackinfo_get_unknown();
 }
 
@@ -187,7 +187,7 @@ void arch_stack_walk(stack_trace_consume_func consume_entry, void *cookie,
 	unwind_stack_walk(arch_unwind_consume_entry, &data, task, regs);
 }
 
-static bool show_Linker(void *cookie, phys_addr_t pc) {
+static bool show_Linker(void *cookie, virt_addr_t pc) {
 	uint32_t *level = (uint32_t *)cookie;
 
 	if (pc) {

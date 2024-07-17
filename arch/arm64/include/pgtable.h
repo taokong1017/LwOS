@@ -76,15 +76,15 @@ static inline pte_t pmd_pte(pmd_t pmd) { return pte(pmd_val(pmd)); }
 
 static inline pmd_t pte_pmd(pte_t pte) { return pmd(pte_val(pte)); }
 
-static inline unsigned long pte_index(unsigned long address) {
+static inline size_t pte_index(virt_addr_t address) {
 	return (address >> PAGE_SHIFT) & (PTRS_PER_PTE - 1);
 }
 
-static inline unsigned long pmd_index(unsigned long address) {
+static inline size_t pmd_index(virt_addr_t address) {
 	return (address >> PMD_SHIFT) & (PTRS_PER_PMD - 1);
 }
 
-static inline unsigned long pud_index(unsigned long address) {
+static inline size_t pud_index(virt_addr_t address) {
 	return (address >> PUD_SHIFT) & (PTRS_PER_PUD - 1);
 }
 
