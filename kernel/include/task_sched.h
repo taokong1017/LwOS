@@ -4,8 +4,6 @@
 #include <kernel.h>
 #include <spin_lock.h>
 
-#define forever() for (;;)
-
 void task_sched_init();
 uint32_t sched_spin_lock();
 void sched_spin_unlock(uint32_t key);

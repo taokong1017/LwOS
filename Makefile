@@ -17,7 +17,7 @@ else
 endif
 export srctree = $(BASE_DIR)
 
-QEMU_RUN = qemu-system-aarch64 -machine virt -m size=1024M -cpu cortex-a53 -nographic -kernel
+QEMU_RUN = qemu-system-aarch64 -machine virt -smp 2 -m size=1024M -cpu cortex-a53 -nographic -kernel
 
 define ALL_OBJS
 	$(shell find $(1) -name "*.o")

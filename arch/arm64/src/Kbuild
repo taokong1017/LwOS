@@ -13,7 +13,8 @@ obj-y := vector.o \
 	arch_spinlock.o \
 	cache.o \
 	tlb.o \
-	smccc.o
+	smccc.o \
+	cpu_ops_psci.o
 
 obj-$(CONFIG_GIC_V2) += gic_v2.o \
 	isr_table.o \
