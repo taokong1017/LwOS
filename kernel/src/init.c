@@ -19,7 +19,7 @@ void kernel_start() {
 	shell_logo_show();
 
 	psci_init("hvc");
-	arm_gic_init();
+	arm_gic_init(true);
 	arch_timer_init();
 	percpu_init(0);
 	task_sched_init();

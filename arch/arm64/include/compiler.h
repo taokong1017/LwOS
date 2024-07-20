@@ -8,6 +8,9 @@ typedef uint16_t __attribute__((__may_alias__)) __u16_alias_t;
 typedef uint32_t __attribute__((__may_alias__)) __u32_alias_t;
 typedef uint64_t __attribute__((__may_alias__)) __u64_alias_t;
 
+#define wfe() __asm__ __volatile__("wfe")
+#define wfi() __asm__ __volatile__("wfi")
+#define sev() __asm__ __volatile__("sev" : : : "memory")
 #define barrier() __asm__ __volatile__("" : : : "memory")
 #define isb(option) __asm__ __volatile__("isb " #option : : : "memory")
 #define dsb(option) __asm__ __volatile__("dsb " #option : : : "memory")

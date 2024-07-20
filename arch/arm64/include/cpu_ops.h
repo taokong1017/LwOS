@@ -2,6 +2,7 @@
 #define __CPU_OPS_H__
 
 #include <types.h>
+#include <errno.h>
 
 enum cpu_reset_type { CPU_WARM_RESET, CPU_COLD_RESET };
 

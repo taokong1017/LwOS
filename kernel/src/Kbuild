@@ -16,3 +16,5 @@ obj-y := string.o \
 	kernel.o \
 	timer.o
 
+obj-$(CONFIG_SMP) += smp.o
+

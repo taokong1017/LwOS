@@ -243,12 +243,14 @@ static bool gic_v2_check(void) {
 /**
  * @brief Initialize the GIC driver
  */
-void arm_gic_init() {
+void arm_gic_init(bool primary) {
 	if (!gic_v2_check()) {
 		log_err(GIC_V2_TAG, "GICv2 not available\n");
 		return;
 	}
 
-	gic_dist_init();
+	if (primary) {
+		gic_dist_init();
+	}
 	gic_cpu_init();
 }

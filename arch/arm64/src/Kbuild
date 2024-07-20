@@ -22,3 +22,6 @@ obj-$(CONFIG_GIC_V2) += gic_v2.o \
 
 obj-$(CONFIG_FPU_ENABLE) += fpu.o
 
+obj-$(CONFIG_SMP) += arch_smp.o \
+	arch_atomic.o
+

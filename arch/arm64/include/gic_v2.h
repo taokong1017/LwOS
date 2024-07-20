@@ -221,7 +221,7 @@ void gic_raise_sgi(uint32_t sgi_id, uint64_t affinity, uint16_t cpu_mask);
 /**
  * @brief Initialize the GIC (Generic Interrupt Controller)
  */
-void arm_gic_init();
+void arm_gic_init(bool primary);
 
 #endif
 #endif
