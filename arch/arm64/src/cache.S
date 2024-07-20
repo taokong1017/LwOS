@@ -72,7 +72,7 @@ dcache_inval_poc:
 	ret
 
 /*
- *	dcache_clean_poc(start, end)
+ * dcache_clean_poc(start, end)
  */
 .text
 .globl dcache_clean_poc
@@ -84,7 +84,7 @@ dcache_clean_poc:
 	ret
 
 /*
- *	dcache_clean_inval_poc(start, end)
+ * dcache_clean_inval_poc(start, end)
  */
 .text
 .globl dcache_clean_inval_poc
@@ -96,7 +96,7 @@ dcache_clean_inval_poc:
 	ret
 
 /*
- *	dcache_clean_pop(start, end)
+ * dcache_clean_pop(start, end)
  */
 .text
 .globl dcache_clean_pop
@@ -109,7 +109,7 @@ dcache_clean_pop:
 	ret
 
 /*
- *	icache_inval_pou(start,end)
+ * icache_inval_pou(start,end)
  */
 .text
 .globl icache_inval_pou

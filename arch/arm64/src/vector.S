@@ -40,18 +40,18 @@
 #include <cpu.h>
 #include <offsets.h>
 
-.macro	ventry	label
-	.align	7
-	b	\label
+.macro ventry label
+	.align 7
+	b  \label
 .endm
 
 .macro CALL_EXCEPTION_CFUNC cfunc
-	mov	x0, sp
-	bl	\cfunc
+	mov x0, sp
+	bl  \cfunc
 .endm
 
 .macro CALL_IRQ_CFUNC cfunc
-	mrs	x0, tpidrro_el0
+	mrs x0, tpidrro_el0
 	ldr w1, [x0, #PER_CPU_OF_IRQ_NESTED_CNT_OFFSET]
 	add w2, w1, #1
 	str w2, [x0, #PER_CPU_OF_IRQ_NESTED_CNT_OFFSET]
@@ -63,9 +63,9 @@
 	str x1, [sp, #-16]!
 
 ready_sp:
-	bl	\cfunc
+	bl \cfunc
 
-	mrs	x0, tpidrro_el0
+	mrs x0, tpidrro_el0
 	ldr w1, [x0, #PER_CPU_OF_IRQ_NESTED_CNT_OFFSET]
 	subs w2, w1, #1
 	str w2, [x0, #PER_CPU_OF_IRQ_NESTED_CNT_OFFSET]
@@ -85,53 +85,53 @@ nested_exit:
 .endm
 
 /* Push registers on stack */
-.macro	PUSH_GENERAL_REGS
-	sub	sp, sp,   #ARM_ARCH_REGS_SIZE
-	stp	x28, x29, [sp, #ARM_ARCH_REGS_GPR28]
-	stp	x26, x27, [sp, #ARM_ARCH_REGS_GPR26]
-	stp	x24, x25, [sp, #ARM_ARCH_REGS_GPR24]
-	stp	x22, x23, [sp, #ARM_ARCH_REGS_GPR22]
-	stp	x20, x21, [sp, #ARM_ARCH_REGS_GPR20]
-	stp	x18, x19, [sp, #ARM_ARCH_REGS_GPR18]
-	stp	x16, x17, [sp, #ARM_ARCH_REGS_GPR16]
-	stp	x14, x15, [sp, #ARM_ARCH_REGS_GPR14]
-	stp	x12, x13, [sp, #ARM_ARCH_REGS_GPR12]
-	stp	x10, x11, [sp, #ARM_ARCH_REGS_GPR10]
-	stp	x8,  x9,  [sp, #ARM_ARCH_REGS_GPR8]
-	stp	x6,  x7,  [sp, #ARM_ARCH_REGS_GPR6]
-	stp	x4,  x5,  [sp, #ARM_ARCH_REGS_GPR4]
-	stp	x2,  x3,  [sp, #ARM_ARCH_REGS_GPR2]
-	stp	x0,  x1,  [sp, #ARM_ARCH_REGS_GPR0]
-	add	x29, sp,  #ARM_ARCH_REGS_SIZE
-	stp	x30, x29, [sp, #ARM_ARCH_REGS_LR]    /* LR && SP */
-	mrs	x22, elr_el1
-	mrs	x23, spsr_el1
-	stp	x22, x23, [sp, #ARM_ARCH_REGS_PC]    /* PC && PSTATE */
+.macro PUSH_GENERAL_REGS
+	sub sp, sp,   #ARM_ARCH_REGS_SIZE
+	stp x28, x29, [sp, #ARM_ARCH_REGS_GPR28]
+	stp x26, x27, [sp, #ARM_ARCH_REGS_GPR26]
+	stp x24, x25, [sp, #ARM_ARCH_REGS_GPR24]
+	stp x22, x23, [sp, #ARM_ARCH_REGS_GPR22]
+	stp x20, x21, [sp, #ARM_ARCH_REGS_GPR20]
+	stp x18, x19, [sp, #ARM_ARCH_REGS_GPR18]
+	stp x16, x17, [sp, #ARM_ARCH_REGS_GPR16]
+	stp x14, x15, [sp, #ARM_ARCH_REGS_GPR14]
+	stp x12, x13, [sp, #ARM_ARCH_REGS_GPR12]
+	stp x10, x11, [sp, #ARM_ARCH_REGS_GPR10]
+	stp x8,  x9,  [sp, #ARM_ARCH_REGS_GPR8]
+	stp x6,  x7,  [sp, #ARM_ARCH_REGS_GPR6]
+	stp x4,  x5,  [sp, #ARM_ARCH_REGS_GPR4]
+	stp x2,  x3,  [sp, #ARM_ARCH_REGS_GPR2]
+	stp x0,  x1,  [sp, #ARM_ARCH_REGS_GPR0]
+	add x29, sp,  #ARM_ARCH_REGS_SIZE
+	stp x30, x29, [sp, #ARM_ARCH_REGS_LR]    /* LR && SP */
+	mrs x22, elr_el1
+	mrs x23, spsr_el1
+	stp x22, x23, [sp, #ARM_ARCH_REGS_PC]    /* PC && PSTATE */
 .endm
 
 /* Pop registers from stack */
-.macro	POP_GENERAL_REGS
-	ldp	x22, x23, [sp, #ARM_ARCH_REGS_PC]
-	msr	elr_el1,  x22
-	msr	spsr_el1, x23
-	ldp	x30, x28, [sp, #ARM_ARCH_REGS_LR]
-	mov	x29, sp
-	mov	sp,  x28
-	ldp	x0,  x1,  [x29, #ARM_ARCH_REGS_GPR0]
-	ldp	x2,  x3,  [x29, #ARM_ARCH_REGS_GPR2]
-	ldp	x4,  x5,  [x29, #ARM_ARCH_REGS_GPR4]
-	ldp	x6,  x7,  [x29, #ARM_ARCH_REGS_GPR6]
-	ldp	x8,  x9,  [x29, #ARM_ARCH_REGS_GPR8]
-	ldp	x10, x11, [x29, #ARM_ARCH_REGS_GPR10]
-	ldp	x12, x13, [x29, #ARM_ARCH_REGS_GPR12]
-	ldp	x14, x15, [x29, #ARM_ARCH_REGS_GPR14]
-	ldp	x16, x17, [x29, #ARM_ARCH_REGS_GPR16]
-	ldp	x18, x19, [x29, #ARM_ARCH_REGS_GPR18]
-	ldp	x20, x21, [x29, #ARM_ARCH_REGS_GPR20]
-	ldp	x22, x23, [x29, #ARM_ARCH_REGS_GPR22]
-	ldp	x24, x25, [x29, #ARM_ARCH_REGS_GPR24]
-	ldp	x26, x27, [x29, #ARM_ARCH_REGS_GPR26]
-	ldp	x28, x29, [x29, #ARM_ARCH_REGS_GPR28]
+.macro POP_GENERAL_REGS
+	ldp x22, x23, [sp, #ARM_ARCH_REGS_PC]
+	msr elr_el1,  x22
+	msr spsr_el1, x23
+	ldp x30, x28, [sp, #ARM_ARCH_REGS_LR]
+	mov x29, sp
+	mov sp,  x28
+	ldp x0,  x1,  [x29, #ARM_ARCH_REGS_GPR0]
+	ldp x2,  x3,  [x29, #ARM_ARCH_REGS_GPR2]
+	ldp x4,  x5,  [x29, #ARM_ARCH_REGS_GPR4]
+	ldp x6,  x7,  [x29, #ARM_ARCH_REGS_GPR6]
+	ldp x8,  x9,  [x29, #ARM_ARCH_REGS_GPR8]
+	ldp x10, x11, [x29, #ARM_ARCH_REGS_GPR10]
+	ldp x12, x13, [x29, #ARM_ARCH_REGS_GPR12]
+	ldp x14, x15, [x29, #ARM_ARCH_REGS_GPR14]
+	ldp x16, x17, [x29, #ARM_ARCH_REGS_GPR16]
+	ldp x18, x19, [x29, #ARM_ARCH_REGS_GPR18]
+	ldp x20, x21, [x29, #ARM_ARCH_REGS_GPR20]
+	ldp x22, x23, [x29, #ARM_ARCH_REGS_GPR22]
+	ldp x24, x25, [x29, #ARM_ARCH_REGS_GPR24]
+	ldp x26, x27, [x29, #ARM_ARCH_REGS_GPR26]
+	ldp x28, x29, [x29, #ARM_ARCH_REGS_GPR28]
 	eret
 .endm
 

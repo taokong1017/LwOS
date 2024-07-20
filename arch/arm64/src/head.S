@@ -7,16 +7,16 @@
 .section .init.text, "ax"
 __start:
 	/* Mask all exceptions */
-	msr	daifset, DAIFSET_ALL_BITS
-	mrs	x0, CurrentEL
+	msr daifset, DAIFSET_ALL_BITS
+	mrs x0, CurrentEL
 	lsr x0, x0, MODE_EL_SHIFT
 	and x0, x0, MODE_EL_MASK
-	cmp	x0, MODE_EL3
-	beq	el3_entry
-	cmp	x0, MODE_EL2
-	beq	el2_entry
-	cmp	x0, MODE_EL1
-	beq	el1_entry
+	cmp x0, MODE_EL3
+	beq el3_entry
+	cmp x0, MODE_EL2
+	beq el2_entry
+	cmp x0, MODE_EL1
+	beq el1_entry
 
 el3_entry:
 	/* set cptr_el3 register */
@@ -35,8 +35,8 @@ el3_entry:
 	msr scr_el3, x0
 
 	/* set el2_entry */
-	adr	x0, el2_entry
-	msr	elr_el2, x0
+	adr x0, el2_entry
+	msr elr_el2, x0
 	eret
 
 el2_entry:
@@ -63,33 +63,33 @@ el2_entry:
 	/* set spsr_el2 register*/
 	mov x0, SPSR_DAIF_MASK
 	orr x0, x0, SPSR_MODE_EL1T
-	msr	spsr_el2, x0
+	msr spsr_el2, x0
 
 	/* clear cnt register for EL2 */
 	msr cntvoff_el2, xzr
 	msr cnthctl_el2, xzr
 
 	/* set el1_entry */
-	adr	x0, el1_entry
-	msr	elr_el2, x0
+	adr x0, el1_entry
+	msr elr_el2, x0
 	eret
 
 el1_entry:
 	/* check mpid is valid */
-	ldr	x0, =arch_boot_params
-	ldr	x1, [x0, #BOOT_PARAMS_OF_MP_ID_OFFSET]
-	cmn	x1, #1
+	ldr x0, =arch_boot_params
+	ldr x1, [x0, #BOOT_PARAMS_OF_MP_ID_OFFSET]
+	cmn x1, #1
 	str x1, [x0, #BOOT_PARAMS_OF_MP_ID_OFFSET]
-	beq	primary_core
+	beq primary_core
 
 secondary_core:
 	/* set stack pointer */
 	.extern __kernel_stack_start
 	ldr x0, =__kernel_stack_start
-	ldr	x1, =arch_boot_params
+	ldr x1, =arch_boot_params
 	mov x2, xzr
 	dsb osh
-	ldr	w2, [x1, #BOOT_PARAMS_OF_CPU_ID_OFFSET]
+	ldr w2, [x1, #BOOT_PARAMS_OF_CPU_ID_OFFSET]
 	add x2, x2, #1
 	mov x1, CONFIG_KERNEL_STACK_SIZE
 	mul x3, x1, x2
@@ -102,7 +102,9 @@ primary_core:
 	/* disable instructions trap */
 	mov x0, CPACR_EL1_FPEN_NOTRAP
 	msr cpacr_el1, x0
-	mrs	x1, mpidr_el1
+
+	/* save master pmid */
+	mrs x1, mpidr_el1
 	ubfx x1, x1, #0, #23
 	ldr x2, =cpu_master_mp_id
 	str x1, [x2]
@@ -122,10 +124,10 @@ bss_loop_done:
 	/* set stack pointer */
 	.extern __kernel_stack_start
 	ldr x0, =__kernel_stack_start
-	ldr	x1, =arch_boot_params
+	ldr x1, =arch_boot_params
 	mov x2, xzr
 	dsb osh
-	ldr	w2, [x1, #BOOT_PARAMS_OF_CPU_ID_OFFSET]
+	ldr w2, [x1, #BOOT_PARAMS_OF_CPU_ID_OFFSET]
 	add x2, x2, #1
 	mov x1, CONFIG_KERNEL_STACK_SIZE
 	mul x3, x1, x2
