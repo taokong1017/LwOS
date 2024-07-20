@@ -54,7 +54,7 @@ SECTIONS
 
 	. = ALIGN(0x1000);
 	__kernel_stack_start = .;
-	. += CONFIG_KERNEL_STACK_SIZE;
+	. += (CONFIG_KERNEL_STACK_SIZE * CONFIG_CPUS_MAX_NUM);
 	__kernel_stack_end = .;
 
 	. = ALIGN(0x1000);

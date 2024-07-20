@@ -1,4 +1,6 @@
 #include <cpu.h>
+#include <menuconfig.h>
+#include <offsets.h>
 
 .globl __start
 .type __start, function
@@ -73,9 +75,37 @@ el2_entry:
 	eret
 
 el1_entry:
+	/* check mpid is valid */
+	ldr	x0, =arch_boot_params
+	ldr	x1, [x0, #BOOT_PARAMS_OF_MP_ID_OFFSET]
+	cmn	x1, #1
+	str x1, [x0, #BOOT_PARAMS_OF_MP_ID_OFFSET]
+	beq	primary_core
+
+secondary_core:
+	/* set stack pointer */
+	.extern __kernel_stack_start
+	ldr x0, =__kernel_stack_start
+	ldr	x1, =arch_boot_params
+	mov x2, xzr
+	dsb osh
+	ldr	w2, [x1, #BOOT_PARAMS_OF_CPU_ID_OFFSET]
+	add x2, x2, #1
+	mov x1, CONFIG_KERNEL_STACK_SIZE
+	mul x3, x1, x2
+	add x3, x0, x3
+	msr SPSel, #1
+	mov sp, x3
+	b arch_secondary_cpu_init
+
+primary_core:
 	/* disable instructions trap */
 	mov x0, CPACR_EL1_FPEN_NOTRAP
 	msr cpacr_el1, x0
+	mrs	x1, mpidr_el1
+	ubfx x1, x1, #0, #23
+	ldr x2, =cpu_master_mp_id
+	str x1, [x2]
 
 	/* clear bss */
 clear_bss:
@@ -90,10 +120,18 @@ bss_loop:
 bss_loop_done:
 
 	/* set stack pointer */
-	.extern __kernel_stack_end
-	ldr x0, =__kernel_stack_end
+	.extern __kernel_stack_start
+	ldr x0, =__kernel_stack_start
+	ldr	x1, =arch_boot_params
+	mov x2, xzr
+	dsb osh
+	ldr	w2, [x1, #BOOT_PARAMS_OF_CPU_ID_OFFSET]
+	add x2, x2, #1
+	mov x1, CONFIG_KERNEL_STACK_SIZE
+	mul x3, x1, x2
+	add x3, x0, x3
 	msr SPSel, #1
-	mov sp, x0
+	mov sp, x3
 
 	/* set up early kernel memory map */
 	bl early_kernel_map

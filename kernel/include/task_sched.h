@@ -11,6 +11,7 @@ void sched_ready_queue_remove(uint32_t cpu_id, struct task *task);
 void sched_ready_queue_add(uint32_t cpu_id, struct task *task);
 struct task *current_task_get();
 void task_sched_locked();
+void task_sched_unlocked();
 bool is_in_irq();
 
 #endif

@@ -4,6 +4,7 @@
 #include <kernel.h>
 #include <percpu.h>
 #include <smccc.h>
+#include <arch_smp.h>
 
 GEN_ABS_SYM_BEGIN(ARM64_TASK_SYMBOLE)
 GEN_NAMED_OFFSET_SYM(struct task, entry, TASK_OF_ENTRY);
@@ -55,5 +56,10 @@ GEN_NAMED_OFFSET_SYM(struct arch_smccc, a0, ARCH_SMMCC_A0_A1);
 GEN_NAMED_OFFSET_SYM(struct arch_smccc, a2, ARCH_SMMCC_A2_A3);
 GEN_NAMED_OFFSET_SYM(struct arch_smccc, a4, ARCH_SMMCC_A4_A5);
 GEN_NAMED_OFFSET_SYM(struct arch_smccc, a6, ARCH_SMMCC_A6_A7);
+
+GEN_NAMED_OFFSET_SYM(struct boot_params, cpu_id, BOOT_PARAMS_OF_CPU_ID);
+GEN_NAMED_OFFSET_SYM(struct boot_params, mp_id, BOOT_PARAMS_OF_MP_ID);
+GEN_NAMED_OFFSET_SYM(struct boot_params, func, BOOT_PARAMS_OF_FUNC);
+GEN_NAMED_OFFSET_SYM(struct boot_params, arg, BOOT_PARAMS_OF_ARG);
 
 GEN_ABS_SYM_END

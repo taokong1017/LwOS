@@ -2,22 +2,28 @@
 #include <cpu.h>
 #include <operate_regs.h>
 #include <menuconfig.h>
+#include <compiler.h>
+#include <arch_smp.h>
+#include <log.h>
 
-uint64_t cpu_map[CONFIG_CPUS_MAX_NUM] = {[0 ... CONFIG_CPUS_MAX_NUM - 1] =
-											 (uint64_t)(-1)};
+#define CPU_TAG "CPU"
 
 uint32_t arch_cpu_id_get() {
-	uint32_t cpu_id = 0;
+	uint32_t i = 0;
+	uint32_t cpu_id = -1;
+	uint64_t mpidr = 0;
 
-#ifdef CONFIG_SMP
-	uint64_t mpidr = read_mpidr_el1();
-
-	if (mpidr & MPIDR_MT_MASK) {
-		cpu_id = MPIDR_AFFLVL(mpidr, 1);
-	} else {
-		cpu_id = MPIDR_AFFLVL(mpidr, 0);
+	mpidr = read_mpidr_el1() & 0xffffff;
+	for (i = 0; i < arch_cpu_num_get(); i++) {
+		if (arch_cpu_mpid_get(i) == mpidr) {
+			cpu_id = i;
+			break;
+		}
 	}
-#endif
+
+	if (cpu_id == -1) {
+		log_fatal(CPU_TAG, "invalid cpu id: %d\n", cpu_id);
+	}
 
 	return cpu_id;
 }

@@ -5,11 +5,12 @@
 #include <percpu.h>
 #include <gic_v2.h>
 
-static struct boot_params arch_boot_params = {
-	.arg = NULL, .cpu_id = 0, .func = NULL};
-const static uint32_t cpu_mp_ids[] = {0x0,	 0x1,	0x2,   0x3,
-									  0x100, 0x101, 0x102, 0x103};
+struct boot_params arch_boot_params = {
+	.cpu_id = 0, .mp_id = -1, .arg = NULL, .func = NULL};
+const uint64_t cpu_mp_ids[] = {0x0, 0x1, 0x2, 0x3, 0x100, 0x101, 0x102, 0x103};
+uint64_t cpu_master_mp_id = 0;
 extern void __start();
+extern void mmu_enable();
 
 void arch_cpu_start(uint32_t cpu_id, arch_cpu_start_func func, void *arg) {
 	arch_boot_params.arg = arg;
@@ -34,6 +35,7 @@ void arch_secondary_cpu_init() {
 
 	percpu_init(arch_boot_params.cpu_id);
 	arm_gic_init(false);
+	mmu_enable();
 
 	func = arch_boot_params.func;
 	arg = arch_boot_params.arg;
@@ -45,5 +47,15 @@ void arch_secondary_cpu_init() {
 
 	if (func) {
 		func(arg);
+	}
+}
+
+uint64_t arch_cpu_num_get() { return sizeof(cpu_mp_ids) / sizeof(uint64_t); }
+
+uint64_t arch_cpu_mpid_get(uint32_t cpu_id) {
+	if (cpu_id == 0) {
+		return cpu_master_mp_id;
+	} else {
+		return cpu_mp_ids[cpu_id];
 	}
 }

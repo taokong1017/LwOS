@@ -4,6 +4,8 @@
 #include <tick.h>
 #include <percpu.h>
 #include <arch_smp.h>
+#include <compiler.h>
+#include <task_sched.h>
 
 typedef void (*smp_init_func)(void *arg);
 struct smp_init_callback {
@@ -35,7 +37,11 @@ static void smp_cpu_start_callback(void *arg) {
 
 	if (cb && cb->init_func) {
 		cb->init_func(cb->arg);
+		return;
 	}
+
+	task_sched_unlocked();
+	forever();
 }
 
 void smp_cpu_start(uint32_t cpu_id) {
