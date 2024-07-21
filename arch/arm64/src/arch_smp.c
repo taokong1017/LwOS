@@ -7,7 +7,7 @@
 
 struct boot_params arch_boot_params = {
 	.cpu_id = 0, .mp_id = -1, .arg = NULL, .func = NULL};
-const uint64_t cpu_mp_ids[] = {0x0, 0x1, 0x2, 0x3, 0x100, 0x101, 0x102, 0x103};
+const uint64_t cpu_mp_ids[] = {0x0, 0x1, 0x2, 0x3};
 uint64_t cpu_master_mp_id = 0;
 extern void __start();
 extern void mmu_enable();

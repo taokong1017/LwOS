@@ -27,6 +27,7 @@ endchoice
 config CONFIG_CPUS_MAX_NUM
 	int "CPUs Maximum Number"
 	default 2
+	range 1 4
 	help
 		This represents the number of phyiscal cores.
 
