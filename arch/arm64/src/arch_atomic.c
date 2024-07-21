@@ -14,7 +14,7 @@ bool atomic_cas(atomic_t *target, atomic_t old_value, atomic_t new_value) {
 					 "dmb sy\n"
 					 : "=&r"(result), "=&r"(tmp), "+Q"(*target)
 					 : "r"(old_value), "r"(new_value)
-					 : "memory");
+					 : "cc", "memory");
 
 	return result == new_value;
 }
@@ -31,7 +31,7 @@ atomic_t atomic_add(atomic_t *target, atomic_t value) {
 					 "dmb sy\n"
 					 : "=&r"(result), "=&r"(tmp), "+Q"(*target)
 					 : "r"(value)
-					 : "memory");
+					 : "cc", "memory");
 
 	return result;
 }
@@ -48,7 +48,7 @@ atomic_t atomic_sub(atomic_t *target, atomic_t value) {
 					 "dmb sy\n"
 					 : "=&r"(result), "=&r"(tmp), "+Q"(*target)
 					 : "r"(value)
-					 : "memory");
+					 : "cc", "memory");
 
 	return result;
 }
@@ -63,7 +63,8 @@ atomic_t atomic_inc(atomic_t *target) {
 					 "stxr %w1, %w0, %2\n"
 					 "cbnz %w1, 1b\n"
 					 "dmb sy\n"
-					 : "=&r"(result), "=&r"(tmp), "+Q"(*target)::"memory");
+					 : "=&r"(result), "=&r"(tmp), "+Q"(*target)::"cc",
+					   "memory");
 
 	return result;
 }
@@ -78,7 +79,8 @@ atomic_t atomic_dec(atomic_t *target) {
 					 "stxr %w1, %w0, %2\n"
 					 "cbnz %w1, 1b\n"
 					 "dmb sy\n"
-					 : "=&r"(result), "=&r"(tmp), "+Q"(*target)::"memory");
+					 : "=&r"(result), "=&r"(tmp), "+Q"(*target)::"cc",
+					   "memory");
 
 	return result;
 }
