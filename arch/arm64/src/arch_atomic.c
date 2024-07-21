@@ -12,7 +12,7 @@ bool atomic_cas(atomic_t *target, atomic_t old_value, atomic_t new_value) {
 					 "cbnz %w1, 1b\n"
 					 "2:\n"
 					 "dmb sy\n"
-					 : "=&r"(result), "=&r"(tmp), "+Q"(target)
+					 : "=&r"(result), "=&r"(tmp), "+Q"(*target)
 					 : "r"(old_value), "r"(new_value)
 					 : "memory");
 
@@ -29,7 +29,7 @@ atomic_t atomic_add(atomic_t *target, atomic_t value) {
 					 "stxr %w1, %w0, %2\n"
 					 "cbnz %w1, 1b\n"
 					 "dmb sy\n"
-					 : "=&r"(result), "=&r"(tmp), "+Q"(target)
+					 : "=&r"(result), "=&r"(tmp), "+Q"(*target)
 					 : "r"(value)
 					 : "memory");
 
@@ -46,7 +46,7 @@ atomic_t atomic_sub(atomic_t *target, atomic_t value) {
 					 "stxr %w1, %w0, %2\n"
 					 "cbnz %w1, 1b\n"
 					 "dmb sy\n"
-					 : "=&r"(result), "=&r"(tmp), "+Q"(target)
+					 : "=&r"(result), "=&r"(tmp), "+Q"(*target)
 					 : "r"(value)
 					 : "memory");
 
@@ -63,7 +63,7 @@ atomic_t atomic_inc(atomic_t *target) {
 					 "stxr %w1, %w0, %2\n"
 					 "cbnz %w1, 1b\n"
 					 "dmb sy\n"
-					 : "=&r"(result), "=&r"(tmp), "+Q"(target)::"memory");
+					 : "=&r"(result), "=&r"(tmp), "+Q"(*target)::"memory");
 
 	return result;
 }
@@ -78,16 +78,17 @@ atomic_t atomic_dec(atomic_t *target) {
 					 "stxr %w1, %w0, %2\n"
 					 "cbnz %w1, 1b\n"
 					 "dmb sy\n"
-					 : "=&r"(result), "=&r"(tmp), "+Q"(target)::"memory");
+					 : "=&r"(result), "=&r"(tmp), "+Q"(*target)::"memory");
 
 	return result;
 }
 
-atomic_t atomic_get(const atomic_t *target) {
+atomic_t atomic_get(atomic_t *target) {
 	atomic_t result = 0;
+
 	__asm__ volatile("prfm pstl1strm, %1\n"
 					 "ldxr %w0, %1\n"
-					 : "=&r"(result), "+Q"(target));
+					 : "=&r"(result), "+Q"(*target));
 
 	return result;
 }
@@ -131,7 +132,7 @@ atomic_t atomic_or(atomic_t *target, atomic_t value) {
 					 "stxr %w1, %w0, %2\n"
 					 "cbnz %w1, 1b\n"
 					 "dmb sy\n"
-					 : "=&r"(result), "=&r"(tmp), "+Q"(target)
+					 : "=&r"(result), "=&r"(tmp), "+Q"(*target)
 					 : "r"(value)
 					 : "memory");
 
@@ -148,7 +149,7 @@ atomic_t atomic_xor(atomic_t *target, atomic_t value) {
 					 "stxr %w1, %w0, %2\n"
 					 "cbnz %w1, 1b\n"
 					 "dmb sy\n"
-					 : "=&r"(result), "=&r"(tmp), "+Q"(target)
+					 : "=&r"(result), "=&r"(tmp), "+Q"(*target)
 					 : "r"(value)
 					 : "memory");
 
@@ -165,7 +166,7 @@ atomic_t atomic_and(atomic_t *target, atomic_t value) {
 					 "stxr %w1, %w0, %2\n"
 					 "cbnz %w1, 1b\n"
 					 "dmb sy\n"
-					 : "=&r"(result), "=&r"(tmp), "+Q"(target)
+					 : "=&r"(result), "=&r"(tmp), "+Q"(*target)
 					 : "r"(value)
 					 : "memory");
 
@@ -182,7 +183,7 @@ atomic_t atomic_nand(atomic_t *target, atomic_t value) {
 					 "stxr %w1, %w0, %2\n"
 					 "cbnz %w1, 1b\n"
 					 "dmb sy\n"
-					 : "=&r"(result), "=&r"(tmp), "+Q"(target)
+					 : "=&r"(result), "=&r"(tmp), "+Q"(*target)
 					 : "r"(value)
 					 : "memory");
 

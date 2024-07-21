@@ -154,7 +154,7 @@ void idle_task_create(uint32_t cpu_id) {
 	task->status = TASK_STATUS_READY;
 	task->cpu_affi = TASK_CPU_AFFI(cpu_id);
 	task->cpu_id = cpu_id;
-	sched_ready_queue_add(task->cpu_id, task);
+	sched_ready_queue_add(cpu_id, task);
 }
 
 void main_task_create(uint32_t cpu_id) {
@@ -170,7 +170,7 @@ void main_task_create(uint32_t cpu_id) {
 	task->status = TASK_STATUS_RUNNING;
 	task->cpu_affi = TASK_CPU_AFFI(cpu_id);
 	task->cpu_id = cpu_id;
-	sched_ready_queue_add(task->cpu_id, task);
+	sched_ready_queue_add(cpu_id, task);
 }
 
 void task_sched_locked() {
