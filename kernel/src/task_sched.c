@@ -140,7 +140,7 @@ static void idle_task_entry(void *arg0, void *arg1, void *arg2, void *arg3) {
 	forever();
 }
 
-void idle_task_create() {
+void idle_task_create(uint32_t cpu_id) {
 	task_id_t task_id = 0;
 	struct task *task = NULL;
 	char task_name[TASK_NAME_LEN] = {0};
@@ -152,10 +152,12 @@ void idle_task_create() {
 	task = ID_TO_TASK(task_id);
 	task->priority = TASK_PRIORITY_LOWEST - 1;
 	task->status = TASK_STATUS_READY;
+	task->cpu_affi = TASK_CPU_AFFI(cpu_id);
+	task->cpu_id = cpu_id;
 	sched_ready_queue_add(task->cpu_id, task);
 }
 
-void main_task_create() {
+void main_task_create(uint32_t cpu_id) {
 	task_id_t task_id = 0;
 	struct task *task = NULL;
 	char task_name[TASK_NAME_LEN] = {0};
@@ -166,9 +168,9 @@ void main_task_create() {
 	task = ID_TO_TASK(task_id);
 	task->priority = TASK_PRIORITY_HIGHEST;
 	task->status = TASK_STATUS_RUNNING;
+	task->cpu_affi = TASK_CPU_AFFI(cpu_id);
+	task->cpu_id = cpu_id;
 	sched_ready_queue_add(task->cpu_id, task);
-	current_task_update(task);
-	arch_main_task_switch(task_id);
 }
 
 void task_sched_locked() {
@@ -223,8 +225,12 @@ void task_sched_unlocked() {
 	return;
 }
 
-void task_sched_init() {
-	idle_task_create();
-	main_task_create();
+void task_sched_start() {
+	struct task *task = NULL;
+
+	task = next_task_pick_up();
+	current_task_update(task);
+	arch_main_task_switch(task->id);
+
 	code_unreachable();
 }

@@ -87,19 +87,22 @@ atomic_t atomic_get(const atomic_t *target) {
 	atomic_t result = 0;
 	__asm__ volatile("prfm pstl1strm, %1\n"
 					 "ldxr %w0, %1\n"
-					 : "=&r"(result), "+Q"(target)
-					 :);
+					 : "=&r"(result), "+Q"(target));
 
 	return result;
 }
 
 atomic_t atomic_set(atomic_t *target, atomic_t value) {
 	atomic_t tmp = 0;
-	__asm__ volatile("prfm pstl1strm, %2\n"
-					 "1: stxr %w1, %w0, %2\n"
-					 "cbnz %w1, 1b\n"
+
+	__asm__ volatile("prfm pstl1strm, %1\n"
+					 "ldxr %w0, %1\n"
+					 "1: stxr %w0, %w2, %1\n"
+					 "cbnz %w0, 1b\n"
 					 "dmb sy\n"
-					 : "=&r"(value), "=&r"(tmp), "+Q"(target)::"memory");
+					 : "+r"(tmp), "+Q"(*target)
+					 : "r"(value)
+					 : "memory");
 
 	return value;
 }
@@ -109,12 +112,13 @@ atomic_t atomic_clear(atomic_t *target) {
 	atomic_t result = 0;
 
 	__asm__ volatile("prfm pstl1strm, %2\n"
+					 "ldxr %w1, %2\n"
 					 "1: stxr %w1, %w0, %2\n"
-					 "cbnz %w0, 1b\n"
+					 "cbnz %w1, 1b\n"
 					 "dmb sy\n"
-					 : "=&r"(result), "=&r"(tmp), "+Q"(target)::"memory");
+					 : "=&r"(result), "+r"(tmp), "+Q"(*target)::"memory");
 
-	return 0;
+	return result;
 }
 
 atomic_t atomic_or(atomic_t *target, atomic_t value) {

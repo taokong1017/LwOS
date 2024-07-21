@@ -6,6 +6,7 @@
 #include <cpu.h>
 #include <mem.h>
 #include <cpu_ops_psci.h>
+#include <smp.h>
 
 #define SHELL_LOGO "[LS Kernel]# "
 #define shell_logo_show() printf(SHELL_LOGO)
@@ -22,6 +23,7 @@ void kernel_start() {
 	arm_gic_init(true);
 	arch_timer_init();
 	percpu_init(0);
-	task_sched_init();
-	code_unreachable();
+	smp_init();
+	main_task_create(0);
+	task_sched_start();
 }

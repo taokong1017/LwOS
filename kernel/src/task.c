@@ -341,7 +341,6 @@ errno_t task_stop(task_id_t task_id) {
 			sched_ready_queue_remove(task->cpu_id, task);
 			task->status = TASK_STATUS_STOP;
 			// notify service to delete
-			code_unreachable();
 		} else {
 			// notify smp task pending schedule
 		}

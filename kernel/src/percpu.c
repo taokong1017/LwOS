@@ -4,6 +4,7 @@
 #include <kernel.h>
 #include <string.h>
 #include <operate_regs.h>
+#include <task_sched.h>
 
 extern char __interrupt_stack_start[];
 extern char __interrupt_stack_end[];
@@ -33,4 +34,5 @@ void percpu_init(uint32_t cpu_id) {
 	percpu->irq_stack_size = CONFIG_INTERRUPT_STACK_SIZE;
 	memset((void *)(percpu->irq_stack_ptr - percpu->irq_stack_size), 0,
 		   percpu->irq_stack_size);
+	idle_task_create(cpu_id);
 }

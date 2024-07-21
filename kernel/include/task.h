@@ -64,6 +64,7 @@
 /* task cpu affinity */
 #define TASK_CPU_DEFAULT_AFFI 0x00000001U
 #define TASK_CPU_AFFI_MASK ((1U < CONFIG_CPUS_MAX_NUM) - 1)
+#define TASK_CPU_AFFI(cpu_id) (1U << cpu_id)
 
 #define task_saved_fp(task) (task->task_context.callee_context.x29)
 #define task_saved_lr(task) (task->task_context.callee_context.x30)
