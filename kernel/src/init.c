@@ -21,7 +21,7 @@ void kernel_start() {
 
 	psci_init("hvc");
 	arm_gic_init(true);
-	arch_timer_init();
+	arch_timer_init(true);
 	percpu_init(0);
 	smp_init();
 	main_task_create(0);

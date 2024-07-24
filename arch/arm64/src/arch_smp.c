@@ -4,6 +4,7 @@
 #include <cache.h>
 #include <percpu.h>
 #include <gic_v2.h>
+#include <arch_timer.h>
 
 struct boot_params arch_boot_params = {
 	.cpu_id = 0, .mp_id = -1, .arg = NULL, .func = NULL};
@@ -33,8 +34,9 @@ void arch_secondary_cpu_init() {
 	arch_cpu_start_func func = NULL;
 	void *arg = NULL;
 
-	percpu_init(arch_boot_params.cpu_id);
 	arm_gic_init(false);
+	arch_timer_init(false);
+	percpu_init(arch_boot_params.cpu_id);
 	mmu_enable();
 
 	func = arch_boot_params.func;

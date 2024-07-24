@@ -8,6 +8,7 @@
 #include <sem.h>
 #include <mutex.h>
 #include <timer.h>
+#include <task.h>
 
 #define TEST_TASK1_NAME "test_task1"
 #define TEST_TASK2_NAME "test_task2"
@@ -326,7 +327,11 @@ static void create_test_task6() {
 		return;
 	}
 
-	ret = task_prority_set(test_task6_id, 3 /* prioriy */);
+	struct task *tsk = (struct task *)test_task6_id;
+	tsk->cpu_id = 1;
+	tsk->cpu_affi = TASK_CPU_AFFI(1);
+
+	ret = task_prority_set(test_task6_id, 30 /* prioriy */);
 	if (ret != OK) {
 		printf("set task %s priority failed\n", task_name);
 		return;
@@ -341,10 +346,7 @@ static void create_test_task6() {
 	return;
 }
 
-void test_timeout_cb(void *arg) {
-	(void)arg;
-	printf("enter timer handler\n");
-}
+void test_timeout_cb(void *arg) { (void)arg; }
 
 void main_task_entry(void *arg0, void *arg1, void *arg2, void *arg3) {
 	(void)arg0;

@@ -51,13 +51,16 @@ void arch_timer_compare_isr(const void *arg) {
 	return;
 }
 
-void arch_timer_init() {
-	bool ret = arch_irq_connect(TICK_IRQ_NUM, 160, arch_timer_compare_isr, NULL,
-								IRQ_TYPE_LEVEL);
-	if (!ret) {
-		log_err(ARCH_TIMER_TAG, "failed to connect interrupt\n");
-		return;
+void arch_timer_init(bool primary) {
+	if (primary) {
+		bool ret = arch_irq_connect(TICK_IRQ_NUM, 160, arch_timer_compare_isr,
+									NULL, IRQ_TYPE_LEVEL);
+		if (!ret) {
+			log_err(ARCH_TIMER_TAG, "failed to connect interrupt\n");
+			return;
+		}
 	}
+
 	arch_irq_enable(TICK_IRQ_NUM);
 	arch_timer_set_irq_mask(false);
 

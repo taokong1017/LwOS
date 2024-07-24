@@ -166,6 +166,7 @@ static void gic_dist_init() {
 
 	/*
 	 * Set all global interrupts to be level triggered, active low.
+	 * [N-N model, level-sensitive]
 	 */
 	for (i = GIC_SPI_INT_BASE; i < gic_irqs; i += 16) {
 		sys_write32(0, GICD_ICFGRn + i / 4);
@@ -210,7 +211,7 @@ static void gic_cpu_init() {
 	sys_write32(0x0000ffff, GICD_ISENABLERn);
 
 	/*
-	 * Set priority on PPI and SGI interrupts
+	 * Set priority(160) on PPI and SGI interrupts
 	 */
 	for (i = 0; i < 32; i += 4) {
 		sys_write32(0xa0a0a0a0, GICD_IPRIORITYRn + i);

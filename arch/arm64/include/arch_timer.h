@@ -14,6 +14,6 @@ void arch_timer_set_irq_mask(bool mask);
 uint64_t arch_timer_count();
 void arch_timer_set_compare(uint64_t val);
 uint64_t arch_timer_remaining_count();
-void arch_timer_init();
+void arch_timer_init(bool primary);
 
 #endif
