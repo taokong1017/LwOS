@@ -70,15 +70,12 @@ arch_task_context_switch:
 .section .text, "ax"
 arch_main_task_switch:
 	/* switch to new task's sp */
-	ldr x1, [x0, #TASK_OF_STACK_PTR_OFFSET]
-	mov sp, x1
-
-	ldr x4, [x0, #TASK_OF_ENTRY_OFFSET]
-	ldr x3, [x0, #TASK_OF_ARGS_OFFSET + 24]
-	ldr x2, [x0, #TASK_OF_ARGS_OFFSET + 16]
-	ldr x1, [x0, #TASK_OF_ARGS_OFFSET + 8]
-	ldr x0, [x0, #TASK_OF_ARGS_OFFSET]
-	blr x4
+	add x1, x0, TASK_OF_ARCH_TASK_CONTEXT_OFFSET
+	add x1, x1, TASK_CONTEXT_OF_CALLEE_CONTEXT_OFFSET
+	add x1, x1, CALLEE_CONTEXT_OF_X30_SP_OFFSET
+	ldp x1, x2, [x1]
+	mov sp, x2
+	blr x1
 	ret
 
 /*

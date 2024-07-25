@@ -83,6 +83,10 @@ el1_entry:
 	beq primary_core
 
 secondary_core:
+	/* disable fp trap */
+	mov x0, CPACR_EL1_FPEN_NOTRAP
+	msr cpacr_el1, x0
+
 	/* set stack pointer */
 	.extern __kernel_stack_start
 	ldr x0, =__kernel_stack_start

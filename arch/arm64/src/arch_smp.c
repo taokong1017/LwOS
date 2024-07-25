@@ -12,6 +12,7 @@ const uint64_t cpu_mp_ids[] = {0x0, 0x1, 0x2, 0x3};
 uint64_t cpu_master_mp_id = 0;
 extern void __start();
 extern void mmu_enable();
+extern void exec_enable();
 
 void arch_cpu_start(uint32_t cpu_id, arch_cpu_start_func func, void *arg) {
 	arch_boot_params.arg = arg;
@@ -34,6 +35,7 @@ void arch_secondary_cpu_init() {
 	arch_cpu_start_func func = NULL;
 	void *arg = NULL;
 
+	exec_enable();
 	arm_gic_init(false);
 	arch_timer_init(false);
 	percpu_init(arch_boot_params.cpu_id);
