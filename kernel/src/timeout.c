@@ -7,16 +7,12 @@
 
 void timeout_queue_handle(uint64_t cur_ticks) {
 	struct list_head *queue = NULL;
-	struct list_head *pos = NULL;
-	struct list_head *next = NULL;
-	struct timeout *timeout = NULL;
+	struct timeout *timeout = NULL, *next = NULL;
 
 	queue = &current_percpu_get()->timer_queue.queue;
-
-	list_for_each_safe(pos, next, queue) {
-		timeout = list_entry(pos, struct timeout, node);
+	list_for_each_entry_safe(timeout, next, queue, node) {
 		if (timeout && timeout->func && cur_ticks >= timeout->deadline_ticks) {
-			list_del_init(pos);
+			list_del_init(&timeout->node);
 			timeout->func(timeout);
 		}
 	}
@@ -37,19 +33,16 @@ errno_t timeout_queue_add(struct timeout *timeout) {
 
 errno_t timeout_queue_del(struct timeout *timeout) {
 	struct list_head *queue = NULL;
-	struct list_head *pos = NULL;
-	struct list_head *next = NULL;
-	struct timeout *tmp_timeout = NULL;
+	struct timeout *tmp_timeout = NULL, *next = NULL;
 
 	if (!timeout) {
 		return ERRNO_TIMEOUT_EMPTY_PTR;
 	}
 
 	queue = &current_percpu_get()->timer_queue.queue;
-	list_for_each_safe(pos, next, queue) {
-		tmp_timeout = list_entry(pos, struct timeout, node);
+	list_for_each_entry_safe(tmp_timeout, next, queue, node) {
 		if (tmp_timeout == timeout) {
-			list_del_init(pos);
+			list_del_init(&tmp_timeout->node);
 			break;
 		}
 	}

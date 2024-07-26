@@ -7,6 +7,7 @@
 #include <log.h>
 
 #define SPIN_LOCK_TAG "SPIN_LOCK"
+#define default_str_fill(str) ((str == NULL) ? "unkown" : str)
 
 void spin_lock(struct spinlock *lock) {
 	task_lock();
@@ -56,8 +57,15 @@ void spin_lock_init(struct spinlock *lock) { lock->rawlock = 0; }
 bool spin_lock_is_locked(struct spinlock *lock) { return lock->rawlock != 0; }
 
 void spin_lock_dump(struct spinlock *lock) {
-	log_info(SPIN_LOCK_TAG, "spin lock: %s, owner: %s, raw lock: %u\n",
-			 lock->name, lock->owner->name, lock->rawlock);
+	if (!lock) {
+		return;
+	}
+
+	printf("SPIN_LOCK DUMP:\nspin lock: %s, owner: %s, raw lock: %u\n",
+		   default_str_fill(lock->name),
+		   lock->owner ? default_str_fill(lock->owner->name)
+					   : default_str_fill(NULL),
+		   lock->rawlock);
 
 	return;
 }

@@ -363,8 +363,8 @@ void main_task_entry(void *arg0, void *arg1, void *arg2, void *arg3) {
 	timer_start(test_timer_id);
 	create_test_task1();
 	create_test_task2();
-	create_test_task3();
-	create_test_task4();
-	create_test_task5();
+	// create_test_task3();
+	// create_test_task4();
+	// create_test_task5();
 	create_test_task6();
 }
