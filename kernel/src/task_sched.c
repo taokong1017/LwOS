@@ -167,7 +167,7 @@ void main_task_create(uint32_t cpu_id) {
 				TASK_STACK_DEFAULT_SIZE, TASK_DEFAULT_FLAG);
 	task = ID_TO_TASK(task_id);
 	task->priority = TASK_PRIORITY_HIGHEST;
-	task->status = TASK_STATUS_RUNNING;
+	task->status = TASK_STATUS_READY;
 	task->cpu_affi = TASK_CPU_AFFI(cpu_id);
 	task->cpu_id = cpu_id;
 	sched_ready_queue_add(cpu_id, task);

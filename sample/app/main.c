@@ -367,6 +367,4 @@ void main_task_entry(void *arg0, void *arg1, void *arg2, void *arg3) {
 	create_test_task4();
 	create_test_task5();
 	create_test_task6();
-	task_suspend_self();
-	code_unreachable();
 }

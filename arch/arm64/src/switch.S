@@ -1,4 +1,5 @@
 #include <cpu.h>
+#include <offsets.h>
 #include <task_offsets.h>
 #include <menuconfig.h>
 
@@ -69,13 +70,14 @@ arch_task_context_switch:
 .type arch_main_task_switch, function
 .section .text, "ax"
 arch_main_task_switch:
-	/* switch to new task's sp */
+	/* switch to new task */
+	mov w1, 0x10 /* TASK_STATUS_RUNNING */
+	str w1, [x0, TASK_OF_STATUS_OFFSET]
 	add x1, x0, TASK_OF_ARCH_TASK_CONTEXT_OFFSET
 	add x1, x1, TASK_CONTEXT_OF_CALLEE_CONTEXT_OFFSET
-	add x1, x1, CALLEE_CONTEXT_OF_X30_SP_OFFSET
-	ldp x1, x2, [x1]
-	mov sp, x2
-	blr x1
+	ldp x2, x3, [x1, CALLEE_CONTEXT_OF_X30_SP_OFFSET]
+	mov sp, x3
+	blr x2
 	ret
 
 /*

@@ -142,6 +142,8 @@ void task_entry_point(task_id_t task_id) {
 	spin_unlock(&sched_spinlock);
 	arch_irq_unlock();
 	task->entry(task->args[0], task->args[1], task->args[2], task->args[3]);
+	task_suspend_self();
+	forever();
 }
 
 errno_t task_prority_set(task_id_t task_id, uint32_t prioriy) {

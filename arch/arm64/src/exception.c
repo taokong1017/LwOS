@@ -127,9 +127,7 @@ static void panic_unhandled(struct arch_regs *regs, const char *vector,
 		   esr_get_class_string(esr));
 	show_regs(regs);
 	arch_stack_default_walk(EXC_TAG, NULL, regs);
-	while (1) {
-		;
-	}
+	forever();
 }
 
 #define unhandled_handler_define(el, regsize, vector)                          \

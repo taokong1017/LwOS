@@ -349,32 +349,9 @@ static void *malloc_ex(uint32_t size, void *mem_pool) {
 	return (void *)b->ptr.buffer;
 }
 
-void *mem_malloc(uint32_t size) {
-	void *ret = NULL;
-	struct tlsf *tlsf = (struct tlsf *)mp;
+void *mem_malloc(uint32_t size) { return malloc_ex(size, mp); }
 
-	if (!current_task_get()) {
-		return malloc_ex(size, mp);
-	}
-
-	mutex_take(tlsf->mutex.id, MUTEX_WAIT_FOREVER);
-	ret = malloc_ex(size, mp);
-	mutex_give(tlsf->mutex.id);
-
-	return ret;
-}
-
-void mem_free(void *ptr) {
-	struct tlsf *tlsf = (struct tlsf *)mp;
-	if (!current_task_get()) {
-		free_ex(ptr, mp);
-		return;
-	}
-
-	mutex_take(tlsf->mutex.id, MUTEX_WAIT_FOREVER);
-	free_ex(ptr, mp);
-	mutex_give(tlsf->mutex.id);
-}
+void mem_free(void *ptr) { free_ex(ptr, mp); }
 
 static void *realloc_ex(void *ptr, uint32_t new_size, void *mem_pool) {
 	struct tlsf *tlsf = (struct tlsf *)mem_pool;
@@ -459,17 +436,7 @@ static void *realloc_ex(void *ptr, uint32_t new_size, void *mem_pool) {
 }
 
 void *mem_realloc(void *ptr, uint32_t size) {
-	void *ret = NULL;
-	struct tlsf *tlsf = (struct tlsf *)mp;
-	if (!current_task_get()) {
-		return realloc_ex(ptr, size, mp);
-	}
-
-	mutex_take(tlsf->mutex.id, MUTEX_WAIT_FOREVER);
-	ret = realloc_ex(ptr, size, mp);
-	mutex_give(tlsf->mutex.id);
-
-	return ret;
+	return realloc_ex(ptr, size, mp);
 }
 
 static void *calloc_ex(size_t nelem, size_t elem_size, void *mem_pool) {
@@ -489,15 +456,5 @@ static void *calloc_ex(size_t nelem, size_t elem_size, void *mem_pool) {
 }
 
 void *mem_calloc(uint32_t nelem, uint32_t elem_size) {
-	void *ret = NULL;
-	struct tlsf *tlsf = (struct tlsf *)mp;
-	if (!current_task_get()) {
-		return calloc_ex(nelem, elem_size, mp);
-	}
-
-	mutex_take(tlsf->mutex.id, MUTEX_WAIT_FOREVER);
-	ret = calloc_ex(nelem, elem_size, mp);
-	mutex_give(tlsf->mutex.id);
-
-	return ret;
+	return calloc_ex(nelem, elem_size, mp);
 }
