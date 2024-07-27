@@ -204,7 +204,6 @@ void task_sched_unlocked() {
 	}
 
 	if (spin_lock_is_locked(&sched_spinlock)) {
-		spin_lock_dump(&sched_spinlock);
 		log_info(TASK_SCHED_TAG, "%s: the sched lock %s is locked\n", __func__,
 				 sched_spinlock.name);
 		return;
