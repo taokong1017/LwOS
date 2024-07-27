@@ -561,16 +561,16 @@ int vsnprintf(char *buf, size_t size, const char *fmt, va_list args) {
 
 	/* Reject out-of-range values early.  Large positive sizes are
 	   used for unknown buffer sizes. */
-	if (size > U32_MAX)
+	if (size > U32_MAX) {
 		return 0;
+	}
 
 	str = buf;
 	end = buf + size;
 
-	/* Make sure end is always >= buf */
-	if (end < buf) {
-		end = ((void *)-1);
-		size = end - buf;
+	/* Make sure end is always > buf */
+	if (end <= buf) {
+		return 0;
 	}
 
 	while (*fmt) {
