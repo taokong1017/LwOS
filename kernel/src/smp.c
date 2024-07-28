@@ -6,6 +6,12 @@
 #include <arch_smp.h>
 #include <compiler.h>
 #include <task_sched.h>
+#include <gic_v2.h>
+#include <irq.h>
+#include <cpu.h>
+#include <log.h>
+
+#define LOG_TAG "SMP"
 
 typedef void (*smp_init_func)(void *arg);
 struct smp_init_callback {
@@ -25,6 +31,9 @@ void smp_init() {
 	}
 
 	atomic_set(&cpu_start_flag, (atomic_t)1);
+	arch_irq_connect(SMP_IPI_SCHED, 160, smp_sched_handler, NULL,
+					 IRQ_TYPE_LEVEL);
+	arch_irq_connect(SMP_IPI_HALT, 160, smp_halt_handler, NULL, IRQ_TYPE_LEVEL);
 }
 
 static void smp_cpu_start_callback(void *arg) {
@@ -52,4 +61,34 @@ void smp_cpu_start(uint32_t cpu_id) {
 	while (!atomic_get(&ready_flag)) {
 		udelay(100);
 	}
+}
+
+void smp_sched_notify() {
+	uint32_t cur_cpu_id = arch_cpu_id_get();
+	uint32_t mask = ALL_CPU_MASK & (~(1U << cur_cpu_id));
+	uint64_t no_use_affi = 0;
+
+	gic_raise_sgi(SMP_IPI_SCHED, no_use_affi, mask);
+}
+
+void smp_halt_notify() {
+	uint32_t cur_cpu_id = arch_cpu_id_get();
+	uint32_t mask = ALL_CPU_MASK & (~(1U << cur_cpu_id));
+	uint64_t no_use_affi = 0;
+
+	gic_raise_sgi(SMP_IPI_HALT, no_use_affi, mask);
+}
+
+void smp_sched_handler(const void *arg) {
+	(void)arg;
+
+	log_debug(LOG_TAG, "smp_sched_handler\n");
+	return;
+}
+
+void smp_halt_handler(const void *arg) {
+	(void)arg;
+
+	log_debug(LOG_TAG, "smp_halt_handler\n");
+	return;
 }

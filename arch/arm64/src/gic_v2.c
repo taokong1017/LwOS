@@ -214,7 +214,7 @@ static void gic_cpu_init() {
 	 * Set priority(160) on PPI and SGI interrupts
 	 */
 	for (i = 0; i < 32; i += 4) {
-		sys_write32(0xa0a0a0a0, GICD_IPRIORITYRn + i);
+		sys_write32(GIC_INT_DEF_PRI_X4, GICD_IPRIORITYRn + i);
 	}
 
 	sys_write32(0xff, GICC_PMR);
