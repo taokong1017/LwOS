@@ -9,6 +9,8 @@
 #include <tick.h>
 #include <irq.h>
 #include <log.h>
+#include <cpu.h>
+#include <smp.h>
 
 #define ALIGN(start, align) ((start + align - 1) & ~(align - 1))
 #define TASK_TO_ID(task) ((task_id_t)task)
@@ -73,6 +75,7 @@ static void task_init(struct task *task, const char *name,
 	strncpy(task->name, name, TASK_NAME_LEN);
 	task->name[TASK_NAME_LEN - 1] = '\0';
 	task->status = TASK_STATUS_STOP;
+	task->sig = TASK_SIG_NONE;
 	task->stack_ptr = stack_ptr;
 	task->stack_size = stack_size;
 	task->cpu_affi = TASK_CPU_DEFAULT_AFFI;
@@ -406,10 +409,6 @@ errno_t task_suspend(task_id_t task_id) {
 		return ERRNO_TASK_ID_INVALID;
 	}
 
-	if (is_in_irq()) {
-		return ERRNO_TASK_IN_IRQ_STATUS;
-	}
-
 	key = sched_spin_lock();
 	if (task->status & TASK_STATUS_SUSPEND) {
 		sched_spin_unlock(key);
@@ -426,9 +425,17 @@ errno_t task_suspend(task_id_t task_id) {
 		sched_ready_queue_remove(task->cpu_id, task);
 	}
 
+	/* The task is running on the other cpu */
+	if ((task->status == TASK_STATUS_RUNNING) &&
+		task->cpu_id != arch_cpu_id_get()) {
+		task->sig = TASK_SIG_SUSPEND;
+		smp_sched_notify();
+		return ERRNO_TASK_WILL_SUSPEND;
+	}
+
+	/* task is running on the current cpu */
 	if (task->status & TASK_STATUS_RUNNING) {
 		task->status &= ~TASK_STATUS_RUNNING;
-		/* For no smp, delete task is OK */
 		sched_ready_queue_remove(task->cpu_id, task);
 	}
 
@@ -562,4 +569,25 @@ errno_t task_wakeup_locked(struct wait_queue *wq) {
 	}
 
 	return OK;
+}
+
+bool task_sig_handle() {
+	bool need_sched = true;
+	struct task *cur_task = current_task_get();
+	struct per_cpu *per_cpu = current_percpu_get();
+
+	/* task signal is set by other cpu */
+	if (cur_task->sig == TASK_SIG_SUSPEND) {
+		cur_task->sig &= ~TASK_SIG_SUSPEND;
+		task_suspend(cur_task->id);
+		need_sched = false;
+	}
+
+	/* if the task is waiting for the signal, wake it up */
+	if (per_cpu->pend_sched) {
+		per_cpu->pend_sched = false;
+		need_sched = false;
+	}
+
+	return need_sched;
 }

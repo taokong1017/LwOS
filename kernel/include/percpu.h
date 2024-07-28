@@ -18,6 +18,8 @@ struct ready_queue {
 };
 
 struct per_cpu {
+	bool pend_sched;
+
 	/* interrupt related */
 	uint32_t irq_nested_cnt;
 	void *irq_stack_ptr;

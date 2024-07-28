@@ -29,6 +29,12 @@
 #define TASK_STATUS_PEND 0x0008U
 #define TASK_STATUS_RUNNING 0x0010U
 
+/* task signal definition */
+#define TASK_SIG_NONE 0U
+#define TASK_SIG_SUSPEND 1U
+#define TASK_SIG_AFFI 2U
+#define TASK_SIG_STOP 3U
+
 /* task flag definition */
 #define TASK_FLAG_SYSTEM 0x0001U
 #define TASK_FLAG_KERNEL 0x0002U
@@ -60,6 +66,7 @@
 #define ERRNO_TASK_WAIT_TIMEOUT ERRNO_OS_ERROR(MOD_ID_TASK, 0x0f)
 #define ERRNO_TASK_NO_SCHEDLE ERRNO_OS_ERROR(MOD_ID_TASK, 0x10)
 #define ERRNO_TASK_INVALID_TIMEOUT ERRNO_OS_ERROR(MOD_ID_TASK, 0x11)
+#define ERRNO_TASK_WILL_SUSPEND ERRNO_OS_ERROR(MOD_ID_TASK, 0x12)
 
 /* task cpu affinity */
 #define TASK_CPU_DEFAULT_AFFI 0x00000001U
@@ -85,6 +92,7 @@ struct task {
 	task_id_t id;
 	char name[TASK_NAME_LEN];
 	uint32_t status;
+	uint32_t sig;
 	uint32_t priority;
 	uint32_t cpu_affi;
 	uint32_t flag;
@@ -121,5 +129,6 @@ void task_unlock();
 errno_t task_wait_locked(struct wait_queue *wq, uint64_t ticks,
 						 bool need_sched);
 errno_t task_wakeup_locked(struct wait_queue *wq);
+bool task_sig_handle();
 
 #endif

@@ -74,6 +74,10 @@ ready_sp:
 	/* reschedule task */
 	ldr x0, [sp], #16
 	mov sp, x0
+
+	/* process task signal and check schedule */
+	bl task_sig_handle
+	cbz w0, nested_exit
 	bl task_sched_unlocked
 
 nested_exit:

@@ -34,5 +34,6 @@ void percpu_init(uint32_t cpu_id) {
 	percpu->irq_stack_size = CONFIG_INTERRUPT_STACK_SIZE;
 	memset((void *)(percpu->irq_stack_ptr - percpu->irq_stack_size), 0,
 		   percpu->irq_stack_size);
+	percpu->pend_sched = false;
 	idle_task_create(cpu_id);
 }

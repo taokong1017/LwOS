@@ -12,6 +12,12 @@
 #include <log.h>
 
 #define LOG_TAG "SMP"
+#define ALL_CPU_MASK (((1U) << CONFIG_CPUS_MAX_NUM) - 1)
+
+enum smp_ipi_type {
+	SMP_IPI_SCHED = 0,
+	SMP_IPI_HALT,
+};
 
 typedef void (*smp_init_func)(void *arg);
 struct smp_init_callback {
@@ -81,8 +87,9 @@ void smp_halt_notify() {
 
 void smp_sched_handler(const void *arg) {
 	(void)arg;
+	struct per_cpu *percpu = current_percpu_get();
 
-	log_debug(LOG_TAG, "smp_sched_handler\n");
+	percpu->pend_sched = true;
 	return;
 }
 

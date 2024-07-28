@@ -154,14 +154,14 @@ static void test_task3_entry(void *arg0, void *arg1, void *arg2, void *arg3) {
 		printf("task %s %d\n", TEST_TASK3_NAME, i++);
 		task_suspend(test_task2_id);
 		printf("task %s suspended\n", TEST_TASK2_NAME);
-		task_stop(test_task1_id);
-		printf("task %s stoped\n", TEST_TASK1_NAME);
+		// task_stop(test_task1_id);
+		// printf("task %s stoped\n", TEST_TASK1_NAME);
 		task_delay(20);
 		task_resume(test_task2_id);
 		printf("task %s resumed\n", TEST_TASK2_NAME);
-		task_start(test_task1_id);
-		printf("task %s started\n", TEST_TASK1_NAME);
-		task_delay(20);
+		// task_start(test_task1_id);
+		// printf("task %s started\n", TEST_TASK1_NAME);
+		/* task_delay(20);
 		ret = msgq_send(test_msgq_id, &i, sizeof(i), MSGQ_NO_WAIT);
 		printf("msgq send: %u, ret = %d\n", i, ret);
 		ret = sem_give(test_sem_id);
@@ -172,7 +172,7 @@ static void test_task3_entry(void *arg0, void *arg1, void *arg2, void *arg3) {
 		task_delay(30);
 		printf("task %s will give a mutex\n", TEST_TASK3_NAME);
 		ret = mutex_give(test_mutex_id);
-		printf("task %s has give a mutex, ret = %d\n", TEST_TASK3_NAME, ret);
+		printf("task %s has give a mutex, ret = %d\n", TEST_TASK3_NAME, ret); */
 	}
 }
 
@@ -213,12 +213,13 @@ static void test_task4_entry(void *arg0, void *arg1, void *arg2, void *arg3) {
 	int32_t ret = 0;
 
 	for (;;) {
-		size = TEST_MSGQ_SIZE;
-		memset(msg, 0, TEST_MSGQ_SIZE);
-		ret = msgq_receive(test_msgq_id, &msg, &size, MSGQ_WAIT_FOREVER);
-		msg[TEST_MSGQ_SIZE - 1] = 0;
-		printf("task %s received msg: %u ret = %d\n", TEST_TASK4_NAME,
-			   *(uint32_t *)msg, ret);
+		task_delay(30);
+		// size = TEST_MSGQ_SIZE;
+		// memset(msg, 0, TEST_MSGQ_SIZE);
+		// ret = msgq_receive(test_msgq_id, &msg, &size, MSGQ_WAIT_FOREVER);
+		// msg[TEST_MSGQ_SIZE - 1] = 0;
+		// printf("task %s received msg: %u ret = %d\n", TEST_TASK4_NAME,
+		// 	   *(uint32_t *)msg, ret);
 	}
 }
 
@@ -363,8 +364,8 @@ void main_task_entry(void *arg0, void *arg1, void *arg2, void *arg3) {
 	timer_start(test_timer_id);
 	create_test_task1();
 	create_test_task2();
-	// create_test_task3();
-	// create_test_task4();
-	// create_test_task5();
+	create_test_task3();
+	create_test_task4();
+	create_test_task5();
 	create_test_task6();
 }
