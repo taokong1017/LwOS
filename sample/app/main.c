@@ -154,13 +154,13 @@ static void test_task3_entry(void *arg0, void *arg1, void *arg2, void *arg3) {
 		printf("task %s %d\n", TEST_TASK3_NAME, i++);
 		task_suspend(test_task2_id);
 		printf("task %s suspended\n", TEST_TASK2_NAME);
-		// task_stop(test_task1_id);
-		// printf("task %s stoped\n", TEST_TASK1_NAME);
+		task_stop(test_task1_id);
+		printf("task %s stoped\n", TEST_TASK1_NAME);
 		task_delay(20);
 		task_resume(test_task2_id);
 		printf("task %s resumed\n", TEST_TASK2_NAME);
-		// task_start(test_task1_id);
-		// printf("task %s started\n", TEST_TASK1_NAME);
+		task_start(test_task1_id);
+		printf("task %s started\n", TEST_TASK1_NAME);
 		/* task_delay(20);
 		ret = msgq_send(test_msgq_id, &i, sizeof(i), MSGQ_NO_WAIT);
 		printf("msgq send: %u, ret = %d\n", i, ret);

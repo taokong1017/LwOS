@@ -305,7 +305,9 @@ task_id_t task_self_id() {
 }
 
 errno_t task_stop(task_id_t task_id) {
+	struct task *cur_task = NULL;
 	struct task *task = ID_TO_TASK(task_id);
+	uint32_t cur_cpu_id = arch_cpu_id_get();
 	uint32_t key = 0;
 
 	if (!task || task->id != task_id) {
@@ -313,11 +315,6 @@ errno_t task_stop(task_id_t task_id) {
 	}
 
 	key = sched_spin_lock();
-	if (is_in_irq()) {
-		sched_spin_unlock(key);
-		return ERRNO_TASK_IN_IRQ_STATUS;
-	}
-
 	if (task->flag & TASK_FLAG_SYSTEM) {
 		sched_spin_unlock(key);
 		return ERRNO_TASK_OPERATE_INVALID;
@@ -341,13 +338,16 @@ errno_t task_stop(task_id_t task_id) {
 		timeout_queue_del(&task->timeout);
 	}
 
+	cur_task = current_task_get();
 	if (task->status == TASK_STATUS_RUNNING) {
-		if (current_task_get() == task) {
-			sched_ready_queue_remove(task->cpu_id, task);
-			task->status = TASK_STATUS_STOP;
-			// notify service to delete
+		if (task->cpu_id == cur_cpu_id) {
+			if (cur_task == task) {
+				sched_ready_queue_remove(task->cpu_id, task);
+				/* request system task to stop current task */
+			}
 		} else {
-			// notify smp task pending schedule
+			task->sig = TASK_SIG_STOP;
+			smp_sched_notify();
 		}
 	} else {
 		task_reset(task);

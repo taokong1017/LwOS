@@ -8,6 +8,13 @@
 #define DIV_ROUND_UP(n, d) (((n) + (d)-1) / (d))
 #define PRIQ_BITMAP_SIZE (DIV_ROUND_UP(TASK_PRIORITY_NUM, MASK_NBITS))
 
+#ifndef msgq_id_t
+typedef long msgq_id_t;
+#endif
+#define SERVICE_MSGQ_NAME "SYSTEM_MSGQ"
+#define SERVICE_MSGQ_SIZE 32
+#define SERVICE_MSGQ_NUM 4
+
 struct priority_mqueue {
 	struct list_head queues[TASK_PRIORITY_NUM];
 	uint64_t bitmask[PRIQ_BITMAP_SIZE];
@@ -19,6 +26,7 @@ struct ready_queue {
 
 struct per_cpu {
 	bool pend_sched;
+	msgq_id_t msgq_id;
 
 	/* interrupt related */
 	uint32_t irq_nested_cnt;

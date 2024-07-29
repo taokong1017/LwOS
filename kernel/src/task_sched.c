@@ -6,9 +6,12 @@
 #include <irq.h>
 #include <operate_regs.h>
 #include <log.h>
+#include <percpu.h>
+#include <msgq.h>
 
 #define IDLE_TASK_NAME "idle_task"
 #define ROOT_TASK_NAME "main_task"
+#define SYSTEM_TASK_NAME "system_task"
 #define TASK_SCHED_TAG "TASK_SCHED"
 #define TASK_IS_LOCKED(task) (task->lock_cnt > 0)
 
@@ -164,6 +167,40 @@ void main_task_create(uint32_t cpu_id) {
 
 	strncpy(task_name, ROOT_TASK_NAME, TASK_NAME_LEN);
 	task_create(&task_id, task_name, main_task_entry, NULL, NULL, NULL, NULL,
+				TASK_STACK_DEFAULT_SIZE, TASK_DEFAULT_FLAG);
+	task = ID_TO_TASK(task_id);
+	task->priority = TASK_PRIORITY_HIGHEST;
+	task->status = TASK_STATUS_READY;
+	task->cpu_affi = TASK_CPU_AFFI(cpu_id);
+	task->cpu_id = cpu_id;
+	sched_ready_queue_add(cpu_id, task);
+}
+
+static void system_task_entry(void *arg0, void *arg1, void *arg2, void *arg3) {
+	(void)arg0;
+	(void)arg1;
+	(void)arg2;
+	(void)arg3;
+
+	msgq_id_t msgq_id = (msgq_id_t)arg0;
+	uint8_t msg[SERVICE_MSGQ_SIZE] = {0};
+	uint32_t msg_len = SERVICE_MSGQ_SIZE;
+
+	forever() {
+		if (!msgq_receive(msgq_id, msg, &msg_len, MSGQ_WAIT_FOREVER)) {
+		}
+	}
+
+	return;
+}
+
+void system_task_create(uint32_t cpu_id) {
+	struct per_cpu *percpu = percpu_get(cpu_id);
+	task_id_t task_id = 0;
+	struct task *task = NULL;
+
+	task_create(&task_id, SYSTEM_TASK_NAME, system_task_entry,
+				(void *)percpu->msgq_id, NULL, NULL, NULL,
 				TASK_STACK_DEFAULT_SIZE, TASK_DEFAULT_FLAG);
 	task = ID_TO_TASK(task_id);
 	task->priority = TASK_PRIORITY_HIGHEST;
