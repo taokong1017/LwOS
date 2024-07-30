@@ -1,6 +1,7 @@
 #include <task.h>
 #include <kernel.h>
 #include <cpu.h>
+#include <task_cmd.h>
 #include <task_sched.h>
 #include <string.h>
 #include <irq.h>
@@ -17,6 +18,7 @@
 
 SPIN_LOCK_DEFINE(sched_spinlock);
 extern void main_task_entry(void *arg0, void *arg1, void *arg2, void *arg3);
+extern void task_reset(struct task *task);
 
 struct prio_info {
 	uint32_t prio;
@@ -183,11 +185,24 @@ static void system_task_entry(void *arg0, void *arg1, void *arg2, void *arg3) {
 	(void)arg3;
 
 	msgq_id_t msgq_id = (msgq_id_t)arg0;
-	uint8_t msg[SERVICE_MSGQ_SIZE] = {0};
-	uint32_t msg_len = SERVICE_MSGQ_SIZE;
+	struct task_cmd cmd = {.id = TASK_INVALID_ID,
+						   .cmd = TASK_CMD_NUM,
+						   .data = NULL};
+	uint32_t len = sizeof(struct task_cmd);
 
 	forever() {
-		if (!msgq_receive(msgq_id, msg, &msg_len, MSGQ_WAIT_FOREVER)) {
+		if (!msgq_receive(msgq_id, &cmd, &len, MSGQ_WAIT_FOREVER)) {
+			switch (cmd.cmd) {
+			case TASK_CMD_STOP:
+				task_reset(ID_TO_TASK(cmd.id));
+				break;
+			default:
+				break;
+			}
+
+			cmd.id = TASK_INVALID_ID;
+			cmd.cmd = TASK_CMD_NUM;
+			cmd.data = NULL;
 		}
 	}
 

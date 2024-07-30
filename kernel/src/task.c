@@ -11,6 +11,8 @@
 #include <log.h>
 #include <cpu.h>
 #include <smp.h>
+#include <msgq.h>
+#include <task_cmd.h>
 
 #define ALIGN(start, align) ((start + align - 1) & ~(align - 1))
 #define TASK_TO_ID(task) ((task_id_t)task)
@@ -91,7 +93,8 @@ static void task_init(struct task *task, const char *name,
 	INIT_LIST_HEAD(&task->timeout.node);
 }
 
-static void task_reset(struct task *task) {
+void task_reset(struct task *task) {
+	sched_ready_queue_remove(task->cpu_id, task);
 	task->status = TASK_STATUS_STOP;
 	task->is_timeout = false;
 	INIT_LIST_HEAD(&task->timeout.node);
@@ -147,6 +150,13 @@ void task_entry_point(task_id_t task_id) {
 	task->entry(task->args[0], task->args[1], task->args[2], task->args[3]);
 	task_suspend_self();
 	forever();
+}
+
+static void task_service_notify(task_id_t id, enum task_cmd_type cmd_type) {
+	struct per_cpu *percpu = current_percpu_get();
+	struct task_cmd cmd = {.id = id, .cmd = cmd_type, .data = NULL};
+
+	msgq_send(percpu->msgq_id, &cmd, sizeof(cmd), MSGQ_WAIT_FOREVER);
 }
 
 errno_t task_prority_set(task_id_t task_id, uint32_t prioriy) {
@@ -342,8 +352,8 @@ errno_t task_stop(task_id_t task_id) {
 	if (task->status == TASK_STATUS_RUNNING) {
 		if (task->cpu_id == cur_cpu_id) {
 			if (cur_task == task) {
-				sched_ready_queue_remove(task->cpu_id, task);
-				/* request system task to stop current task */
+				sched_spin_unlock(key);
+				task_service_notify(task->id, TASK_CMD_STOP);
 			}
 		} else {
 			task->sig = TASK_SIG_STOP;
@@ -580,6 +590,12 @@ bool task_sig_handle() {
 	if (cur_task->sig == TASK_SIG_SUSPEND) {
 		cur_task->sig &= ~TASK_SIG_SUSPEND;
 		task_suspend(cur_task->id);
+		need_sched = false;
+	}
+
+	if (cur_task->sig == TASK_SIG_STOP) {
+		cur_task->sig &= ~TASK_SIG_STOP;
+		task_stop(cur_task->id);
 		need_sched = false;
 	}
 
