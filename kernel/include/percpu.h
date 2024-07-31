@@ -26,6 +26,7 @@ struct ready_queue {
 
 struct per_cpu {
 	bool pend_sched;
+	bool is_idle;
 	msgq_id_t msgq_id;
 
 	/* interrupt related */
@@ -43,5 +44,6 @@ struct per_cpu {
 
 struct stack_info irq_stack_info(uint32_t cpu_id);
 void percpu_init(uint32_t cpu_id);
+uint32_t percpu_idle_mask_get();
 
 #endif

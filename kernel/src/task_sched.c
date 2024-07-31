@@ -61,7 +61,7 @@ void prio_mq_remove(struct priority_mqueue *prio_mq, struct task *task) {
 	}
 }
 
-static uint64_t mask_trailing_zeros(uint64_t mask) {
+uint64_t mask_trailing_zeros(uint64_t mask) {
 	uint32_t shift = MASK_NBITS - 1;
 
 	if (mask == 0) {
@@ -155,6 +155,7 @@ void idle_task_create(uint32_t cpu_id) {
 				(void *)3, (void *)4, TASK_STACK_DEFAULT_SIZE,
 				TASK_DEFAULT_FLAG);
 	task = ID_TO_TASK(task_id);
+	task->is_idle_task = true;
 	task->priority = TASK_PRIORITY_LOWEST - 1;
 	task->status = TASK_STATUS_READY;
 	task->cpu_affi = TASK_CPU_AFFI(cpu_id);
@@ -228,6 +229,9 @@ void system_task_create(uint32_t cpu_id) {
 void task_sched_locked() {
 	struct task *current_task = current_task_get();
 	struct task *next_task = next_task_pick_up();
+	struct per_cpu *per_cpu = current_percpu_get();
+	uint32_t idle_affi = percpu_idle_mask_get();
+	uint32_t same_affi = 0;
 
 	if (current_task == next_task) {
 		return;
@@ -236,8 +240,21 @@ void task_sched_locked() {
 				  current_task->name, next_task->name);
 	}
 
+	same_affi = current_task->cpu_affi & idle_affi;
+	if (same_affi != 0) {
+		sched_ready_queue_remove(current_task->cpu_id, current_task);
+		current_task->cpu_id = mask_trailing_zeros(same_affi);
+		sched_ready_queue_add(current_task->cpu_id, current_task);
+	}
 	current_task->status &= ~TASK_STATUS_RUNNING;
+
+	if (next_task->is_idle_task) {
+		per_cpu->is_idle = true;
+	} else {
+		per_cpu->is_idle = false;
+	}
 	next_task->status = TASK_STATUS_RUNNING;
+
 	current_task_update(next_task);
 	task_switch(next_task, current_task);
 }
@@ -246,6 +263,9 @@ void task_sched_unlocked() {
 	uint32_t key = 0;
 	struct task *current_task = current_task_get();
 	struct task *next_task = next_task_pick_up();
+	struct per_cpu *per_cpu = current_percpu_get();
+	uint32_t idle_affi = percpu_idle_mask_get();
+	uint32_t same_affi = 0;
 
 	if (current_task == next_task) {
 		return;
@@ -265,8 +285,17 @@ void task_sched_unlocked() {
 
 	current_task->status = TASK_STATUS_READY;
 	sched_ready_queue_remove(current_task->cpu_id, current_task);
+	same_affi = current_task->cpu_affi & idle_affi;
+	if (same_affi != 0) {
+		current_task->cpu_id = mask_trailing_zeros(same_affi);
+	}
 	sched_ready_queue_add(current_task->cpu_id, current_task);
 
+	if (next_task->is_idle_task) {
+		per_cpu->is_idle = true;
+	} else {
+		per_cpu->is_idle = false;
+	}
 	next_task->status = TASK_STATUS_RUNNING;
 	current_task_update(next_task);
 

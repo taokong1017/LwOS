@@ -41,10 +41,26 @@ void percpu_init(uint32_t cpu_id) {
 	/* set percpu status */
 	write_tpidrro_el0((uint64_t)percpu);
 	percpu->pend_sched = false;
+	percpu->is_idle = false;
 	msgq_create(SERVICE_MSGQ_NAME, SERVICE_MSGQ_NUM, SERVICE_MSGQ_SIZE,
 				&percpu->msgq_id);
 
 	/* create service task */
 	idle_task_create(cpu_id);
 	system_task_create(cpu_id);
+}
+
+uint32_t percpu_idle_mask_get() {
+	struct per_cpu *per_cpu = NULL;
+	int32_t i = 0;
+	uint32_t mask = 0;
+
+	for (i = 0; i < CONFIG_CPUS_MAX_NUM; i++) {
+		per_cpu = percpu_get(i);
+		if (per_cpu->is_idle) {
+			mask |= TASK_CPU_AFFI(i);
+		}
+	}
+
+	return mask;
 }

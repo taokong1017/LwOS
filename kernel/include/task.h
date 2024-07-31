@@ -90,6 +90,7 @@ struct wait_queue {
 /* task structure definition */
 struct task {
 	task_id_t id;
+	bool is_idle_task;
 	char name[TASK_NAME_LEN];
 	uint32_t status;
 	uint32_t sig;

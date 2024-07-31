@@ -21,6 +21,7 @@
 
 extern struct spinlock sched_spinlock;
 extern void task_sched_unlocked();
+extern uint64_t mask_trailing_zeros(uint64_t mask);
 
 /*
  * when the delay task exceeds timeout, it will be added to ready
@@ -73,6 +74,7 @@ static void task_init(struct task *task, const char *name,
 					  void *arg3, void *stack_ptr, uint32_t stack_size,
 					  uint32_t flag) {
 	memset(task, 0, sizeof(struct task));
+	task->is_idle_task = false;
 	task->id = TASK_TO_ID(task);
 	strncpy(task->name, name, TASK_NAME_LEN);
 	task->name[TASK_NAME_LEN - 1] = '\0';
@@ -223,7 +225,10 @@ errno_t task_prority_get(task_id_t task_id, uint32_t *prioriy) {
 
 errno_t task_cpu_affi_set(task_id_t task_id, uint32_t cpu_affi) {
 	struct task *task = ID_TO_TASK(task_id);
+	uint32_t cur_cpu_id = 0;
 	uint32_t key = 0;
+	uint32_t idle_affi = 0;
+	uint32_t same_affi = 0;
 
 	if (!task || task->id != task_id) {
 		return ERRNO_TASK_ID_INVALID;
@@ -233,13 +238,32 @@ errno_t task_cpu_affi_set(task_id_t task_id, uint32_t cpu_affi) {
 		return ERRNO_TASK_CPU_AFFI_INAVLID;
 	}
 
-	key = sched_spin_lock();
-	if (is_in_irq()) {
-		sched_spin_unlock(key);
-		return ERRNO_TASK_IN_IRQ_STATUS;
+	if (cpu_affi == 0) {
+		return ERRNO_TASK_CPU_AFFI_INAVLID;
 	}
 
-	// TO DO
+	key = sched_spin_lock();
+	cur_cpu_id = arch_cpu_id_get();
+	idle_affi = percpu_idle_mask_get();
+
+	task->cpu_affi = cpu_affi;
+	if (task->status == TASK_STATUS_RUNNING) {
+		if (cur_cpu_id == task->id) {
+			task_sched_locked();
+		} else {
+			task->sig = TASK_SIG_AFFI;
+			smp_sched_notify();
+		}
+	}
+
+	if (task->status == TASK_STATUS_READY) {
+		sched_ready_queue_remove(task->cpu_id, task);
+		same_affi = cpu_affi & idle_affi;
+		if (same_affi != 0) {
+			task->cpu_id = mask_trailing_zeros(same_affi);
+		}
+		sched_ready_queue_add(task->cpu_id, task);
+	}
 
 	sched_spin_unlock(key);
 
@@ -315,7 +339,6 @@ task_id_t task_self_id() {
 }
 
 errno_t task_stop(task_id_t task_id) {
-	struct task *cur_task = NULL;
 	struct task *task = ID_TO_TASK(task_id);
 	uint32_t cur_cpu_id = arch_cpu_id_get();
 	uint32_t key = 0;
@@ -348,13 +371,10 @@ errno_t task_stop(task_id_t task_id) {
 		timeout_queue_del(&task->timeout);
 	}
 
-	cur_task = current_task_get();
 	if (task->status == TASK_STATUS_RUNNING) {
 		if (task->cpu_id == cur_cpu_id) {
-			if (cur_task == task) {
-				sched_spin_unlock(key);
-				task_service_notify(task->id, TASK_CMD_STOP);
-			}
+			sched_spin_unlock(key);
+			task_service_notify(task->id, TASK_CMD_STOP);
 		} else {
 			task->sig = TASK_SIG_STOP;
 			smp_sched_notify();
@@ -596,6 +616,12 @@ bool task_sig_handle() {
 	if (cur_task->sig == TASK_SIG_STOP) {
 		cur_task->sig &= ~TASK_SIG_STOP;
 		task_stop(cur_task->id);
+		need_sched = false;
+	}
+
+	if (cur_task->sig == TASK_SIG_AFFI) {
+		cur_task->sig &= ~TASK_SIG_AFFI;
+		task_cpu_affi_set(cur_task->id, cur_task->cpu_affi);
 		need_sched = false;
 	}
 
