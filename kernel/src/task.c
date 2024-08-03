@@ -99,6 +99,8 @@ void task_reset(struct task *task) {
 	sched_ready_queue_remove(task->cpu_id, task);
 	task->status = TASK_STATUS_STOP;
 	task->is_timeout = false;
+	task->lock_cnt = 0;
+	timeout_queue_del(&task->timeout);
 	INIT_LIST_HEAD(&task->timeout.node);
 	arch_task_init(task->id);
 }
@@ -149,6 +151,7 @@ void task_entry_point(task_id_t task_id) {
 
 	spin_unlock(&sched_spinlock);
 	arch_irq_unlock();
+	log_debug(TASK_TAG, "task %s starts from entry point\n", task->name);
 	task->entry(task->args[0], task->args[1], task->args[2], task->args[3]);
 	task_suspend_self();
 	forever();

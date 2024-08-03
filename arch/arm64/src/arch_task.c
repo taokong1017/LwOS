@@ -11,7 +11,7 @@ void arch_task_init(task_id_t task_id) {
 	struct task *task = ID_TO_TASK(task_id);
 
 	/* root任务主动切换调度 */
-	memset(task->stack_ptr - task->stack_size, 0, task->stack_size);
+	memset(task->stack_ptr - sizeof(struct arch_esf_context), 0, sizeof(struct arch_esf_context));
 	esf = (struct arch_esf_context *)(task->stack_ptr -
 									  sizeof(struct arch_esf_context));
 	esf->x0 = (uint64_t)task_id;

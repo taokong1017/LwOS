@@ -203,10 +203,11 @@ void arch_stack_default_walk(char *tag, struct task *task,
 	uint32_t level = 0;
 
 	if (tag == NULL) {
-		return;
+		printf("stack trace:\n");
+	} else {
+		printf("[%s] stack trace:\n", tag);
 	}
 
-	printf("[%s] stack trace:\n", tag);
 	arch_stack_walk(show_Linker, &level, task, regs);
 
 	return;

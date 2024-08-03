@@ -3,9 +3,7 @@
 .section .text, "ax"
 arch_spin_lock:
 	mov w2, #1
-	sevl
 1:
-	wfe
 	ldaxr w1, [x0]
 	cbnz w1, 1b
 	stxr w1, w2, [x0]

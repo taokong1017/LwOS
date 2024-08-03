@@ -11,9 +11,11 @@ void timeout_queue_handle(uint64_t cur_ticks) {
 
 	queue = &current_percpu_get()->timer_queue.queue;
 	list_for_each_entry_safe(timeout, next, queue, node) {
-		if (timeout && timeout->func && cur_ticks >= timeout->deadline_ticks) {
+		if (timeout) {
 			list_del_init(&timeout->node);
-			timeout->func(timeout);
+			if (timeout->func && cur_ticks >= timeout->deadline_ticks) {
+				timeout->func(timeout);
+			}
 		}
 	}
 }

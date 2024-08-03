@@ -14,9 +14,10 @@
 #define ROOT_TASK_NAME "main_task"
 #define SYSTEM_TASK_NAME "system_task"
 #define TASK_SCHED_TAG "TASK_SCHED"
+#define TASK_SCHED_LOCKER "SCHED_SPIN_LOCKER"
 #define TASK_IS_LOCKED(task) (task->lock_cnt > 0)
 
-SPIN_LOCK_DEFINE(sched_spinlock);
+SPIN_LOCK_DEFINE(sched_spinlock, TASK_SCHED_LOCKER)
 extern void main_task_entry(void *arg0, void *arg1, void *arg2, void *arg3);
 extern void task_reset(struct task *task);
 
@@ -190,12 +191,15 @@ static void system_task_entry(void *arg0, void *arg1, void *arg2, void *arg3) {
 						   .cmd = TASK_CMD_NUM,
 						   .data = NULL};
 	uint32_t len = sizeof(struct task_cmd);
+	uint32_t key = 0;
 
 	forever() {
 		if (!msgq_receive(msgq_id, &cmd, &len, MSGQ_WAIT_FOREVER)) {
 			switch (cmd.cmd) {
 			case TASK_CMD_STOP:
+				key = sched_spin_lock();
 				task_reset(ID_TO_TASK(cmd.id));
+				sched_spin_unlock(key);
 				break;
 			default:
 				break;
@@ -276,8 +280,8 @@ void task_sched_unlocked() {
 	}
 
 	if (spin_lock_is_locked(&sched_spinlock)) {
-		log_info(TASK_SCHED_TAG, "%s: the sched lock %s is locked\n", __func__,
-				 sched_spinlock.name);
+		log_fatal(TASK_SCHED_TAG, "the sched lock %s is locked\n",
+				  sched_spinlock.name);
 		return;
 	}
 
