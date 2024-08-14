@@ -112,3 +112,13 @@ arch_exc_exit:
 current_pc_get:
 	mov x0, lr
 	ret
+
+/*
+ * uint64_t current_sp_get()
+ */
+.globl current_sp_get
+.type current_sp_get, function
+.section .text, "ax"
+current_sp_get:
+	mov x0, sp
+	ret

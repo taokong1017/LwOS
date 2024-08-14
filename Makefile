@@ -1,4 +1,5 @@
-TARGET     = LwOS.elf
+PROJECT    = LwOS
+TARGET     = $(PROJECT).elf
 BASE_DIR   = $(CURDIR)
 CONFIG_DIR = $(BASE_DIR)/config
 SUB_DIRS   = arch kernel drivers sample
@@ -53,6 +54,7 @@ endef
 all: obj $(LINKER)
 	$(Q)$(LD) $(LDFLAGS) -T $(LINKER) -e __start -o $(TARGET) \
 		$(strip $(filter-out %/offsets.o, $(call ALL_OBJS, $(srctree))))
+	$(Q)$(OBJDUMP) -d $(TARGET) > $(PROJECT).sym
 	@echo "build all success"
 
 check:
