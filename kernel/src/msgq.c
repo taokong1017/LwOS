@@ -228,10 +228,7 @@ errno_t msgq_receive(msgq_id_t id, void *msg, uint32_t *size,
 		return ERRNO_MSGQ_ZERO_SIZE;
 	}
 
-	if (*size < msgq->max_msg_size) {
-		log_info(MSGQ_TAG, "the msg size is %d, not enough\n",
-				 msgq->max_msg_size);
-	}
+	log_info(MSGQ_TAG, "the msg size is %d\n", msgq->max_msg_size);
 
 	key = sched_spin_lock();
 
