@@ -4,10 +4,13 @@
 #include <kernel.h>
 #include <spin_lock.h>
 
+#define TASK_SCHED_LOCKED(task) (task->lock_cnt > 1)
+
 uint32_t sched_spin_lock();
 void sched_spin_unlock(uint32_t key);
 void sched_ready_queue_remove(uint32_t cpu_id, struct task *task);
 void sched_ready_queue_add(uint32_t cpu_id, struct task *task);
+void sched_ready_queue_dump(uint32_t cpu_id);
 struct task *current_task_get();
 void task_sched_locked();
 void task_sched_unlocked();

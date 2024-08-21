@@ -3,6 +3,7 @@
 #include <mem.h>
 #include <string.h>
 #include <tick.h>
+#include <task_sched.h>
 
 #define TIMER_TAG "TIMER"
 #define timer2id(timer) ((msgq_id_t)timer)
@@ -37,7 +38,7 @@ static errno_t timer_param_check(const char *name, enum timer_type type,
 	return OK;
 }
 
-static void timer_timeout_handler(struct timeout *timeout) {
+static bool timer_timeout_handler(struct timeout *timeout) {
 	struct timer *timer = container_of(timeout, struct timer, timeout);
 	timer_cb *call_back = timer->cb;
 	void *arg = timer->arg;
@@ -54,6 +55,8 @@ static void timer_timeout_handler(struct timeout *timeout) {
 		timer->timeout.deadline_ticks += timer->ticks;
 		timeout_queue_add(&timer->timeout);
 	}
+
+	return false;
 }
 
 errno_t timer_create(const char *name, enum timer_type type, uint64_t ticks,
@@ -88,8 +91,10 @@ errno_t timer_create(const char *name, enum timer_type type, uint64_t ticks,
 
 errno_t timer_start(timer_id_t id) {
 	struct timer *timer = id2timer(id);
+	uint32_t key = sched_spin_lock();
 
 	if (!timer || id != timer->id) {
+		sched_spin_unlock(key);
 		log_err(TIMER_TAG, "invalid timer id\n");
 		return ERRNO_TIMER_INVALID_ID;
 	}
@@ -101,12 +106,14 @@ errno_t timer_start(timer_id_t id) {
 
 	if (timer->ticks == TIMER_WAIT_FOREVER) {
 		log_err(TIMER_TAG, "ticks is 0\n");
+		sched_spin_unlock(key);
 		return ERRNO_TIMER_INVALID_INTERVAL;
 	}
 
 	timer->status = TIMER_STATUS_RUNNING;
 	timer->timeout.deadline_ticks = current_ticks_get() + timer->ticks;
 	timeout_queue_add(&timer->timeout);
+	sched_spin_unlock(key);
 	log_debug(TIMER_TAG, "timer %s is started\n", timer->name);
 
 	return OK;
@@ -114,20 +121,24 @@ errno_t timer_start(timer_id_t id) {
 
 errno_t timer_stop(timer_id_t id) {
 	struct timer *timer = id2timer(id);
+	uint32_t key = sched_spin_lock();
 
 	if (!timer || id != timer->id) {
+		sched_spin_unlock(key);
 		log_err(TIMER_TAG, "invalid timer id\n");
 		return ERRNO_TIMER_INVALID_ID;
 	}
 
 	if (timer->status == TIMER_STATUS_STOPPED ||
 		timer->status == TIMER_STATUS_CREATED) {
+		sched_spin_unlock(key);
 		log_info(TIMER_TAG, "timer %s is not runing\n", timer->name);
 		return OK;
 	}
 
 	timer->status = TIMER_STATUS_STOPPED;
 	timeout_queue_del(&timer->timeout);
+	sched_spin_unlock(key);
 	log_debug(TIMER_TAG, "timer %s is stoped\n", timer->name);
 
 	return OK;

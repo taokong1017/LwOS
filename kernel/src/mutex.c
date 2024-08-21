@@ -7,7 +7,6 @@
 #define MUTEX_TAG "MUTEX"
 #define mutex2id(mutex) ((mutex_id_t)mutex)
 #define id2mutex(id) ((struct mutex *)id)
-#define TASK_SCHED_LOCKED(task) (task->lock_cnt > 1)
 
 errno_t mutex_init(struct mutex *mutex, const char *name) {
 	if (!mutex) {

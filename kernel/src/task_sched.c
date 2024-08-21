@@ -98,6 +98,26 @@ struct task *prio_mq_best(struct priority_mqueue *prio_mq) {
 	return task;
 }
 
+void sched_ready_queue_dump(uint32_t cpu_id) {
+	struct per_cpu *per_cpu = percpu_get(cpu_id);
+	struct priority_mqueue *prio_mq = &per_cpu->ready_queue.run_queue;
+	struct list_head *queue = NULL;
+	uint32_t prio = 0;
+	struct task *task = NULL;
+
+	printf("\nCPU %d ready queue:\n", cpu_id);
+	for (; prio <= TASK_PRIORITY_HIGHEST; ++prio) {
+		queue = &prio_mq->queues[prio];
+		if (list_empty(queue)) {
+			continue;
+		}
+		printf("priority %u:\n", prio);
+		list_for_each_entry(task, queue, task_list) {
+			printf("\t%s\n", task->name);
+		}
+	}
+}
+
 struct task *current_task_get() {
 	return current_percpu_get()->current_task;
 }
@@ -149,10 +169,8 @@ static void idle_task_entry(void *arg0, void *arg1, void *arg2, void *arg3) {
 void idle_task_create(uint32_t cpu_id) {
 	task_id_t task_id = 0;
 	struct task *task = NULL;
-	char task_name[TASK_NAME_LEN] = {0};
 
-	strncpy(task_name, IDLE_TASK_NAME, TASK_NAME_LEN);
-	task_create(&task_id, task_name, idle_task_entry, (void *)1, (void *)2,
+	task_create(&task_id, IDLE_TASK_NAME, idle_task_entry, (void *)1, (void *)2,
 				(void *)3, (void *)4, TASK_STACK_DEFAULT_SIZE,
 				TASK_DEFAULT_FLAG);
 	task = ID_TO_TASK(task_id);
@@ -167,10 +185,8 @@ void idle_task_create(uint32_t cpu_id) {
 void main_task_create(uint32_t cpu_id) {
 	task_id_t task_id = 0;
 	struct task *task = NULL;
-	char task_name[TASK_NAME_LEN] = {0};
 
-	strncpy(task_name, ROOT_TASK_NAME, TASK_NAME_LEN);
-	task_create(&task_id, task_name, main_task_entry, NULL, NULL, NULL, NULL,
+	task_create(&task_id, ROOT_TASK_NAME, main_task_entry, NULL, NULL, NULL, NULL,
 				TASK_STACK_DEFAULT_SIZE, TASK_DEFAULT_FLAG);
 	task = ID_TO_TASK(task_id);
 	task->priority = TASK_PRIORITY_HIGHEST;
@@ -208,6 +224,7 @@ static void system_task_entry(void *arg0, void *arg1, void *arg2, void *arg3) {
 			cmd.id = TASK_INVALID_ID;
 			cmd.cmd = TASK_CMD_NUM;
 			cmd.data = NULL;
+			len = sizeof(struct task_cmd);
 		}
 	}
 
@@ -237,13 +254,18 @@ void task_sched_locked() {
 	uint32_t idle_affi = percpu_idle_mask_get();
 	uint32_t same_affi = 0;
 
-	if (current_task == next_task) {
+	if (TASK_SCHED_LOCKED(current_task)) {
+		per_cpu->pend_sched = true;
 		return;
-	} else {
-		log_debug(TASK_SCHED_TAG, "current task is %s, next task is %s\n",
-				  current_task->name, next_task->name);
 	}
 
+	if (current_task == next_task) {
+		return;
+	}
+
+	log_debug(TASK_SCHED_TAG,
+				  "[cpu %d]current task is %s, next task is %s\n",
+				  arch_cpu_id_get(), current_task->name, next_task->name);
 	same_affi = current_task->cpu_affi & idle_affi;
 	if (same_affi != 0) {
 		sched_ready_queue_remove(current_task->cpu_id, current_task);
@@ -271,17 +293,25 @@ void task_sched_unlocked() {
 	uint32_t idle_affi = percpu_idle_mask_get();
 	uint32_t same_affi = 0;
 
+	if (TASK_LOCKED(current_task)) {
+		per_cpu->pend_sched = true;
+		return;
+	}
+
+	if (is_in_irq()) {
+		return;
+	}
+
 	if (current_task == next_task) {
 		return;
 	}
 
-	if (TASK_IS_LOCKED(current_task)) {
-		return;
-	}
-
 	if (spin_lock_is_locked(&sched_spinlock)) {
-		log_fatal(TASK_SCHED_TAG, "the sched lock %s is locked\n",
-				  sched_spinlock.name);
+		log_debug(
+			TASK_SCHED_TAG,
+			"[cpu %d] the sched lock %s is locked, current task is %s, next task is %s\n",
+			arch_cpu_id_get(), sched_spinlock.name, current_task->name,
+			next_task->name);
 		return;
 	}
 

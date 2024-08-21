@@ -16,7 +16,6 @@
 
 #define ALIGN(start, align) ((start + align - 1) & ~(align - 1))
 #define TASK_TO_ID(task) ((task_id_t)task)
-#define TASK_SCHED_LOCKED(task) (task->lock_cnt > 1)
 #define TASK_TAG "TASK"
 
 extern struct spinlock sched_spinlock;
@@ -31,14 +30,16 @@ extern uint64_t mask_trailing_zeros(uint64_t mask);
  * because the task which put in the percpu timer queue is already
  * locked using the interface spin_lock_save.
  */
-void task_delay_timeout(struct timeout *timeout) {
+bool task_delay_timeout(struct timeout *timeout) {
 	struct task *task = container_of(timeout, struct task, timeout);
 	if (task->status == TASK_STATUS_PEND) {
 		task->status = TASK_STATUS_READY;
 		task->is_timeout = true;
 		sched_ready_queue_add(task->cpu_id, task);
+		return true;
 	} else {
 		task->status &= ~TASK_STATUS_PEND;
+		return false;
 	}
 }
 
@@ -93,6 +94,8 @@ static void task_init(struct task *task, const char *name,
 	task->args[3] = arg3;
 	task->timeout.func = task_delay_timeout;
 	INIT_LIST_HEAD(&task->timeout.node);
+	INIT_LIST_HEAD(&task->task_list);
+	INIT_LIST_HEAD(&task->pend_list);
 }
 
 void task_reset(struct task *task) {
@@ -540,13 +543,16 @@ void task_lock() {
 void task_unlock() {
 	uint32_t key = 0;
 	struct task *task = NULL;
+	struct per_cpu *per_cpu = NULL;
 
 	key = arch_irq_save();
 	task = current_task_get();
+	per_cpu = current_percpu_get();
 
 	if (task->lock_cnt > 0) {
 		task->lock_cnt--;
-		if (task->lock_cnt == 0) {
+		if (task->lock_cnt == 0 && per_cpu->pend_sched) {
+			per_cpu->pend_sched = false;
 			arch_irq_restore(key);
 			task_sched_unlocked();
 			return;
@@ -605,7 +611,7 @@ errno_t task_wakeup_locked(struct wait_queue *wq) {
 }
 
 bool task_sig_handle() {
-	bool need_sched = true;
+	bool need_sched = false;
 	struct task *cur_task = current_task_get();
 	struct per_cpu *per_cpu = current_percpu_get();
 
@@ -613,25 +619,26 @@ bool task_sig_handle() {
 	if (cur_task->sig == TASK_SIG_SUSPEND) {
 		cur_task->sig &= ~TASK_SIG_SUSPEND;
 		task_suspend(cur_task->id);
-		need_sched = false;
 	}
 
 	if (cur_task->sig == TASK_SIG_STOP) {
 		cur_task->sig &= ~TASK_SIG_STOP;
 		task_stop(cur_task->id);
-		need_sched = false;
 	}
 
 	if (cur_task->sig == TASK_SIG_AFFI) {
 		cur_task->sig &= ~TASK_SIG_AFFI;
 		task_cpu_affi_set(cur_task->id, cur_task->cpu_affi);
-		need_sched = false;
 	}
 
 	/* if the task is waiting for the signal, wake it up */
-	if (per_cpu->pend_sched) {
-		per_cpu->pend_sched = false;
-		need_sched = false;
+	if (TASK_LOCKED(cur_task)) {
+		per_cpu->pend_sched = true;
+	} else {
+		if (per_cpu->pend_sched) {
+			per_cpu->pend_sched = false;
+			need_sched = true;
+		}
 	}
 
 	return need_sched;

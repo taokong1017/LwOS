@@ -62,7 +62,7 @@ void spin_lock(struct spinlock *lock) {
 	task_lock();
 	arch_spin_lock(&lock->rawlock);
 	spin_lock_trace();
-	log_info(SPIN_LOCK_TAG, "spin lock %s is owned by %s\n",
+	log_debug(SPIN_LOCK_TAG, "spin lock %s is owned by %s\n",
 			 default_str_fill(lock->name), current_task_get()->name);
 
 	return;
@@ -84,6 +84,7 @@ int32_t spin_trylock(struct spinlock *lock) {
 void spin_unlock(struct spinlock *lock) {
 	arch_spin_unlock(&lock->rawlock);
 	task_unlock();
+	spin_lock_trace_info.total_level = 0;
 	log_debug(SPIN_LOCK_TAG, "spin lock %s is free\n",
 			  default_str_fill(lock->name));
 

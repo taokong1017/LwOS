@@ -8,7 +8,7 @@
 #define ERRNO_TIMEOUT_EMPTY_PTR ERRNO_OS_ERROR(MOD_ID_TIMEOUT, 0x00)
 
 struct timeout;
-typedef void (*timeout_func)(struct timeout *timeout);
+typedef bool (*timeout_func)(struct timeout *timeout);
 
 struct timer_queue {
 	struct list_head queue;

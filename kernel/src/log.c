@@ -8,7 +8,7 @@
 extern int32_t uart_puts(const char *str, int32_t len);
 static const char *level_strings[] = {"FATAL", "ERROR", "INFO", "DEBUG"};
 static output_func log_output_func = uart_puts;
-static int32_t log_level = LOG_LEVEL_DEBUG;
+static int32_t log_level = LOG_LEVEL_INFO;
 
 void log_init(int32_t level, output_func output) {
 	if (LOG_LEVEL_IS_INVALID(level)) {
