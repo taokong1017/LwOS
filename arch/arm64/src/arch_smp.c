@@ -26,9 +26,7 @@ void arch_cpu_start(uint32_t cpu_id, arch_cpu_start_func func, void *arg) {
 							   sizeof(struct boot_params));
 	cpu_on(arch_boot_params.mp_id, (uintptr_t)__start);
 
-	while (arch_boot_params.func) {
-		wfe();
-	}
+	while (arch_boot_params.func);
 }
 
 void arch_secondary_cpu_init() {

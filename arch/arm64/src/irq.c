@@ -39,7 +39,7 @@ void arch_irq_restore(uint32_t key) {
 uint32_t arch_irq_unlock() {
 	uint32_t key;
 	__asm__ __volatile__("mrs %0, daif \n"
-						 "msr daifclr, #3"
+						 "msr daifclr, #0xf"
 						 : "=r"(key)
 						 :
 						 : "memory");
