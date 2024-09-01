@@ -186,8 +186,8 @@ void main_task_create(uint32_t cpu_id) {
 	task_id_t task_id = 0;
 	struct task *task = NULL;
 
-	task_create(&task_id, ROOT_TASK_NAME, main_task_entry, NULL, NULL, NULL, NULL,
-				TASK_STACK_DEFAULT_SIZE, TASK_DEFAULT_FLAG);
+	task_create(&task_id, ROOT_TASK_NAME, main_task_entry, NULL, NULL, NULL,
+				NULL, TASK_STACK_DEFAULT_SIZE, TASK_DEFAULT_FLAG);
 	task = ID_TO_TASK(task_id);
 	task->priority = TASK_PRIORITY_HIGHEST;
 	task->status = TASK_STATUS_READY;
@@ -263,9 +263,8 @@ void task_sched_locked() {
 		return;
 	}
 
-	log_debug(TASK_SCHED_TAG,
-				  "[cpu %d]current task is %s, next task is %s\n",
-				  arch_cpu_id_get(), current_task->name, next_task->name);
+	log_debug(TASK_SCHED_TAG, "[cpu %d]current task is %s, next task is %s\n",
+			  arch_cpu_id_get(), current_task->name, next_task->name);
 	same_affi = current_task->cpu_affi & idle_affi;
 	if (same_affi != 0) {
 		sched_ready_queue_remove(current_task->cpu_id, current_task);
@@ -295,10 +294,6 @@ void task_sched_unlocked() {
 
 	if (TASK_LOCKED(current_task)) {
 		per_cpu->pend_sched = true;
-		return;
-	}
-
-	if (is_in_irq()) {
 		return;
 	}
 

@@ -18,7 +18,7 @@
 #define TASK_TO_ID(task) ((task_id_t)task)
 #define TASK_TAG "TASK"
 
-extern struct spinlock sched_spinlock;
+SPIN_LOCK_DECLARE(sched_spinlock);
 extern void task_sched_unlocked();
 extern uint64_t mask_trailing_zeros(uint64_t mask);
 

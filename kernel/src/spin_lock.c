@@ -13,14 +13,18 @@
 #define SPIN_LOCK_TAG "SPIN_LOCK"
 #define default_str_fill(str) ((str == NULL) ? "unkown" : str)
 #define STACK_WALK_SIZE 20
+#define OWNER_SIZE 32
+#define IRQ_OWNER "IRQ"
 
 struct spinlock_trace_info {
 	uint32_t total_level;
 	uint32_t cpu_id;
 	virt_addr_t trace[STACK_WALK_SIZE];
+	char lock_name[OWNER_SIZE];
+	char owner[OWNER_SIZE];
 };
 
-struct spinlock_trace_info spin_lock_trace_info;
+struct spinlock_trace_info spin_lock_trace_info = {.owner = "unkown"};
 
 static bool save_Linker(void *cookie, virt_addr_t pc) {
 	struct spinlock_trace_info *info = (struct spinlock_trace_info *)cookie;
@@ -33,16 +37,19 @@ static bool save_Linker(void *cookie, virt_addr_t pc) {
 	return false;
 }
 
-static void spin_lock_trace() {
+static void spin_lock_trace(struct spinlock *lock) {
 	spin_lock_trace_info.total_level = 0;
 	struct task *task = current_task_get();
 
 	spin_lock_trace_info.cpu_id = arch_cpu_id_get();
 	memset(spin_lock_trace_info.trace, 0, sizeof(spin_lock_trace_info.trace));
-	if (task) {
+	strncpy(spin_lock_trace_info.lock_name, lock->name, OWNER_SIZE);
+	if (is_in_irq()) {
 		arch_stack_walk(save_Linker, &spin_lock_trace_info, NULL, NULL);
-	} else {
+		strncpy(spin_lock_trace_info.owner, IRQ_OWNER, OWNER_SIZE);
+	} else if (task) {
 		arch_stack_walk(save_Linker, &spin_lock_trace_info, task, NULL);
+		strncpy(spin_lock_trace_info.owner, task->name, OWNER_SIZE);
 	}
 
 	return;
@@ -52,7 +59,8 @@ void spin_lock_trace_dump() {
 	uint32_t i = 0;
 	struct spinlock_trace_info *info = &spin_lock_trace_info;
 
-	printf("[%s - %d] trace info: \n", SPIN_LOCK_TAG, info->cpu_id);
+	printf("[%s - CPU%d - %s]\nTrace Info: \n", info->lock_name, info->cpu_id,
+		   info->owner);
 	for (i = 0; i < info->total_level; i++) {
 		printf("  %u: 0x%016llx\n", i, info->trace[i]);
 	}
@@ -61,9 +69,9 @@ void spin_lock_trace_dump() {
 void spin_lock(struct spinlock *lock) {
 	task_lock();
 	arch_spin_lock(&lock->rawlock);
-	spin_lock_trace();
+	spin_lock_trace(lock);
 	log_debug(SPIN_LOCK_TAG, "spin lock %s is owned by %s\n",
-			 default_str_fill(lock->name), current_task_get()->name);
+			  default_str_fill(lock->name), current_task_get()->name);
 
 	return;
 }

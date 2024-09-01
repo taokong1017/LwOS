@@ -2,6 +2,7 @@
 #include <isr_table.h>
 #include <irq.h>
 #include <cpu.h>
+#include <task_sched.h>
 
 void arch_irq_enable(uint32_t irq) { arm_gic_irq_enable(irq); }
 
@@ -48,7 +49,12 @@ uint32_t arch_irq_unlock() {
 
 bool arch_irq_locked() {
 	uint32_t key;
-	__asm__ __volatile__("mrs %0, daif" : "=r"(key) : : "memory");
+	if (is_in_irq()) {
+		__asm__ __volatile__("mrs %0, SPSR_EL1" : "=r"(key) : : "memory");
+	} else {
+		__asm__ __volatile__("mrs %0, daif" : "=r"(key) : : "memory");
+	}
+
 	return (key & DAIF_IRQ_BIT) != 0;
 }
 
