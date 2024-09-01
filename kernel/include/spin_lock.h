@@ -10,6 +10,7 @@
 #define NAME_LEN 32
 #define SPIN_LOCK_DEFINE(locker, locker_name)                                  \
 	struct spinlock locker = {.rawlock = 0, .name = locker_name};
+#define SPIN_LOCK_DECLARE(locker) extern struct spinlock locker
 
 struct spinlock {
 	uint32_t rawlock;

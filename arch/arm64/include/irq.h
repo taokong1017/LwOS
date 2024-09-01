@@ -14,8 +14,9 @@ bool arch_irq_connect(uint32_t irq, uint32_t priority,
 					  uint32_t flags);
 
 uint32_t arch_irq_save();
+uint32_t arch_irq_status();
 void arch_irq_restore(uint32_t key);
-bool arch_irq_lock_check(uint32_t key);
+bool arch_irq_locked();
 uint32_t arch_irq_unlock();
 #endif
 
