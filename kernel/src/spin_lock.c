@@ -67,7 +67,6 @@ void spin_lock_trace_dump() {
 }
 
 void spin_lock(struct spinlock *lock) {
-	task_lock();
 	arch_spin_lock(&lock->rawlock);
 	spin_lock_trace(lock);
 	log_debug(SPIN_LOCK_TAG, "spin lock %s is owned by %s\n",
@@ -79,10 +78,8 @@ void spin_lock(struct spinlock *lock) {
 int32_t spin_trylock(struct spinlock *lock) {
 	int32_t ret = 0;
 
-	task_lock();
 	ret = arch_spin_try_lock(&lock->rawlock);
 	if (ret != OK) {
-		task_unlock();
 		return ERRNO_SPINLOCK_TRY_LOCK_FAILED;
 	}
 
@@ -91,7 +88,6 @@ int32_t spin_trylock(struct spinlock *lock) {
 
 void spin_unlock(struct spinlock *lock) {
 	arch_spin_unlock(&lock->rawlock);
-	task_unlock();
 	spin_lock_trace_info.total_level = 0;
 	log_debug(SPIN_LOCK_TAG, "spin lock %s is free\n",
 			  default_str_fill(lock->name));

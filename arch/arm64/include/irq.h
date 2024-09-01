@@ -2,7 +2,7 @@
 #define __ARM64_ISR_H__
 
 #define UART_IRQ_NUM 33
-#define TICK_IRQ_NUM 30
+#define TICK_IRQ_NUM 27
 #define IRQ_MAX_NUM 1020
 
 #ifndef __ASSEMBLY__
@@ -17,7 +17,7 @@ uint32_t arch_irq_save();
 uint32_t arch_irq_status();
 void arch_irq_restore(uint32_t key);
 bool arch_irq_locked();
-uint32_t arch_irq_unlock();
+void arch_irq_unlock();
 #endif
 
 #endif

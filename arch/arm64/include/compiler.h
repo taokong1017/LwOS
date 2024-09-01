@@ -16,6 +16,13 @@ typedef uint64_t __attribute__((__may_alias__)) __u64_alias_t;
 #define dsb(option) __asm__ __volatile__("dsb " #option : : : "memory")
 #define dmb(option) __asm__ __volatile__("dmb " #option : : : "memory")
 #define code_unreachable() __builtin_unreachable()
+#define assert(flag, msg, ...)                                                 \
+	do {                                                                       \
+		if (!flag) {                                                           \
+			printf(msg, ##__VA_ARGS__);                                        \
+			forever();                                                         \
+		}                                                                      \
+	} while (0)
 
 static inline void __read_once_size(const volatile void *p, void *res,
 									int size) {
