@@ -6,15 +6,30 @@
 #include <arch_timer.h>
 #include <timeout.h>
 #include <menuconfig.h>
+#include <log.h>
+#include <cpu.h>
+#include <task_sched.h>
 
+#define TICK_TAG "TICK"
 static uint64_t tick_counts[CONFIG_CPUS_MAX_NUM] = {0};
 
 void tick_announce() {
-	tick_counts[arch_cpu_id_get()]++;
-	timeout_queue_handle(current_ticks_get());
+	uint32_t cpu_id = arch_cpu_id_get();
+	uint32_t key = sched_spin_lock();
+	tick_counts[cpu_id]++;
+	sched_spin_unlock(key);
+	log_debug(TICK_TAG, "cpu%u tick: %llu\n", cpu_id, tick_counts[cpu_id]);
+	timeout_queue_handle(tick_counts[cpu_id]);
 }
 
-uint64_t current_ticks_get() { return tick_counts[arch_cpu_id_get()]; }
+uint64_t current_ticks_get() {
+	uint64_t tick = 0;
+	uint32_t key = sched_spin_lock();
+	tick = tick_counts[arch_cpu_id_get()];
+	sched_spin_unlock(key);
+
+	return tick;
+}
 
 uint64_t current_cycles_get() {
 	uint64_t cycles = 0;

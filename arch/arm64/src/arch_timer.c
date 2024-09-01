@@ -43,8 +43,8 @@ void arch_timer_set_compare(uint64_t val) { write_cntv_cval_el0(val); }
 void arch_timer_compare_isr(const void *arg) {
 	(void)arg;
 
-	arch_timer_set_compare(read_cntv_cval_el0() + CYC_PER_TICK);
 	tick_announce();
+	arch_timer_set_compare(arch_timer_count() + CYC_PER_TICK);
 	arch_timer_enable(true);
 	arch_timer_set_irq_mask(false);
 
