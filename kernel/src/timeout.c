@@ -17,9 +17,9 @@ void timeout_queue_handle(uint64_t cur_ticks) {
 	spin_lock(&sched_spinlock);
 	queue = &per_cpu->timer_queue.queue;
 	list_for_each_entry_safe(timeout, next, queue, node) {
-		if (timeout) {
+		if (timeout && cur_ticks >= timeout->deadline_ticks) {
 			list_del_init(&timeout->node);
-			if (timeout->func && cur_ticks >= timeout->deadline_ticks) {
+			if (timeout->func) {
 				need_sched |= timeout->func(timeout);
 			}
 		}
