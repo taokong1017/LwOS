@@ -17,7 +17,7 @@
 #define TASK_SCHED_LOCKER "SCHED_SPIN_LOCKER"
 #define TASK_IS_LOCKED(task) (task->lock_cnt > 0)
 
-SPIN_LOCK_DEFINE(sched_spinlock, TASK_SCHED_LOCKER)
+SPIN_LOCK_DEFINE(sched_spinlock, TASK_SCHED_LOCKER);
 extern void main_task_entry(void *arg0, void *arg1, void *arg2, void *arg3);
 extern void task_reset(struct task *task);
 
@@ -301,17 +301,7 @@ void task_sched_unlocked() {
 		return;
 	}
 
-	if (spin_lock_is_locked(&sched_spinlock)) {
-		log_debug(
-			TASK_SCHED_TAG,
-			"[cpu %d] the sched lock %s is locked, current task is %s, next task is %s\n",
-			arch_cpu_id_get(), sched_spinlock.name, current_task->name,
-			next_task->name);
-		return;
-	}
-
 	key = sched_spin_lock();
-
 	current_task->status = TASK_STATUS_READY;
 	sched_ready_queue_remove(current_task->cpu_id, current_task);
 	same_affi = current_task->cpu_affi & idle_affi;

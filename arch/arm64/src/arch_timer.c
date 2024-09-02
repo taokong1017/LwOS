@@ -4,6 +4,7 @@
 #include <log.h>
 #include <tick.h>
 #include <menuconfig.h>
+#include <compiler.h>
 
 #define ARCH_TIMER_TAG "ARCH_TIMER"
 #define CYC_PER_TICK (arch_timer_freq_get() / CONFIG_TICKS_PER_SECOND)
@@ -22,6 +23,7 @@ void arch_timer_enable(bool enable) {
 	}
 
 	write_cntv_ctl_el0(cntv_ctl);
+	isb();
 }
 
 void arch_timer_set_irq_mask(bool mask) {
@@ -34,6 +36,7 @@ void arch_timer_set_irq_mask(bool mask) {
 	}
 
 	write_cntv_ctl_el0(cntv_ctl);
+	isb();
 }
 
 uint64_t arch_timer_count() { return read_cntvct_el0(); }

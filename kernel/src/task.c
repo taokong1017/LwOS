@@ -19,7 +19,6 @@
 #define TASK_TAG "TASK"
 
 SPIN_LOCK_DECLARE(sched_spinlock);
-extern void task_sched_unlocked();
 extern uint64_t mask_trailing_zeros(uint64_t mask);
 
 /*
@@ -488,6 +487,7 @@ errno_t task_suspend_self() { return task_suspend(task_self_id()); }
 
 errno_t task_delay(uint64_t ticks) {
 	struct task *task = current_task_get();
+	uint64_t current_ticks = current_ticks_get();
 	uint32_t key = 0;
 
 	if (is_in_irq()) {
@@ -516,7 +516,7 @@ errno_t task_delay(uint64_t ticks) {
 	if (ticks > 0) {
 		sched_ready_queue_remove(task->cpu_id, task);
 		task->status = TASK_STATUS_PEND;
-		task->timeout.deadline_ticks = current_ticks_get() + ticks;
+		task->timeout.deadline_ticks = current_ticks + ticks;
 		timeout_queue_add(&task->timeout);
 	}
 
@@ -532,10 +532,10 @@ void task_lock() {
 	uint32_t key = 0;
 	struct task *task = NULL;
 
-	key = arch_irq_save();
+	key = sched_spin_lock();
 	task = current_task_get();
 	task->lock_cnt++;
-	arch_irq_restore(key);
+	sched_spin_unlock(key);
 
 	return;
 }
@@ -543,22 +543,17 @@ void task_lock() {
 void task_unlock() {
 	uint32_t key = 0;
 	struct task *task = NULL;
-	struct per_cpu *per_cpu = NULL;
 
-	key = arch_irq_save();
+	key = sched_spin_lock();
 	task = current_task_get();
-	per_cpu = current_percpu_get();
 
 	if (task->lock_cnt > 0) {
 		task->lock_cnt--;
-		if (task->lock_cnt == 0 && per_cpu->pend_sched) {
-			per_cpu->pend_sched = false;
-			arch_irq_restore(key);
-			task_sched_unlocked();
-			return;
-		}
 	}
-	arch_irq_restore(key);
+
+	if (task->lock_cnt == 0) {
+		sched_spin_unlock(key);
+	}
 
 	return;
 }
@@ -614,6 +609,13 @@ bool task_sig_handle() {
 	bool need_sched = false;
 	struct task *cur_task = current_task_get();
 	struct per_cpu *per_cpu = current_percpu_get();
+
+	if (spin_lock_is_locked(&sched_spinlock)) {
+		log_info(TASK_TAG,
+				 "[cpu %d] the sched lock %s is locked, current task is %s\n",
+				 arch_cpu_id_get(), sched_spinlock.name, cur_task->name);
+		return need_sched;
+	}
 
 	/* task signal is set by other cpu */
 	if (cur_task->sig == TASK_SIG_SUSPEND) {
