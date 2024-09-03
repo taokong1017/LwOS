@@ -11,22 +11,29 @@
 #include <task_sched.h>
 
 #define TICK_TAG "TICK"
+#define TICK_SPIN_LOCKER "TICK_SPIN_LOCKER"
+SPIN_LOCK_DEFINE(tick_spinlocker, TICK_SPIN_LOCKER);
 static uint64_t tick_counts[CONFIG_CPUS_MAX_NUM] = {0};
 
 void tick_announce() {
 	uint32_t cpu_id = arch_cpu_id_get();
-	uint32_t key = sched_spin_lock();
+	uint32_t key = 0;
+
+	spin_lock_save(&tick_spinlocker, &key);
 	tick_counts[cpu_id]++;
-	sched_spin_unlock(key);
+	spin_lock_restore(&tick_spinlocker, key);
+
 	log_debug(TICK_TAG, "cpu%u tick: %llu\n", cpu_id, tick_counts[cpu_id]);
 	timeout_queue_handle(tick_counts[cpu_id]);
 }
 
 uint64_t current_ticks_get() {
 	uint64_t tick = 0;
-	uint32_t key = sched_spin_lock();
+	uint32_t key = 0;
+
+	spin_lock_save(&tick_spinlocker, &key);
 	tick = tick_counts[arch_cpu_id_get()];
-	sched_spin_unlock(key);
+	spin_lock_restore(&tick_spinlocker, key);
 
 	return tick;
 }

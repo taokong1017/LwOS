@@ -17,7 +17,7 @@
 #define TASK_SCHED_LOCKER "SCHED_SPIN_LOCKER"
 #define TASK_IS_LOCKED(task) (task->lock_cnt > 0)
 
-SPIN_LOCK_DEFINE(sched_spinlock, TASK_SCHED_LOCKER);
+SPIN_LOCK_DEFINE(sched_spinlocker, TASK_SCHED_LOCKER);
 extern void main_task_entry(void *arg0, void *arg1, void *arg2, void *arg3);
 extern void task_reset(struct task *task);
 
@@ -124,13 +124,13 @@ struct task *current_task_get() {
 
 uint32_t sched_spin_lock() {
 	uint32_t key = 0;
-	spin_lock_save(&sched_spinlock, &key);
+	spin_lock_save(&sched_spinlocker, &key);
 
 	return key;
 }
 
 void sched_spin_unlock(uint32_t key) {
-	spin_lock_restore(&sched_spinlock, key);
+	spin_lock_restore(&sched_spinlocker, key);
 }
 
 void sched_ready_queue_remove(uint32_t cpu_id, struct task *task) {

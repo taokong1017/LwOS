@@ -6,7 +6,7 @@
 #include <stdio.h>
 #include <smp.h>
 
-SPIN_LOCK_DECLARE(sched_spinlock);
+SPIN_LOCK_DECLARE(sched_spinlocker);
 
 void timeout_queue_handle(uint64_t cur_ticks) {
 	struct list_head *queue = NULL;
@@ -14,7 +14,7 @@ void timeout_queue_handle(uint64_t cur_ticks) {
 	bool need_sched = false;
 	struct per_cpu *per_cpu = current_percpu_get();
 
-	spin_lock(&sched_spinlock);
+	spin_lock(&sched_spinlocker);
 	queue = &per_cpu->timer_queue.queue;
 	list_for_each_entry_safe(timeout, next, queue, node) {
 		if (timeout && cur_ticks >= timeout->deadline_ticks) {
@@ -29,7 +29,7 @@ void timeout_queue_handle(uint64_t cur_ticks) {
 		per_cpu->pend_sched = true;
 		smp_halt_notify();
 	}
-	spin_unlock(&sched_spinlock);
+	spin_unlock(&sched_spinlocker);
 }
 
 errno_t timeout_queue_add(struct timeout *timeout) {

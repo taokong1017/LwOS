@@ -18,7 +18,7 @@
 #define TASK_TO_ID(task) ((task_id_t)task)
 #define TASK_TAG "TASK"
 
-SPIN_LOCK_DECLARE(sched_spinlock);
+SPIN_LOCK_DECLARE(sched_spinlocker);
 extern uint64_t mask_trailing_zeros(uint64_t mask);
 
 /*
@@ -151,7 +151,7 @@ errno_t task_create(task_id_t *task_id, const char *name, task_entry_func entry,
 void task_entry_point(task_id_t task_id) {
 	struct task *task = ID_TO_TASK(task_id);
 
-	spin_unlock(&sched_spinlock);
+	spin_unlock(&sched_spinlocker);
 	arch_irq_unlock();
 	log_debug(TASK_TAG, "task %s starts from entry point\n", task->name);
 	task->entry(task->args[0], task->args[1], task->args[2], task->args[3]);
@@ -610,10 +610,10 @@ bool task_sig_handle() {
 	struct task *cur_task = current_task_get();
 	struct per_cpu *per_cpu = current_percpu_get();
 
-	if (spin_lock_is_locked(&sched_spinlock)) {
+	if (spin_lock_is_locked(&sched_spinlocker)) {
 		log_info(TASK_TAG,
 				 "[cpu %d] the sched lock %s is locked, current task is %s\n",
-				 arch_cpu_id_get(), sched_spinlock.name, cur_task->name);
+				 arch_cpu_id_get(), sched_spinlocker.name, cur_task->name);
 		return need_sched;
 	}
 
