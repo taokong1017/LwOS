@@ -254,7 +254,7 @@ void task_sched_locked() {
 	uint32_t idle_affi = percpu_idle_mask_get();
 	uint32_t same_affi = 0;
 
-	if (TASK_SCHED_LOCKED(current_task)) {
+	if (TASK_IS_LOCKED(current_task)) {
 		per_cpu->pend_sched = true;
 		return;
 	}
@@ -292,7 +292,7 @@ void task_sched_unlocked() {
 	uint32_t idle_affi = percpu_idle_mask_get();
 	uint32_t same_affi = 0;
 
-	if (TASK_LOCKED(current_task)) {
+	if (TASK_IS_LOCKED(current_task)) {
 		per_cpu->pend_sched = true;
 		return;
 	}

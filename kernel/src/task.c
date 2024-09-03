@@ -319,6 +319,7 @@ errno_t task_start(task_id_t task_id) {
 	}
 
 	task->status = TASK_STATUS_READY;
+	task->cpu_id = mask_trailing_zeros(task->cpu_affi);
 	sched_ready_queue_add(task->cpu_id, task);
 	task_sched_locked();
 	sched_spin_unlock(key);
@@ -503,7 +504,7 @@ errno_t task_delay(uint64_t ticks) {
 	}
 
 	key = sched_spin_lock();
-	if (TASK_SCHED_LOCKED(task)) {
+	if (TASK_IS_LOCKED(task)) {
 		sched_spin_unlock(key);
 		return ERRNO_TASK_IS_LOCKED;
 	}
@@ -610,13 +611,6 @@ bool task_sig_handle() {
 	struct task *cur_task = current_task_get();
 	struct per_cpu *per_cpu = current_percpu_get();
 
-	if (spin_lock_is_locked(&sched_spinlocker)) {
-		log_info(TASK_TAG,
-				 "[cpu %d] the sched lock %s is locked, current task is %s\n",
-				 arch_cpu_id_get(), sched_spinlocker.name, cur_task->name);
-		return need_sched;
-	}
-
 	/* task signal is set by other cpu */
 	if (cur_task->sig == TASK_SIG_SUSPEND) {
 		cur_task->sig &= ~TASK_SIG_SUSPEND;
@@ -634,7 +628,7 @@ bool task_sig_handle() {
 	}
 
 	/* if the task is waiting for the signal, wake it up */
-	if (TASK_LOCKED(cur_task)) {
+	if (TASK_IS_LOCKED(cur_task)) {
 		per_cpu->pend_sched = true;
 	} else {
 		if (per_cpu->pend_sched) {

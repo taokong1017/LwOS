@@ -137,7 +137,7 @@ errno_t mutex_take(mutex_id_t id, uint32_t timeout) {
 		return ERRNO_MUTEX_IS_BUSY;
 	}
 
-	if (TASK_SCHED_LOCKED(cur_task)) {
+	if (TASK_IS_LOCKED(cur_task)) {
 		log_debug(MUTEX_TAG, "the task %s is locked\n", cur_task->name);
 		sched_spin_unlock(key);
 		return ERRNO_MUTEX_IS_LOCKED;
@@ -221,7 +221,7 @@ errno_t mutex_give(mutex_id_t id) {
 		return ERRNO_MUTEX_OHTER_OWNER;
 	}
 
-	if (TASK_SCHED_LOCKED(cur_task)) {
+	if (TASK_IS_LOCKED(cur_task)) {
 		log_debug(MUTEX_TAG, "the task %s is locked\n", cur_task->name);
 		sched_spin_unlock(key);
 		return ERRNO_MUTEX_IS_LOCKED;
