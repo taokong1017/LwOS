@@ -11,6 +11,7 @@
 #include <percpu.h>
 
 #define array_size(x) (sizeof(x) / sizeof((x)[0]))
+#define IS_VALID_ADDR(addr) (addr && addr != -1)
 
 extern uint64_t current_pc_get();
 
@@ -190,7 +191,7 @@ void arch_stack_walk(stack_trace_consume_func consume_entry, void *cookie,
 static bool show_Linker(void *cookie, virt_addr_t pc) {
 	uint32_t *level = (uint32_t *)cookie;
 
-	if (pc) {
+	if (IS_VALID_ADDR(pc)) {
 		printf("  %u: 0x%016llx\n", (*level)++, pc);
 		return true;
 	} else {

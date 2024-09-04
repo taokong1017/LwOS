@@ -31,7 +31,7 @@ extern uint64_t mask_trailing_zeros(uint64_t mask);
  */
 bool task_delay_timeout(struct timeout *timeout) {
 	struct task *task = container_of(timeout, struct task, timeout);
-	if (task->status == TASK_STATUS_PEND) {
+	if (TASK_IS_PEND(task)) {
 		task->status = TASK_STATUS_READY;
 		task->is_timeout = true;
 		sched_ready_queue_add(task->cpu_id, task);
@@ -184,14 +184,13 @@ errno_t task_prority_set(task_id_t task_id, uint32_t prioriy) {
 		return ERRNO_TASK_IN_IRQ_STATUS;
 	}
 
-	if (task->status == TASK_STATUS_STOP) {
+	if (TASK_IS_STOP(task)) {
 		task->priority = prioriy;
 		sched_spin_unlock(key);
 		return OK;
 	}
 
-	if ((task->status == TASK_STATUS_READY) ||
-		(task->status == TASK_STATUS_RUNNING)) {
+	if (TASK_IS_READY(task) || TASK_IS_RUNNING(task)) {
 		sched_ready_queue_remove(task->cpu_id, task);
 		task->priority = prioriy;
 		sched_ready_queue_add(task->cpu_id, task);
@@ -252,7 +251,7 @@ errno_t task_cpu_affi_set(task_id_t task_id, uint32_t cpu_affi) {
 	idle_affi = percpu_idle_mask_get();
 
 	task->cpu_affi = cpu_affi;
-	if (task->status == TASK_STATUS_RUNNING) {
+	if (TASK_IS_RUNNING(task)) {
 		if (cur_cpu_id == task->id) {
 			task_sched_locked();
 		} else {
@@ -261,7 +260,7 @@ errno_t task_cpu_affi_set(task_id_t task_id, uint32_t cpu_affi) {
 		}
 	}
 
-	if (task->status == TASK_STATUS_READY) {
+	if (TASK_IS_READY(task)) {
 		sched_ready_queue_remove(task->cpu_id, task);
 		same_affi = cpu_affi & idle_affi;
 		if (same_affi != 0) {
@@ -367,12 +366,12 @@ errno_t task_stop(task_id_t task_id) {
 		return ERRNO_TASK_OPERATE_INVALID;
 	}
 
-	if (task->status == TASK_STATUS_STOP) {
+	if (TASK_IS_STOP(task)) {
 		sched_spin_unlock(key);
 		return ERRNO_TASK_STATUS_INVALID;
 	}
 
-	if (task->status == TASK_STATUS_READY) {
+	if (TASK_IS_READY(task)) {
 		sched_ready_queue_remove(task->cpu_id, task);
 	}
 
@@ -385,7 +384,7 @@ errno_t task_stop(task_id_t task_id) {
 		timeout_queue_del(&task->timeout);
 	}
 
-	if (task->status == TASK_STATUS_RUNNING) {
+	if (TASK_IS_RUNNING(task)) {
 		if (task->cpu_id == cur_cpu_id) {
 			sched_spin_unlock(key);
 			task_service_notify(task->id, TASK_CMD_STOP);
@@ -459,7 +458,7 @@ errno_t task_suspend(task_id_t task_id) {
 		return OK;
 	}
 
-	if (task->status == TASK_STATUS_STOP) {
+	if (TASK_IS_STOP(task)) {
 		sched_spin_unlock(key);
 		return ERRNO_TASK_STATUS_INVALID;
 	}
@@ -470,8 +469,7 @@ errno_t task_suspend(task_id_t task_id) {
 	}
 
 	/* The task is running on the other cpu */
-	if ((task->status == TASK_STATUS_RUNNING) &&
-		task->cpu_id != arch_cpu_id_get()) {
+	if (TASK_IS_RUNNING(task) && task->cpu_id != arch_cpu_id_get()) {
 		task->sig = TASK_SIG_SUSPEND;
 		smp_sched_notify();
 		return ERRNO_TASK_WILL_SUSPEND;

@@ -82,8 +82,7 @@ errno_t mutex_destroy(mutex_id_t id) {
 }
 
 static void mutex_owner_priority_set(struct task *task, uint32_t priority) {
-	if (task->status == TASK_STATUS_READY ||
-		task->status == TASK_STATUS_RUNNING) {
+	if (TASK_IS_READY(task) || TASK_IS_RUNNING(task)) {
 		sched_ready_queue_remove(task->cpu_id, task);
 		task->priority = priority;
 		sched_ready_queue_add(task->cpu_id, task);
