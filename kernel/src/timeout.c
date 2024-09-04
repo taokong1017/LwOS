@@ -13,8 +13,8 @@ void timeout_queue_handle(uint64_t cur_ticks) {
 	struct timeout *timeout = NULL, *next = NULL;
 	bool need_sched = false;
 	struct per_cpu *per_cpu = current_percpu_get();
+	uint32_t key = sched_spin_lock();
 
-	spin_lock(&sched_spinlocker);
 	queue = &per_cpu->timer_queue.queue;
 	list_for_each_entry_safe(timeout, next, queue, node) {
 		if (timeout && cur_ticks >= timeout->deadline_ticks) {
@@ -27,19 +27,20 @@ void timeout_queue_handle(uint64_t cur_ticks) {
 
 	if (need_sched) {
 		per_cpu->pend_sched = true;
-		smp_halt_notify();
+		smp_sched_notify();
 	}
-	spin_unlock(&sched_spinlocker);
+
+	sched_spin_unlock(key);
 }
 
-errno_t timeout_queue_add(struct timeout *timeout) {
+errno_t timeout_queue_add(struct timeout *timeout, uint32_t cpu_id) {
 	struct list_head *queue = NULL;
 
 	if (!timeout) {
 		return ERRNO_TIMEOUT_EMPTY_PTR;
 	}
 
-	queue = &current_percpu_get()->timer_queue.queue;
+	queue = &percpu_get(cpu_id)->timer_queue.queue;
 	list_add_tail(&timeout->node, queue);
 
 	return OK;

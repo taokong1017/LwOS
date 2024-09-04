@@ -10,6 +10,7 @@
 #define ID_TO_TASK(task_id) ((struct task *)task_id)
 #define TASK_WAIT_FOREVER WAIT_FOREVER
 #define TASK_IS_LOCKED(task) (task->lock_cnt > 0)
+#define TASK_IS_READY(task) (task->status == TASK_STATUS_READY)
 
 /* task default invalid ID definition */
 #define TASK_INVALID_CPUID 0xFFFF

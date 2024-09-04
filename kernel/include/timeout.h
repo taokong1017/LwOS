@@ -21,7 +21,7 @@ struct timeout {
 };
 
 void timeout_queue_handle(uint64_t cur_ticks);
-errno_t timeout_queue_add(struct timeout *timeout);
+errno_t timeout_queue_add(struct timeout *timeout, uint32_t cpu_id);
 errno_t timeout_queue_del(struct timeout *timeout);
 
 #endif

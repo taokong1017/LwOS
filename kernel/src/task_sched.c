@@ -267,9 +267,7 @@ void task_sched_locked() {
 			  arch_cpu_id_get(), current_task->name, next_task->name);
 	same_affi = current_task->cpu_affi & idle_affi;
 	if (same_affi != 0) {
-		sched_ready_queue_remove(current_task->cpu_id, current_task);
 		current_task->cpu_id = mask_trailing_zeros(same_affi);
-		sched_ready_queue_add(current_task->cpu_id, current_task);
 	}
 	current_task->status &= ~TASK_STATUS_RUNNING;
 

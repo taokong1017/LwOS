@@ -713,10 +713,10 @@ int printf(const char *fmt, ...) {
 	int ret;
 	uint32_t key = 0;
 
+	spin_lock_save(&print_locker, &key);
 	va_start(args, fmt);
 	ret = vsnprintf(buf, BUF_SIZE - 1, fmt, args);
 	va_end(args);
-	spin_lock_save(&print_locker, &key);
 	uart_puts(buf, ret);
 	spin_lock_restore(&print_locker, key);
 

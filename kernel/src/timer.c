@@ -4,6 +4,7 @@
 #include <string.h>
 #include <tick.h>
 #include <task_sched.h>
+#include <cpu.h>
 
 #define TIMER_TAG "TIMER"
 #define timer2id(timer) ((msgq_id_t)timer)
@@ -42,6 +43,7 @@ static bool timer_timeout_handler(struct timeout *timeout) {
 	struct timer *timer = container_of(timeout, struct timer, timeout);
 	timer_cb *call_back = timer->cb;
 	void *arg = timer->arg;
+	uint32_t cpu_id = arch_cpu_id_get();
 
 	if (timer->type == TIMER_TYPE_ONE_SHOT) {
 		timer->status = TIMER_STATUS_STOPPED;
@@ -53,7 +55,7 @@ static bool timer_timeout_handler(struct timeout *timeout) {
 
 	if (timer->type == TIMER_TYPE_PERIODIC) {
 		timer->timeout.deadline_ticks += timer->ticks;
-		timeout_queue_add(&timer->timeout);
+		timeout_queue_add(&timer->timeout, cpu_id);
 	}
 
 	return false;
@@ -92,6 +94,7 @@ errno_t timer_create(const char *name, enum timer_type type, uint64_t ticks,
 errno_t timer_start(timer_id_t id) {
 	struct timer *timer = id2timer(id);
 	uint32_t key = sched_spin_lock();
+	uint32_t cpu_id = arch_cpu_id_get();
 
 	if (!timer || id != timer->id) {
 		sched_spin_unlock(key);
@@ -112,7 +115,7 @@ errno_t timer_start(timer_id_t id) {
 
 	timer->status = TIMER_STATUS_RUNNING;
 	timer->timeout.deadline_ticks = current_ticks_get() + timer->ticks;
-	timeout_queue_add(&timer->timeout);
+	timeout_queue_add(&timer->timeout, cpu_id);
 	sched_spin_unlock(key);
 	log_debug(TIMER_TAG, "timer %s is started\n", timer->name);
 

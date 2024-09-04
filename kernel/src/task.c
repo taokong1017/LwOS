@@ -302,6 +302,8 @@ errno_t task_cpu_affi_get(task_id_t task_id, uint32_t *cpu_affi) {
 errno_t task_start(task_id_t task_id) {
 	struct task *task = ID_TO_TASK(task_id);
 	uint32_t key = 0;
+	uint32_t cur_cpu_id = arch_cpu_id_get();
+	uint64_t current_ticks = current_ticks_get();
 
 	if (!task || task->id != task_id) {
 		return ERRNO_TASK_ID_INVALID;
@@ -318,10 +320,16 @@ errno_t task_start(task_id_t task_id) {
 		return ERRNO_TASK_STATUS_INVALID;
 	}
 
-	task->status = TASK_STATUS_READY;
 	task->cpu_id = mask_trailing_zeros(task->cpu_affi);
-	sched_ready_queue_add(task->cpu_id, task);
-	task_sched_locked();
+	if (task->cpu_id == cur_cpu_id) {
+		task->status = TASK_STATUS_READY;
+		sched_ready_queue_add(task->cpu_id, task);
+		task_sched_locked();
+	} else {
+		task->status = TASK_STATUS_PEND;
+		task->timeout.deadline_ticks = current_ticks;
+		timeout_queue_add(&task->timeout, task->cpu_id);
+	}
 	sched_spin_unlock(key);
 
 	return OK;
@@ -518,7 +526,7 @@ errno_t task_delay(uint64_t ticks) {
 		sched_ready_queue_remove(task->cpu_id, task);
 		task->status = TASK_STATUS_PEND;
 		task->timeout.deadline_ticks = current_ticks + ticks;
-		timeout_queue_add(&task->timeout);
+		timeout_queue_add(&task->timeout, task->cpu_id);
 	}
 
 	log_debug(TASK_TAG, "%s delay %d ticks\n", task->name, ticks);
@@ -575,7 +583,7 @@ errno_t task_wait_locked(struct wait_queue *wq, uint64_t ticks,
 	task->status = TASK_STATUS_PEND;
 	if (ticks != TASK_WAIT_FOREVER) {
 		task->timeout.deadline_ticks = current_ticks_get() + ticks;
-		timeout_queue_add(&task->timeout);
+		timeout_queue_add(&task->timeout, task->cpu_id);
 	}
 	list_add_tail(&task->pend_list, &wq->wait_list);
 	task_sched_locked();
