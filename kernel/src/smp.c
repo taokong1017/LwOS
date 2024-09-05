@@ -26,26 +26,25 @@ struct smp_init_callback {
 };
 
 static atomic_t cpu_start_flag = 0;
-static atomic_t ready_flag = 0;
 
 void smp_init() {
 	uint32_t i = 0;
-	atomic_clear(&cpu_start_flag);
 
+	arch_irq_connect(SMP_IPI_SCHED, 160, smp_sched_handler, NULL,
+					 IRQ_TYPE_LEVEL);
+	arch_irq_connect(SMP_IPI_HALT, 160, smp_halt_handler, NULL, IRQ_TYPE_LEVEL);
+
+	atomic_clear(&cpu_start_flag);
 	for (i = 1; i < CONFIG_CPUS_MAX_NUM; i++) {
 		smp_cpu_start(i);
 	}
 
 	atomic_set(&cpu_start_flag, (atomic_t)1);
-	arch_irq_connect(SMP_IPI_SCHED, 160, smp_sched_handler, NULL,
-					 IRQ_TYPE_LEVEL);
-	arch_irq_connect(SMP_IPI_HALT, 160, smp_halt_handler, NULL, IRQ_TYPE_LEVEL);
 }
 
 static void smp_cpu_start_callback(void *arg) {
 	struct smp_init_callback *cb = arg;
 
-	atomic_set(&ready_flag, 1);
 	while (!atomic_get(&cpu_start_flag)) {
 		udelay(100);
 	}
@@ -60,13 +59,7 @@ static void smp_cpu_start_callback(void *arg) {
 }
 
 void smp_cpu_start(uint32_t cpu_id) {
-	atomic_clear(&ready_flag);
-
 	arch_cpu_start(cpu_id, smp_cpu_start_callback, NULL);
-
-	while (!atomic_get(&ready_flag)) {
-		udelay(100);
-	}
 }
 
 void smp_sched_notify() {

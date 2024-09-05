@@ -23,7 +23,7 @@ void kernel_start() {
 	arm_gic_init(true);
 	arch_timer_init(true);
 	percpu_init(0);
-	smp_init();
 	main_task_create(0);
+	smp_init();
 	task_sched_start();
 }
