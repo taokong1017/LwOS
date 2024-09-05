@@ -9,6 +9,7 @@
 #include <mutex.h>
 #include <timer.h>
 #include <task.h>
+#include <cpu.h>
 
 #define TEST_TASK1_NAME "test_task1"
 #define TEST_TASK2_NAME "test_task2"
@@ -28,8 +29,8 @@ static void test_task1_entry(void *arg0, void *arg1, void *arg2, void *arg3) {
 	for (;;) {
 		arch_stack_default_walk(TEST_TASK1_NAME, current_task_get(), NULL);
 
-		printf("task %s %d\n", TEST_TASK1_NAME, i++);
-		task_delay(2);
+		printf("%s - cpu%u: %d\n", TEST_TASK1_NAME, arch_cpu_id_get(), i++);
+		task_delay(10);
 	}
 }
 
@@ -74,14 +75,8 @@ static void test_task2_entry(void *arg0, void *arg1, void *arg2, void *arg3) {
 	uint32_t i = 0;
 
 	for (;;) {
-		printf("task %s i = %d\n", TEST_TASK2_NAME, i++);
-		task_stop(test_task1_id);
-		printf("task %s stoped\n", TEST_TASK1_NAME);
-		task_delay(5);
-
-		task_start(test_task1_id);
-		printf("task %s started\n", TEST_TASK1_NAME);
-		task_delay(5);
+		printf("%s - cpu%u: %d\n", TEST_TASK2_NAME, arch_cpu_id_get(), i++);
+		task_delay(10);
 	}
 }
 
@@ -126,8 +121,8 @@ static void test_task3_entry(void *arg0, void *arg1, void *arg2, void *arg3) {
 	uint32_t i = 0;
 
 	for (;;) {
-		printf("task %s i = %d\n", TEST_TASK3_NAME, i++);
-		task_delay(2);
+		printf("%s - cpu%u: %d\n", TEST_TASK3_NAME, arch_cpu_id_get(), i++);
+		task_delay(10);
 	}
 
 	return;
