@@ -1,0 +1,1 @@
+obj-$(CONFIG_TASK_001) := task_001.o

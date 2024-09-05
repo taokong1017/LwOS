@@ -2,8 +2,8 @@ PROJECT    = LwOS
 TARGET     = $(PROJECT).elf
 BASE_DIR   = $(CURDIR)
 CONFIG_DIR = $(BASE_DIR)/config
-SUB_DIRS   = arch kernel drivers sample
-LINKER     = $(BASE_DIR)/sample/linker/lwos.lds
+SUB_DIRS   = arch kernel drivers samples
+LINKER     = $(BASE_DIR)/samples/linker/lwos.lds
 CONFIG     :=
 
 CROSS_COMPILE :=
@@ -19,7 +19,7 @@ else
 endif
 export srctree = $(BASE_DIR)
 
-QEMU_RUN = qemu-system-aarch64 -machine virt -smp $(CPU_NUM) -m size=1024M -cpu cortex-a53 -nographic -kernel
+QEMU_RUN = qemu-system-aarch64 -machine virt -smp $(CPU_NUM) -m size=1024M -cpu cortex-a72 -nographic -kernel
 
 define ALL_OBJS
 	$(shell find $(1) -name "*.o")

@@ -1,0 +1,5 @@
+menu "Samples"
+
+source "samples/kernel/Kconfig"
+
+endmenu
