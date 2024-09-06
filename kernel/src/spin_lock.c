@@ -11,26 +11,14 @@
 #include <cpu.h>
 
 #define SPIN_LOCK_TAG "SPIN_LOCK"
-#define default_str_fill(str) ((str == NULL) ? "unkown" : str)
-#define STACK_WALK_SIZE 20
-#define OWNER_SIZE 32
 #define IRQ_OWNER "IRQ"
-
-struct spinlock_trace_info {
-	uint32_t total_level;
-	uint32_t cpu_id;
-	virt_addr_t trace[STACK_WALK_SIZE];
-	char lock_name[OWNER_SIZE];
-	char owner[OWNER_SIZE];
-};
-
-struct spinlock_trace_info spin_lock_trace_info = {.owner = "unkown"};
+#define default_str_fill(str) ((str == NULL) ? "unkown" : str)
 
 static bool save_Linker(void *cookie, virt_addr_t pc) {
-	struct spinlock_trace_info *info = (struct spinlock_trace_info *)cookie;
+	struct spinlock *lock = (struct spinlock *)cookie;
 
-	if (info->total_level < STACK_WALK_SIZE) {
-		info->trace[info->total_level++] = pc;
+	if (lock->level < STACK_WALK_SIZE) {
+		lock->trace[lock->level++] = pc;
 		return true;
 	}
 
@@ -38,39 +26,50 @@ static bool save_Linker(void *cookie, virt_addr_t pc) {
 }
 
 static void spin_lock_trace(struct spinlock *lock) {
-	spin_lock_trace_info.total_level = 0;
 	struct task *task = current_task_get();
 
-	spin_lock_trace_info.cpu_id = arch_cpu_id_get();
-	memset(spin_lock_trace_info.trace, 0, sizeof(spin_lock_trace_info.trace));
-	strncpy(spin_lock_trace_info.lock_name, lock->name, OWNER_SIZE);
+	lock->cpu_id = arch_cpu_id_get();
 	if (is_in_irq()) {
-		arch_stack_walk(save_Linker, &spin_lock_trace_info, NULL, NULL);
-		strncpy(spin_lock_trace_info.owner, IRQ_OWNER, OWNER_SIZE);
+		arch_stack_walk(save_Linker, lock, NULL, NULL);
+		strncpy(lock->owner, IRQ_OWNER, OWNER_NAME_LEN);
 	} else if (task) {
-		arch_stack_walk(save_Linker, &spin_lock_trace_info, task, NULL);
-		strncpy(spin_lock_trace_info.owner, task->name, OWNER_SIZE);
+		arch_stack_walk(save_Linker, lock, task, NULL);
+		strncpy(lock->owner, task->name, OWNER_NAME_LEN);
 	}
 
 	return;
 }
 
-void spin_lock_trace_dump() {
-	uint32_t i = 0;
-	struct spinlock_trace_info *info = &spin_lock_trace_info;
+static void spin_lock_trace_free(struct spinlock *lock) {
+	lock->level = 0;
+	lock->cpu_id = -1;
+	memset(lock->owner, 0, OWNER_NAME_LEN);
+	memset(lock->trace, 0, sizeof(lock->trace));
+}
 
-	printf("[%s - CPU%d - %s]\nTrace Info: \n", info->lock_name, info->cpu_id,
-		   info->owner);
-	for (i = 0; i < info->total_level; i++) {
-		printf("  %u: 0x%016llx\n", i, info->trace[i]);
+void spin_lock_dump(struct spinlock *lock) {
+	uint32_t i = 0;
+
+	if ((strlen(lock->owner) == 0) && (lock->level == 0)) {
+		printf("NO Spin Lock trace\n");
+		return;
+	}
+
+	printf("[Trace Info]:\n");
+	printf("Name:\t%s\n", lock->name);
+	printf("CPU:\tcpu%u\n", lock->cpu_id);
+	printf("Owner:\t%s\n", lock->owner);
+	printf("Trace Info:\n");
+	for (i = 0; i < lock->level; i++) {
+		printf("  %u: 0x%016llx\n", i, lock->trace[i]);
 	}
 }
 
 void spin_lock(struct spinlock *lock) {
 	arch_spin_lock(&lock->rawlock);
 	spin_lock_trace(lock);
-	log_debug(SPIN_LOCK_TAG, "spin lock %s is owned by %s\n",
-			  default_str_fill(lock->name), current_task_get()->name);
+	log_debug(SPIN_LOCK_TAG, "spin lock %s is owned by %s\n", lock->name,
+			  current_task_get()->name);
 
 	return;
 }
@@ -82,15 +81,15 @@ int32_t spin_trylock(struct spinlock *lock) {
 	if (ret != OK) {
 		return ERRNO_SPINLOCK_TRY_LOCK_FAILED;
 	}
+	spin_lock_trace(lock);
 
 	return OK;
 }
 
 void spin_unlock(struct spinlock *lock) {
 	arch_spin_unlock(&lock->rawlock);
-	spin_lock_trace_info.total_level = 0;
-	log_debug(SPIN_LOCK_TAG, "spin lock %s is free\n",
-			  default_str_fill(lock->name));
+	spin_lock_trace_free(lock);
+	log_debug(SPIN_LOCK_TAG, "spin lock %s is free\n", lock->name);
 
 	return;
 }
