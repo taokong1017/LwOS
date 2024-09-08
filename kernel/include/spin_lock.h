@@ -18,6 +18,7 @@ struct spinlock {
 	const char *name;
 	uint32_t level;
 	uint32_t cpu_id;
+	uint64_t daif;
 	char owner[OWNER_NAME_LEN];
 	virt_addr_t trace[STACK_WALK_SIZE];
 };

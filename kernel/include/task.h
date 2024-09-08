@@ -96,7 +96,6 @@ struct wait_queue {
 /* task structure definition */
 struct task {
 	task_id_t id;
-	bool is_idle_task;
 	char name[TASK_NAME_LEN];
 	uint32_t status;
 	uint32_t sig;
@@ -109,11 +108,12 @@ struct task {
 	uint32_t cpu_id;
 	task_entry_func entry;
 	void *args[4];
-	bool is_timeout;
 	struct list_head task_list; /* ready queue */
 	struct list_head pend_list; /* pend queue */
 	struct timeout timeout;
 	struct arch_task_context task_context;
+	bool is_idle_task;
+	bool is_timeout;
 };
 
 errno_t task_create(task_id_t *task_id, const char *name, task_entry_func entry,

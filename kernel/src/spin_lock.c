@@ -29,6 +29,7 @@ static void spin_lock_trace(struct spinlock *lock) {
 	struct task *task = current_task_get();
 
 	lock->cpu_id = arch_cpu_id_get();
+	lock->daif = arch_irq_status();
 	if (is_in_irq()) {
 		arch_stack_walk(save_Linker, lock, NULL, NULL);
 		strncpy(lock->owner, IRQ_OWNER, OWNER_NAME_LEN);
@@ -43,6 +44,7 @@ static void spin_lock_trace(struct spinlock *lock) {
 static void spin_lock_trace_free(struct spinlock *lock) {
 	lock->level = 0;
 	lock->cpu_id = -1;
+	lock->daif = -1;
 	memset(lock->owner, 0, OWNER_NAME_LEN);
 	memset(lock->trace, 0, sizeof(lock->trace));
 }
@@ -58,6 +60,7 @@ void spin_lock_dump(struct spinlock *lock) {
 	printf("[Trace Info]:\n");
 	printf("Name:\t%s\n", lock->name);
 	printf("CPU:\tcpu%u\n", lock->cpu_id);
+	printf("DAIF:\t0x%x\n", lock->daif);
 	printf("Owner:\t%s\n", lock->owner);
 	printf("Trace Info:\n");
 	for (i = 0; i < lock->level; i++) {

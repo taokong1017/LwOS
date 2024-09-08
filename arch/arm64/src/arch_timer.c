@@ -23,7 +23,6 @@ void arch_timer_enable(bool enable) {
 	}
 
 	write_cntv_ctl_el0(cntv_ctl);
-	isb();
 }
 
 void arch_timer_set_irq_mask(bool mask) {
@@ -36,10 +35,13 @@ void arch_timer_set_irq_mask(bool mask) {
 	}
 
 	write_cntv_ctl_el0(cntv_ctl);
-	isb();
 }
 
-uint64_t arch_timer_count() { return read_cntvct_el0(); }
+uint64_t arch_timer_count() {
+	dsb(sy);
+	isb();
+	return read_cntvct_el0();
+}
 
 void arch_timer_set_compare(uint64_t val) { write_cntv_cval_el0(val); }
 
