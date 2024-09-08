@@ -8,4 +8,5 @@ OBJCOPY  = $(CROSS_COMPILE)objcopy
 OBJDUMP  = $(CROSS_COMPILE)objdump
 SIZE     = $(CROSS_COMPILE)size
 NM       = $(CROSS_COMPILE)nm
+READELF  = $(CROSS_COMPILE)readelf
 MAKE     = make

@@ -52,9 +52,10 @@ endef
 .PHONY: all check menuconfig run dbg clean help obj defconfig gen $(LINKER)
 
 all: obj $(LINKER)
-	$(Q)$(LD) $(LDFLAGS) -T $(LINKER) -e __start -o $(TARGET) \
+	$(Q)$(LD) $(LDFLAGS) -T $(LINKER) -e __start -o $(TARGET) -Map=$(PROJECT).map \
 		$(strip $(filter-out %/offsets.o, $(call ALL_OBJS, $(srctree))))
 	$(Q)$(OBJDUMP) -d $(TARGET) > $(PROJECT).sym
+	$(Q)$(READELF) -e $(TARGET) > $(PROJECT).stat
 	@echo "build all success"
 
 check:
