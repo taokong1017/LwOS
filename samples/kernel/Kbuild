@@ -1,1 +1,2 @@
 obj-$(CONFIG_TASK_001) := task_001.o
+obj-$(CONFIG_TASK_002) := task_002.o

@@ -14,11 +14,13 @@
 #define IRQ_OWNER "IRQ"
 #define default_str_fill(str) ((str == NULL) ? "unkown" : str)
 
-static bool save_Linker(void *cookie, virt_addr_t pc) {
+static bool save_Linker(void *cookie, virt_addr_t pc, virt_addr_t fp) {
 	struct spinlock *lock = (struct spinlock *)cookie;
 
 	if (lock->level < STACK_WALK_SIZE) {
-		lock->trace[lock->level++] = pc;
+		lock->trace[lock->level].pc = pc;
+		lock->trace[lock->level].fp = fp;
+		lock->level++;
 		return true;
 	}
 
@@ -62,9 +64,10 @@ void spin_lock_dump(struct spinlock *lock) {
 	printf("CPU:\tcpu%u\n", lock->cpu_id);
 	printf("DAIF:\t0x%x\n", lock->daif);
 	printf("Owner:\t%s\n", lock->owner);
-	printf("Trace Info:\n");
+	printf("Trace:\n");
 	for (i = 0; i < lock->level; i++) {
-		printf("  %u: 0x%016llx\n", i, lock->trace[i]);
+		printf("  %u: 0x%016llx - 0x%016llx\n", i, lock->trace[i].fp,
+			   lock->trace[i].pc);
 	}
 }
 

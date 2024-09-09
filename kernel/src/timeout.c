@@ -16,6 +16,10 @@ void timeout_queue_handle(uint64_t cur_ticks) {
 	uint32_t key = sched_spin_lock();
 
 	queue = &per_cpu->timer_queue.queue;
+	if (list_empty(queue)) {
+		sched_spin_unlock(key);
+		return;
+	}
 	list_for_each_entry_safe(timeout, next, queue, node) {
 		if (timeout && cur_ticks >= timeout->deadline_ticks) {
 			list_del_init(&timeout->node);

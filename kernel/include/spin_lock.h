@@ -13,6 +13,11 @@
 #define SPIN_LOCK_DECLARE(locker) extern struct spinlock locker;
 #define ERRNO_SPINLOCK_TRY_LOCK_FAILED ERRNO_OS_WARN(MOD_ID_SPINLOCK, 0x00)
 
+struct trace_info {
+	virt_addr_t fp;
+	virt_addr_t pc;
+};
+
 struct spinlock {
 	uint32_t rawlock;
 	const char *name;
@@ -20,7 +25,7 @@ struct spinlock {
 	uint32_t cpu_id;
 	uint64_t daif;
 	char owner[OWNER_NAME_LEN];
-	virt_addr_t trace[STACK_WALK_SIZE];
+	struct trace_info trace[STACK_WALK_SIZE];
 };
 
 void spin_lock(struct spinlock *lock);

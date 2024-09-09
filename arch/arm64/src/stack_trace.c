@@ -9,6 +9,7 @@
 #include <stack_trace.h>
 #include <stdio.h>
 #include <percpu.h>
+#include <cpu.h>
 
 #define array_size(x) (sizeof(x) / sizeof((x)[0]))
 #define IS_VALID_ADDR(addr) (addr && addr != -1)
@@ -40,7 +41,7 @@ static bool stackinfo_on_stack(const struct stack_info *info, virt_addr_t sp,
 static struct stack_info *
 unwind_find_next_stack(const struct unwind_state *state, virt_addr_t sp,
 					   size_t size) {
-	for (int i = 0; i < state->stacks_num; i++) {
+	for (int32_t i = 0; i < state->stacks_num; i++) {
 		struct stack_info *info = &state->stacks[i];
 
 		if (stackinfo_on_stack(info, sp, size)) {
@@ -147,7 +148,7 @@ static void unwind_stack_walk(unwind_consume_func consume_state, void *cookie,
 
 	struct stack_info stacks[] = {
 		task_stack_info(task == NULL ? current_task : task),
-		irq_stack_info(task == NULL ? current_task->cpu_id : task->cpu_id),
+		irq_stack_info(arch_cpu_id_get()),
 	};
 	struct unwind_state state = {
 		.stacks = stacks,
@@ -175,7 +176,7 @@ struct unwind_consume_entry_data {
 static bool arch_unwind_consume_entry(const struct unwind_state *state,
 									  void *cookie) {
 	struct unwind_consume_entry_data *data = cookie;
-	return data->consume_entry(data->cookie, state->pc);
+	return data->consume_entry(data->cookie, state->pc, state->fp);
 }
 
 void arch_stack_walk(stack_trace_consume_func consume_entry, void *cookie,
@@ -188,11 +189,11 @@ void arch_stack_walk(stack_trace_consume_func consume_entry, void *cookie,
 	unwind_stack_walk(arch_unwind_consume_entry, &data, task, regs);
 }
 
-static bool show_Linker(void *cookie, virt_addr_t pc) {
+static bool show_Linker(void *cookie, virt_addr_t pc, virt_addr_t fp) {
 	uint32_t *level = (uint32_t *)cookie;
 
 	if (IS_VALID_ADDR(pc)) {
-		printf("  %u: 0x%016llx\n", (*level)++, pc);
+		printf("  %u: 0x%016llx - 0x%016llx\n", (*level)++, fp, pc);
 		return true;
 	} else {
 		return false;

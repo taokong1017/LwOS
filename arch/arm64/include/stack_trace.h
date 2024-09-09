@@ -18,7 +18,8 @@ struct unwind_state {
 	uint32_t stacks_num;
 };
 
-typedef bool (*stack_trace_consume_func)(void *cookie, virt_addr_t pc);
+typedef bool (*stack_trace_consume_func)(void *cookie, virt_addr_t pc,
+										 virt_addr_t fp);
 
 void arch_stack_walk(stack_trace_consume_func consume_entry, void *cookie,
 					 struct task *task, struct arch_regs *regs);
