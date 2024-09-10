@@ -16,10 +16,6 @@ void timeout_queue_handle(uint64_t cur_ticks) {
 	uint32_t key = sched_spin_lock();
 
 	queue = &per_cpu->timer_queue.queue;
-	if (list_empty(queue)) {
-		sched_spin_unlock(key);
-		return;
-	}
 	list_for_each_entry_safe(timeout, next, queue, node) {
 		if (timeout && cur_ticks >= timeout->deadline_ticks) {
 			list_del_init(&timeout->node);
@@ -50,7 +46,7 @@ errno_t timeout_queue_add(struct timeout *timeout, uint32_t cpu_id) {
 	return OK;
 }
 
-errno_t timeout_queue_del(struct timeout *timeout) {
+errno_t timeout_queue_del(struct timeout *timeout, uint32_t cpu_id) {
 	struct list_head *queue = NULL;
 	struct timeout *tmp_timeout = NULL, *next = NULL;
 
@@ -58,7 +54,7 @@ errno_t timeout_queue_del(struct timeout *timeout) {
 		return ERRNO_TIMEOUT_EMPTY_PTR;
 	}
 
-	queue = &current_percpu_get()->timer_queue.queue;
+	queue = &percpu_get(cpu_id)->timer_queue.queue;
 	list_for_each_entry_safe(tmp_timeout, next, queue, node) {
 		if (tmp_timeout == timeout) {
 			list_del_init(&tmp_timeout->node);

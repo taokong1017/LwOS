@@ -104,7 +104,7 @@ errno_t timer_start(timer_id_t id) {
 
 	if (timer->status == TIMER_STATUS_RUNNING) {
 		log_info(TIMER_TAG, "timer %s is already running\n", timer->name);
-		timeout_queue_del(&timer->timeout);
+		timeout_queue_del(&timer->timeout, arch_cpu_id_get());
 	}
 
 	if (timer->ticks == TIMER_WAIT_FOREVER) {
@@ -140,7 +140,7 @@ errno_t timer_stop(timer_id_t id) {
 	}
 
 	timer->status = TIMER_STATUS_STOPPED;
-	timeout_queue_del(&timer->timeout);
+	timeout_queue_del(&timer->timeout, arch_cpu_id_get());
 	sched_spin_unlock(key);
 	log_debug(TIMER_TAG, "timer %s is stoped\n", timer->name);
 
