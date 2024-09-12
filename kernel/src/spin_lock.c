@@ -9,10 +9,12 @@
 #include <stack_trace.h>
 #include <string.h>
 #include <cpu.h>
+#include <tick.h>
 
 #define SPIN_LOCK_TAG "SPIN_LOCK"
 #define IRQ_OWNER "IRQ"
 #define default_str_fill(str) ((str == NULL) ? "unkown" : str)
+extern uint64_t tick_counts[CONFIG_CPUS_MAX_NUM];
 
 static bool save_Linker(void *cookie, virt_addr_t pc, virt_addr_t fp) {
 	struct spinlock *lock = (struct spinlock *)cookie;
@@ -32,6 +34,7 @@ static void spin_lock_trace(struct spinlock *lock) {
 
 	lock->cpu_id = arch_cpu_id_get();
 	lock->daif = arch_irq_status();
+	lock->ticks = tick_counts[arch_cpu_id_get()];
 	if (is_in_irq()) {
 		arch_stack_walk(save_Linker, lock, NULL, NULL);
 		strncpy(lock->owner, IRQ_OWNER, OWNER_NAME_LEN);
@@ -64,6 +67,7 @@ void spin_lock_dump(struct spinlock *lock) {
 	printf("CPU:\tcpu%u\n", lock->cpu_id);
 	printf("DAIF:\t0x%x\n", lock->daif);
 	printf("Owner:\t%s\n", lock->owner);
+	printf("Ticks:\t%u\n", lock->ticks);
 	printf("Trace:\n");
 	for (i = 0; i < lock->level; i++) {
 		printf("  %u: 0x%016llx - 0x%016llx\n", i, lock->trace[i].fp,

@@ -24,6 +24,7 @@ struct spinlock {
 	uint32_t level;
 	uint32_t cpu_id;
 	uint64_t daif;
+	uint64_t ticks;
 	char owner[OWNER_NAME_LEN];
 	struct trace_info trace[STACK_WALK_SIZE];
 };

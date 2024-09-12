@@ -13,7 +13,7 @@
 #define TICK_TAG "TICK"
 #define TICK_SPIN_LOCKER "TICK_SPIN_LOCKER"
 SPIN_LOCK_DEFINE(tick_spinlocker, TICK_SPIN_LOCKER);
-static uint64_t tick_counts[CONFIG_CPUS_MAX_NUM] = {0};
+uint64_t tick_counts[CONFIG_CPUS_MAX_NUM] = {0};
 
 void tick_announce() {
 	uint32_t cpu_id = arch_cpu_id_get();
