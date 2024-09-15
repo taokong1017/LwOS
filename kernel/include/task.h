@@ -8,6 +8,7 @@
 #include <arch_task.h>
 
 #define ID_TO_TASK(task_id) ((struct task *)task_id)
+#define CPU_AFFI_MASK(cpu_id) (1 << cpu_id)
 #define TASK_WAIT_FOREVER WAIT_FOREVER
 #define TASK_IS_LOCKED(task) (task->lock_cnt > 0)
 #define TASK_IS_STOP(task) (task->status == TASK_STATUS_STOP)

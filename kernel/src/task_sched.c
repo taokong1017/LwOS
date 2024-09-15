@@ -253,6 +253,12 @@ void task_sched_locked() {
 	struct task *current_task = current_task_get();
 	struct task *next_task = next_task_pick_up();
 	struct per_cpu *per_cpu = current_percpu_get();
+	uint32_t idle_affi = percpu_idle_mask_get();
+	uint32_t cpu_affi = current_task->cpu_affi;
+
+	if (!current_task || !next_task) {
+		return;
+	}
 
 	if (TASK_IS_LOCKED(current_task)) {
 		per_cpu->pend_sched = true;
@@ -265,6 +271,18 @@ void task_sched_locked() {
 
 	log_debug(TASK_SCHED_TAG, "[cpu %d]current task is %s, next task is %s\n",
 			  arch_cpu_id_get(), current_task->name, next_task->name);
+
+	if (TASK_IS_READY(current_task) || TASK_IS_RUNNING(current_task)) {
+		sched_ready_queue_remove(current_task->cpu_id, current_task);
+	}
+	if (idle_affi & cpu_affi) {
+		current_task->cpu_id = mask_trailing_zeros(idle_affi & cpu_affi);
+	} else {
+		current_task->cpu_id = mask_trailing_zeros(cpu_affi);
+	}
+	if (TASK_IS_READY(current_task) || TASK_IS_RUNNING(current_task)) {
+		sched_ready_queue_add(current_task->cpu_id, current_task);
+	}
 	current_task->status &= ~TASK_STATUS_RUNNING;
 
 	if (next_task->is_idle_task) {
@@ -284,7 +302,7 @@ void task_sched_unlocked() {
 	struct task *next_task = next_task_pick_up();
 	struct per_cpu *per_cpu = current_percpu_get();
 	uint32_t idle_affi = percpu_idle_mask_get();
-	uint32_t use_affi = 0;
+	uint32_t cpu_affi = current_task->cpu_affi;
 
 	if (!next_task || !current_task) {
 		return;
@@ -300,11 +318,12 @@ void task_sched_unlocked() {
 	}
 
 	key = sched_spin_lock();
-	current_task->status = TASK_STATUS_READY;
 	sched_ready_queue_remove(current_task->cpu_id, current_task);
-	use_affi = current_task->cpu_affi & idle_affi;
-	if (use_affi != 0) {
-		current_task->cpu_id = mask_trailing_zeros(use_affi);
+	current_task->status = TASK_STATUS_READY;
+	if (idle_affi & cpu_affi) {
+		current_task->cpu_id = mask_trailing_zeros(idle_affi & cpu_affi);
+	} else {
+		current_task->cpu_id = mask_trailing_zeros(cpu_affi);
 	}
 	sched_ready_queue_add(current_task->cpu_id, current_task);
 
