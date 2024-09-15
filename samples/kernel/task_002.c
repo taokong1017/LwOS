@@ -166,8 +166,10 @@ static void test_task4_entry(void *arg0, void *arg1, void *arg2, void *arg3) {
 	(void)arg1;
 	(void)arg2;
 	(void)arg3;
+	uint32_t i = 0;
 
 	for (;;) {
+		printf("%s - cpu%u: %d\n", TEST_TASK4_NAME, arch_cpu_id_get(), i++);
 		task_stop(test_task1_id);
 		task_stop(test_task2_id);
 		task_stop(test_task3_id);

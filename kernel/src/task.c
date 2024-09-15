@@ -107,7 +107,6 @@ void task_reset(struct task *task) {
 	if (TASK_IS_PEND(task)) {
 		timeout_queue_del(&task->timeout, task->cpu_id);
 	}
-	INIT_LIST_HEAD(&task->timeout.node);
 	arch_task_init(task->id);
 }
 
@@ -331,6 +330,7 @@ errno_t task_start(task_id_t task_id) {
 	} else {
 		task->status = TASK_STATUS_PEND;
 		task->timeout.deadline_ticks = current_ticks;
+		timeout_queue_del(&task->timeout, task->cpu_id);
 		timeout_queue_add(&task->timeout, task->cpu_id);
 	}
 	sched_spin_unlock(key);
@@ -515,6 +515,7 @@ errno_t task_delay(uint64_t ticks) {
 		sched_ready_queue_remove(task->cpu_id, task);
 		task->status = TASK_STATUS_PEND;
 		task->timeout.deadline_ticks = current_ticks + ticks;
+		timeout_queue_del(&task->timeout, task->cpu_id);
 		timeout_queue_add(&task->timeout, task->cpu_id);
 	}
 
@@ -572,6 +573,7 @@ errno_t task_wait_locked(struct wait_queue *wq, uint64_t ticks,
 	task->status = TASK_STATUS_PEND;
 	if (ticks != TASK_WAIT_FOREVER) {
 		task->timeout.deadline_ticks = current_ticks_get() + ticks;
+		timeout_queue_del(&task->timeout, task->cpu_id);
 		timeout_queue_add(&task->timeout, task->cpu_id);
 	}
 	list_add_tail(&task->pend_list, &wq->wait_list);

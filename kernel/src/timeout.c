@@ -18,7 +18,7 @@ void timeout_queue_handle(uint64_t cur_ticks) {
 	queue = &per_cpu->timer_queue.queue;
 	list_for_each_entry_safe(timeout, next, queue, node) {
 		if (timeout && cur_ticks >= timeout->deadline_ticks) {
-			list_del_init(&timeout->node);
+			timeout_queue_del(timeout, arch_cpu_id_get());
 			if (timeout->func) {
 				need_sched |= timeout->func(timeout);
 			}
