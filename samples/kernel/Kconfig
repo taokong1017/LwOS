@@ -6,6 +6,10 @@ config CONFIG_TASK_001
 
 config CONFIG_TASK_002
 	bool "Kernel TASK 002"
+	default n
+
+config CONFIG_TASK_003
+	bool "Kernel TASK 003"
 	default y
 
 endmenu

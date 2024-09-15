@@ -463,6 +463,7 @@ errno_t task_suspend(task_id_t task_id) {
 	if (TASK_IS_RUNNING(task) && task->cpu_id != arch_cpu_id_get()) {
 		task->sig = TASK_SIG_SUSPEND;
 		smp_sched_notify();
+		sched_spin_unlock(key);
 		return ERRNO_TASK_WILL_SUSPEND;
 	}
 
@@ -609,6 +610,10 @@ bool task_sig_handle() {
 	bool need_sched = false;
 	struct task *cur_task = current_task_get();
 	struct per_cpu *per_cpu = current_percpu_get();
+
+	if (spin_lock_is_locked(&sched_spinlocker)) {
+		return need_sched;
+	}
 
 	/* task signal is set by other cpu */
 	if (cur_task->sig == TASK_SIG_SUSPEND) {
