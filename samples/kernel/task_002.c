@@ -197,7 +197,7 @@ static void create_test_task4() {
 		return;
 	}
 
-	ret = task_prority_set(test_task4_id, TASK_PRIORITY_LOWEST + 1);
+	ret = task_prority_set(test_task4_id, TASK_PRIORITY_HIGHEST);
 	if (ret != OK) {
 		printf("set task %s priority failed\n", task_name);
 		return;

@@ -274,13 +274,11 @@ void task_sched_locked() {
 
 	if (TASK_IS_READY(current_task) || TASK_IS_RUNNING(current_task)) {
 		sched_ready_queue_remove(current_task->cpu_id, current_task);
-	}
-	if (idle_affi & cpu_affi) {
-		current_task->cpu_id = mask_trailing_zeros(idle_affi & cpu_affi);
-	} else {
-		current_task->cpu_id = mask_trailing_zeros(cpu_affi);
-	}
-	if (TASK_IS_READY(current_task) || TASK_IS_RUNNING(current_task)) {
+		if (idle_affi & cpu_affi) {
+			current_task->cpu_id = mask_trailing_zeros(idle_affi & cpu_affi);
+		} else {
+			current_task->cpu_id = mask_trailing_zeros(cpu_affi);
+		}
 		sched_ready_queue_add(current_task->cpu_id, current_task);
 	}
 	current_task->status &= ~TASK_STATUS_RUNNING;

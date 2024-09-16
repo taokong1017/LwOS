@@ -235,7 +235,7 @@ errno_t task_cpu_affi_set(task_id_t task_id, uint32_t cpu_affi) {
 	uint32_t cur_cpu_id = 0;
 	uint32_t key = 0;
 	uint32_t idle_affi = 0;
-	uint32_t same_affi = 0;
+	uint32_t use_affi = 0;
 
 	if (!task || task->id != task_id) {
 		return ERRNO_TASK_ID_INVALID;
@@ -252,6 +252,7 @@ errno_t task_cpu_affi_set(task_id_t task_id, uint32_t cpu_affi) {
 	key = sched_spin_lock();
 	cur_cpu_id = arch_cpu_id_get();
 	idle_affi = percpu_idle_mask_get();
+	use_affi = cpu_affi & idle_affi;
 
 	task->cpu_affi = cpu_affi;
 	if (TASK_IS_RUNNING(task)) {
@@ -265,13 +266,23 @@ errno_t task_cpu_affi_set(task_id_t task_id, uint32_t cpu_affi) {
 
 	if (TASK_IS_READY(task)) {
 		sched_ready_queue_remove(task->cpu_id, task);
-		same_affi = cpu_affi & idle_affi;
-		if (same_affi != 0) {
-			task->cpu_id = mask_trailing_zeros(same_affi);
+		if (use_affi) {
+			task->cpu_id = mask_trailing_zeros(use_affi);
+		} else {
+			task->cpu_id = mask_trailing_zeros(cpu_affi);
 		}
 		sched_ready_queue_add(task->cpu_id, task);
 	}
 
+	if (TASK_IS_PEND(task)) {
+		timeout_queue_del(&task->timeout, task->cpu_id);
+		if (use_affi) {
+			task->cpu_id = mask_trailing_zeros(use_affi);
+		} else {
+			task->cpu_id = mask_trailing_zeros(cpu_affi);
+		}
+		timeout_queue_add(&task->timeout, task->cpu_id);
+	}
 	sched_spin_unlock(key);
 
 	return OK;
@@ -378,6 +389,7 @@ errno_t task_stop(task_id_t task_id) {
 		if (task->cpu_id == cur_cpu_id) {
 			sched_spin_unlock(key);
 			task_service_notify(task->id, TASK_CMD_STOP);
+			key = sched_spin_lock();
 		} else {
 			task->sig = TASK_SIG_STOP;
 			smp_sched_notify();
