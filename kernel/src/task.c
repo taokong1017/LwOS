@@ -101,12 +101,12 @@ void task_reset(struct task *task) {
 	if (TASK_IS_READY(task) || TASK_IS_RUNNING(task)) {
 		sched_ready_queue_remove(task->cpu_id, task);
 	}
-	task->status = TASK_STATUS_STOP;
-	task->is_timeout = false;
-	task->lock_cnt = 0;
 	if (TASK_IS_PEND(task)) {
 		timeout_queue_del(&task->timeout, task->cpu_id);
 	}
+	task->status = TASK_STATUS_STOP;
+	task->is_timeout = false;
+	task->lock_cnt = 0;
 	arch_task_init(task->id);
 }
 
@@ -328,7 +328,6 @@ errno_t task_start(task_id_t task_id) {
 		sched_ready_queue_add(task->cpu_id, task);
 		task_sched_locked();
 	} else {
-		timeout_queue_del(&task->timeout, task->cpu_id);
 		task->status = TASK_STATUS_PEND;
 		task->timeout.deadline_ticks = current_ticks;
 		timeout_queue_add(&task->timeout, task->cpu_id);
@@ -514,7 +513,6 @@ errno_t task_delay(uint64_t ticks) {
 
 	if (ticks > 0) {
 		sched_ready_queue_remove(task->cpu_id, task);
-		timeout_queue_del(&task->timeout, task->cpu_id);
 		task->status = TASK_STATUS_PEND;
 		task->timeout.deadline_ticks = current_ticks + ticks;
 		timeout_queue_add(&task->timeout, task->cpu_id);
@@ -552,8 +550,9 @@ void task_unlock() {
 	}
 
 	if (task->lock_cnt == 0) {
-		sched_spin_unlock(key);
+		task_sched_locked();
 	}
+	sched_spin_unlock(key);
 
 	return;
 }
@@ -573,7 +572,6 @@ errno_t task_wait_locked(struct wait_queue *wq, uint64_t ticks,
 	sched_ready_queue_remove(task->cpu_id, task);
 	task->status = TASK_STATUS_PEND;
 	if (ticks != TASK_WAIT_FOREVER) {
-		timeout_queue_del(&task->timeout, task->cpu_id);
 		task->timeout.deadline_ticks = current_ticks_get() + ticks;
 		timeout_queue_add(&task->timeout, task->cpu_id);
 	}
@@ -597,7 +595,6 @@ errno_t task_wakeup_locked(struct wait_queue *wq) {
 	if (!list_empty(&wq->wait_list)) {
 		task = list_first_entry(&wq->wait_list, struct task, pend_list);
 		list_del_init(wq->wait_list.next);
-		timeout_queue_del(&task->timeout, task->cpu_id);
 		task->status = TASK_STATUS_READY;
 		sched_ready_queue_add(task->cpu_id, task);
 		task_sched_locked();

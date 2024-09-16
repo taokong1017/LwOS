@@ -44,6 +44,7 @@ static bool timer_timeout_handler(struct timeout *timeout) {
 	timer_cb *call_back = timer->cb;
 	void *arg = timer->arg;
 	uint32_t cpu_id = arch_cpu_id_get();
+	uint32_t key = sched_spin_lock();
 
 	if (timer->type == TIMER_TYPE_ONE_SHOT) {
 		timer->status = TIMER_STATUS_STOPPED;
@@ -57,6 +58,7 @@ static bool timer_timeout_handler(struct timeout *timeout) {
 		timer->timeout.deadline_ticks += timer->ticks;
 		timeout_queue_add(&timer->timeout, cpu_id);
 	}
+	sched_spin_unlock(key);
 
 	return false;
 }
