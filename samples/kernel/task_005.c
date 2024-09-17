@@ -117,10 +117,11 @@ static void test_task3_entry(void *arg0, void *arg1, void *arg2, void *arg3) {
 	for (;;) {
 		printf("%s - cpu%u: %d\n", TEST_TASK3_NAME, arch_cpu_id_get(), i++);
 		task_lock();
-		printf("%s take an lock on cpu%u\n", TEST_TASK3_NAME, arch_cpu_id_get());
+		printf("%s take a cpu%u task lock\n", TEST_TASK3_NAME, arch_cpu_id_get());
 		mdelay(tick2ms(30));
-		printf("%s give an lock on cpu%u\n", TEST_TASK3_NAME, arch_cpu_id_get());
+		printf("%s give a cpu%u task lock\n", TEST_TASK3_NAME, arch_cpu_id_get());
 		task_unlock();
+		task_delay(10);
 	}
 
 	return;
