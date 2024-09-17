@@ -572,6 +572,7 @@ void task_unlock() {
 errno_t task_wait_locked(struct wait_queue *wq, uint64_t ticks,
 						 bool need_sched) {
 	struct task *task = current_task_get();
+	uint32_t cur_cpuid = arch_cpu_id_get();
 
 	if (!wq) {
 		return ERRNO_TASK_PTR_NULL;
@@ -588,7 +589,11 @@ errno_t task_wait_locked(struct wait_queue *wq, uint64_t ticks,
 		timeout_queue_add(&task->timeout, task->cpu_id);
 	}
 	list_add_tail(&task->pend_list, &wq->wait_list);
-	task_sched_locked();
+	if (task->cpu_id == cur_cpuid) {
+		task_sched_locked();
+	} else {
+		smp_sched_notify();
+	}
 	if (task->is_timeout) {
 		task->is_timeout = false;
 		return ERRNO_TASK_WAIT_TIMEOUT;

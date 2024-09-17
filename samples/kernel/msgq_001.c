@@ -31,15 +31,15 @@ static void test_task1_entry(void *arg0, void *arg1, void *arg2, void *arg3) {
 	(void)arg1;
 	(void)arg2;
 	(void)arg3;
-	uint32_t i = 0;
-	uint8_t buf[TEST_MSGQ_SIZE] = {0};
-	uint32_t size = TEST_MSGQ_SIZE;
+	uint64_t i = 0;
+	uint64_t data = 0;
+	uint32_t size = 0;
 
 	for (;;) {
-		size = TEST_MSGQ_SIZE;
-		memset(buf, 0, size);
-		printf("%s - cpu%u: %d\n", TEST_TASK1_NAME, arch_cpu_id_get(), i++);
-		msgq_receive(test_msgq1_id, buf, &size, MSGQ_WAIT_FOREVER);
+		size = sizeof(data);
+		msgq_receive(test_msgq1_id, &data, &size, MSGQ_WAIT_FOREVER);
+		printf("%s - cpu%u - %lu: %lu\n", TEST_TASK1_NAME, arch_cpu_id_get(),
+			   i++, data);
 	}
 }
 
@@ -81,15 +81,16 @@ static void test_task2_entry(void *arg0, void *arg1, void *arg2, void *arg3) {
 	(void)arg1;
 	(void)arg2;
 	(void)arg3;
-	uint32_t i = 0;
-	uint8_t buf[TEST_MSGQ_SIZE] = {0};
-	uint32_t size = TEST_MSGQ_SIZE;
+	uint64_t i = 0;
+	uint64_t data = 0;
+	uint32_t size = 0;
 
 	for (;;) {
-		size = TEST_MSGQ_SIZE;
-		memset(buf, 0, size);
-		printf("%s - cpu%u: %d\n", TEST_TASK2_NAME, arch_cpu_id_get(), i++);
-		msgq_receive(test_msgq2_id, buf, &size, MSGQ_WAIT_FOREVER);
+		size = sizeof(data);
+		msgq_receive(test_msgq2_id, &data, &size, MSGQ_WAIT_FOREVER);
+		printf("%s - cpu%u - %lu: %lu\n", TEST_TASK2_NAME, arch_cpu_id_get(),
+			   i++, data);
+		task_delay(10);
 	}
 }
 
@@ -132,15 +133,16 @@ static void test_task3_entry(void *arg0, void *arg1, void *arg2, void *arg3) {
 	(void)arg2;
 	(void)arg3;
 
-	uint32_t i = 0;
+	uint64_t i = 0;
 	uint32_t ticks = 10;
+	uint64_t value = 10;
 
 	for (;;) {
-		printf("%s - cpu%u: %d\n", TEST_TASK3_NAME, arch_cpu_id_get(), i++);
-		msgq_send(test_msgq1_id, TEST_MSGQ_MSG, strlen(TEST_MSGQ_MSG),
-				  MSGQ_WAIT_FOREVER);
-		msgq_send(test_msgq2_id, TEST_MSGQ_MSG, strlen(TEST_MSGQ_MSG),
-				  MSGQ_WAIT_FOREVER);
+		printf("%s - cpu%u - %lu: %lu\n", TEST_TASK3_NAME, arch_cpu_id_get(),
+			   i++, value);
+		msgq_send(test_msgq1_id, &value, sizeof(value), MSGQ_WAIT_FOREVER);
+		msgq_send(test_msgq2_id, &value, sizeof(value), MSGQ_WAIT_FOREVER);
+		value++;
 		task_delay(ticks);
 		printf("%s has delayed %u ticks\n", TEST_TASK3_NAME, ticks);
 	}
