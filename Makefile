@@ -78,7 +78,7 @@ ifeq ($(CONFIG_ARM64), y)
 	$(Q)$(CC) $(CFLAGS) -c $(BASE_DIR)/arch/arm64/src/offsets.c -o $(BASE_DIR)/arch/arm64/src/offsets.o
 	$(Q)python3 scripts/gen_offset_header.py -i $(BASE_DIR)/arch/arm64/src/offsets.o -o \
 		$(BASE_DIR)/arch/arm64/include/offsets.h
-	$(Q)$(RM) -rf $(BASE_DIR)/arch/arm64/src/offsets.o
+	$(Q)$(RM) $(BASE_DIR)/arch/arm64/src/offsets.o
 endif
 
 $(LINKER): %.lds: %.lds.S check
@@ -104,10 +104,10 @@ defconfig:
 	$(Q)make clean
 
 clean:
-	$(Q)$(RM) -rf $(BASE_DIR)/sample/linker/lwos.lds $(BASE_DIR)/sample/linker/.lwos.lds*
-	$(Q)$(RM) -rf $(BASE_DIR)/arch/arm64/include/offsets.h
+	$(Q)$(RM) $(BASE_DIR)/samples/linker/lwos.lds $(BASE_DIR)/samples/linker/.lwos.lds*
+	$(Q)$(RM) $(BASE_DIR)/arch/arm64/include/offsets.h
 	$(Q)$(call MAKE_CLEAN_CMD, $(SUB_DIRS))
-	$(Q)$(RM) -rf $(TARGET) $(LOGO)
+	$(Q)$(RM) $(TARGET) $(LOGO)
 
 help:
 	@echo "make config:		make CROSS_COMPILE=~/aarch64-none-elf/bin/aarch64-none-elf- menuconfig"
