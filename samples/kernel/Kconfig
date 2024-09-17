@@ -22,6 +22,10 @@ config CONFIG_TASK_005
 
 config CONFIG_TIMER_001
 	bool "Kernel Timer 001"
+	default n
+
+config CONFIG_MSGQ_001
+	bool "Kernel MSGQ 001"
 	default y
 
 endmenu

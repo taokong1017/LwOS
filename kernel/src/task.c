@@ -599,6 +599,7 @@ errno_t task_wait_locked(struct wait_queue *wq, uint64_t ticks,
 
 errno_t task_wakeup_locked(struct wait_queue *wq) {
 	struct task *task = NULL;
+	uint32_t cur_cpuid = arch_cpu_id_get();
 
 	if (!wq) {
 		return ERRNO_TASK_PTR_NULL;
@@ -609,7 +610,11 @@ errno_t task_wakeup_locked(struct wait_queue *wq) {
 		list_del_init(wq->wait_list.next);
 		task->status = TASK_STATUS_READY;
 		sched_ready_queue_add(task->cpu_id, task);
-		task_sched_locked();
+		if (task->cpu_id == cur_cpuid) {
+			task_sched_locked();
+		} else {
+			smp_sched_notify();
+		}
 	}
 
 	return OK;

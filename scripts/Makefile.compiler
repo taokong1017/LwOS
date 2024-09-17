@@ -10,3 +10,4 @@ SIZE     = $(CROSS_COMPILE)size
 NM       = $(CROSS_COMPILE)nm
 READELF  = $(CROSS_COMPILE)readelf
 MAKE     = make
+RM       = rm -f

@@ -3,7 +3,6 @@
 
 #include <types.h>
 #include <errno.h>
-#include <kernel.h>
 
 #define MSGQ_INVALID_ID -1
 #define MSGQ_NAME_LEN 32

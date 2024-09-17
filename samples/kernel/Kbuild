@@ -4,4 +4,6 @@ obj-$(CONFIG_TASK_003) := task_003.o
 obj-$(CONFIG_TASK_004) := task_004.o
 obj-$(CONFIG_TASK_005) := task_005.o
 obj-$(CONFIG_TIMER_001) := timer_001.o
+obj-$(CONFIG_MSGQ_001) := msgq_001.o
+
 

@@ -3,14 +3,12 @@
 
 #include <types.h>
 #include <task.h>
+#include <msgq.h>
 
 #define MASK_NBITS 64
 #define DIV_ROUND_UP(n, d) (((n) + (d)-1) / (d))
 #define PRIQ_BITMAP_SIZE (DIV_ROUND_UP(TASK_PRIORITY_NUM, MASK_NBITS))
 
-#ifndef msgq_id_t
-typedef long msgq_id_t;
-#endif
 #define SERVICE_MSGQ_NAME "SYSTEM_MSGQ"
 #define SERVICE_MSGQ_SIZE 32
 #define SERVICE_MSGQ_NUM 4
