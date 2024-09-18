@@ -23,16 +23,14 @@ static void test_task1_entry(void *arg0, void *arg1, void *arg2, void *arg3) {
 	(void)arg2;
 	(void)arg3;
 	uint64_t i = 0;
+	uint32_t cpu_id = arch_cpu_id_get();
 
 	for (;;) {
 		mutex_take(test_mutex_id, MUTEX_WAIT_FOREVER);
-		printf("%s - cpu%u - %lu, enter\n", TEST_TASK1_NAME, arch_cpu_id_get(),
-			   i);
+		printf("%s - cpu%u - %lu, enter\n", TEST_TASK1_NAME, cpu_id, i);
 		mdelay(tick2ms(10));
-		printf("%s - cpu%u - %lu, leave\n", TEST_TASK1_NAME, arch_cpu_id_get(),
-			   i);
+		printf("%s - cpu%u - %lu, leave\n", TEST_TASK1_NAME, cpu_id, i++);
 		mutex_give(test_mutex_id);
-		i++;
 		task_delay(10);
 	}
 }
@@ -76,16 +74,14 @@ static void test_task2_entry(void *arg0, void *arg1, void *arg2, void *arg3) {
 	(void)arg2;
 	(void)arg3;
 	uint64_t i = 0;
+	uint32_t cpu_id = arch_cpu_id_get();
 
 	for (;;) {
 		mutex_take(test_mutex_id, MUTEX_WAIT_FOREVER);
-		printf("%s - cpu%u - %lu, enter\n", TEST_TASK2_NAME, arch_cpu_id_get(),
-			   i);
+		printf("%s - cpu%u - %lu, enter\n", TEST_TASK2_NAME, cpu_id, i);
 		mdelay(tick2ms(10));
-		printf("%s - cpu%u - %lu, leave\n", TEST_TASK2_NAME, arch_cpu_id_get(),
-			   i);
+		printf("%s - cpu%u - %lu, leave\n", TEST_TASK2_NAME, cpu_id, i++);
 		mutex_give(test_mutex_id);
-		i++;
 		task_delay(10);
 	}
 }
@@ -129,17 +125,14 @@ static void test_task3_entry(void *arg0, void *arg1, void *arg2, void *arg3) {
 	(void)arg2;
 	(void)arg3;
 	uint64_t i = 0;
+	uint32_t cpu_id = arch_cpu_id_get();
 
 	for (;;) {
-
 		mutex_take(test_mutex_id, MUTEX_WAIT_FOREVER);
-		printf("%s - cpu%u - %lu, enter\n", TEST_TASK3_NAME, arch_cpu_id_get(),
-			   i);
+		printf("%s - cpu%u - %lu, enter\n", TEST_TASK3_NAME, cpu_id, i);
 		mdelay(tick2ms(10));
-		printf("%s - cpu%u - %lu, leave\n", TEST_TASK3_NAME, arch_cpu_id_get(),
-			   i);
+		printf("%s - cpu%u - %lu, leave\n", TEST_TASK3_NAME, cpu_id, i++);
 		mutex_give(test_mutex_id);
-		i++;
 		task_delay(10);
 	}
 
