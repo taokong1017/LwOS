@@ -40,6 +40,7 @@ errno_t timeout_queue_add(struct timeout *timeout, uint32_t cpu_id) {
 		return ERRNO_TIMEOUT_EMPTY_PTR;
 	}
 
+	timeout_queue_del(timeout, cpu_id);
 	queue = &percpu_get(cpu_id)->timer_queue.queue;
 	list_add_tail(&timeout->node, queue);
 

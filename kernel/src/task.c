@@ -531,8 +531,8 @@ errno_t task_delay(uint64_t ticks) {
 	}
 
 	log_debug(TASK_TAG, "%s delay %d ticks\n", task->name, ticks);
-	task_sched_locked();
 	task->is_timeout = false;
+	task_sched_locked();
 	sched_spin_unlock(key);
 
 	return OK;
@@ -615,6 +615,7 @@ errno_t task_wakeup_locked(struct wait_queue *wq) {
 		list_del_init(wq->wait_list.next);
 		task->status = TASK_STATUS_READY;
 		sched_ready_queue_add(task->cpu_id, task);
+		task->is_timeout = false;
 		if (task->cpu_id == cur_cpuid) {
 			task_sched_locked();
 		} else {

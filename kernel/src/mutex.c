@@ -32,6 +32,7 @@ errno_t mutex_init(struct mutex *mutex, const char *name) {
 
 errno_t mutex_create(const char *name, mutex_id_t *id) {
 	struct mutex *mutex = NULL;
+	errno_t errno = OK;
 
 	if (!name) {
 		log_err(MUTEX_TAG, "the name is empty\n");
@@ -50,7 +51,12 @@ errno_t mutex_create(const char *name, mutex_id_t *id) {
 		return ERRNO_MUTEX_NO_MEMORY;
 	}
 
-	mutex_init(mutex, name);
+	errno = mutex_init(mutex, name);
+	if (errno != OK) {
+		log_fatal(MUTEX_TAG, "init the mutex %s failed\n", name);
+		return errno;
+	}
+
 	*id = mutex->id;
 
 	return OK;
