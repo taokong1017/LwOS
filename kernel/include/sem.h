@@ -3,6 +3,7 @@
 
 #include <types.h>
 #include <task.h>
+#include <kernel.h>
 
 #define SEM_INVALID_ID -1
 #define SEM_WAIT_FOREVER WAIT_FOREVER

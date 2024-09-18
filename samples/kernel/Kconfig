@@ -30,6 +30,10 @@ config CONFIG_MSGQ_001
 
 config CONFIG_MUTEX_001
 	bool "Kernel MUTEX 001"
+	default n
+
+config CONFIG_SEM_001
+	bool "Kernel SEM 001"
 	default y
 
 endmenu

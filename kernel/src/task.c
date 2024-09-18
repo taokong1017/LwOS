@@ -523,7 +523,7 @@ errno_t task_delay(uint64_t ticks) {
 		return ERRNO_TASK_STATUS_INVALID;
 	}
 
-	if (ticks > 0) {
+	if (ticks >= 0) {
 		sched_ready_queue_remove(task->cpu_id, task);
 		task->status = TASK_STATUS_PEND;
 		task->timeout.deadline_ticks = current_ticks + ticks;
