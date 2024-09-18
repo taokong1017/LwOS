@@ -71,7 +71,6 @@ errno_t sem_take(sem_id_t id, uint64_t timeout) {
 
 	ret = task_wait_locked(&sem->wait_queue, timeout, true);
 	if (ret != OK) {
-		sched_spin_unlock(key);
 		ret = ERRNO_SEM_TIMEOUT;
 		log_err(SEM_TAG, "the sem %s is taken failed\n", sem->name);
 	} else {
@@ -80,7 +79,7 @@ errno_t sem_take(sem_id_t id, uint64_t timeout) {
 
 	sched_spin_unlock(key);
 
-	return OK;
+	return ret;
 }
 
 errno_t sem_give(sem_id_t id) {
