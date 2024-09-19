@@ -14,7 +14,8 @@ obj-y := string.o \
 	log.o \
 	percpu.o \
 	kernel.o \
-	timer.o
+	timer.o \
+	syscall_dispatch.o \
 
 obj-$(CONFIG_SMP) += smp.o
 
