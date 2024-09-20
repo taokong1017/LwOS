@@ -3,6 +3,7 @@
 
 #define SVC_CALL_SYSTEM_CALL 0
 
+#ifndef __ASSEMBLY__
 static inline uintptr_t arch_syscall_invoke6(uintptr_t arg1, uintptr_t arg2,
 											 uintptr_t arg3, uintptr_t arg4,
 											 uintptr_t arg5, uintptr_t arg6,
@@ -118,4 +119,5 @@ static inline uintptr_t arch_syscall_invoke0(uintptr_t call_id) {
 	return ret;
 }
 
+#endif
 #endif

@@ -181,7 +181,7 @@ EXCEPTION_HANDLER el1h_serror_handler
 
 EXCEPTION_HANDLER aarch64_el0_sync_handler
 	PUSH_GENERAL_REGS
-	CALL_EXCEPTION_CFUNC el0t_64_sync_handler
+	CALL_EXCEPTION_CFUNC sync_func
 	POP_GENERAL_REGS
 
 EXCEPTION_HANDLER aarch64_el0_irq_handler

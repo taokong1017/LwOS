@@ -12,6 +12,6 @@ enum syscall_id {
 typedef uintptr_t (*syscall_handler_t)(uintptr_t arg1, uintptr_t arg2,
 									   uintptr_t arg3, uintptr_t arg4,
 									   uintptr_t arg5, uintptr_t arg6,
-									   void *ssf);
+									   void *regs);
 
 #endif

@@ -14,7 +14,8 @@ obj-y := vector.o \
 	cache.o \
 	tlb.o \
 	smccc.o \
-	cpu_ops_psci.o
+	cpu_ops_psci.o \
+	sync_exc.o
 
 obj-$(CONFIG_GIC_V2) += gic_v2.o \
 	isr_table.o \
