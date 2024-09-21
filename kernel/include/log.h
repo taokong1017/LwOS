@@ -33,5 +33,7 @@ typedef int32_t (*output_func)(const char *str, int32_t len);
 
 int32_t log_output(int32_t level, const char *tag, const char *format, ...);
 void log_init(int32_t level, output_func output);
+bool log_level_set(int32_t level);
+int32_t log_level_get();
 
 #endif

@@ -4,6 +4,7 @@
 #define SVC_CALL_SYSTEM_CALL 0
 
 #ifndef __ASSEMBLY__
+#include <types.h>
 static inline uintptr_t arch_syscall_invoke6(uintptr_t arg1, uintptr_t arg2,
 											 uintptr_t arg3, uintptr_t arg4,
 											 uintptr_t arg5, uintptr_t arg6,

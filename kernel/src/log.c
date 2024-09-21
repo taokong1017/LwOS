@@ -62,3 +62,14 @@ int32_t log_output(int32_t level, const char *tag, const char *format, ...) {
 
 	return ret;
 }
+
+bool log_level_set(int32_t level) {
+	if (LOG_LEVEL_IS_INVALID(level)) {
+		return false;
+	}
+	log_level = level;
+
+	return true;
+}
+
+int32_t log_level_get() { return log_level; }
