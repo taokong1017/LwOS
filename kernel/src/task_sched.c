@@ -164,13 +164,8 @@ static void idle_task_entry(void *arg0, void *arg1, void *arg2, void *arg3) {
 	(void)arg1;
 	(void)arg2;
 	(void)arg3;
-	uint32_t key = 0;
 
-	forever() {
-		key = sched_spin_lock();
-		task_sched_locked();
-		sched_spin_unlock(key);
-	}
+	forever();
 }
 
 void idle_task_create(uint32_t cpu_id) {
