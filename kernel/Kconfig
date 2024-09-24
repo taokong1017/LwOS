@@ -6,6 +6,20 @@ config CONFIG_SMP
 	help
 		this option enables kernel smp to use multiple CPUs.
 
+config CONFIG_USER_SPACE
+	bool "Enable User Space"
+	default n
+	help
+		this option enables to use user space running applications.
+
+config CONFIG_MEM_PARTITION_NUM
+	int "Memory Partition Number"
+	default 1 if !CONFIG_USER_SPACE
+	default 16 if CONFIG_USER_SPACE
+	range 1 32
+	help
+		This represents the memory partition number.
+
 config CONFIG_TICKS_PER_SECOND
 	int "Tick Value Per Second"
 	default 1000
