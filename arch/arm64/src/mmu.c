@@ -63,58 +63,31 @@ static void alloc_init_pmd(pud_t *pudp, virt_addr_t addr, virt_addr_t end,
 	} while (pmdp++, addr = next, addr != end);
 }
 
-static void alloc_init_pud(p4d_t *p4dp, virt_addr_t addr, virt_addr_t end,
+static void alloc_init_pud(pgd_t *pgdp, virt_addr_t addr, virt_addr_t end,
 						   phys_addr_t phys, pgprot_t prot,
 						   phys_addr_t (*pgtable_alloc)(int), int flags) {
 	virt_addr_t next;
-	p4d_t p4d = read_once(*p4dp);
+	pgd_t pgd = read_once(*pgdp);
 	pud_t *pudp;
 
-	if (p4d_none(p4d)) {
-		p4dval_t p4dval = P4D_TYPE_TABLE | P4D_TABLE_UXN;
+	if (pgd_none(pgd)) {
+		pudval_t pudval = PUD_TYPE_TABLE | PUD_TABLE_UXN;
 		phys_addr_t pud_phys;
 
 		if (flags & NO_EXEC_MAPPINGS) {
-			p4dval |= P4D_TABLE_PXN;
+			pudval |= PUD_TABLE_PXN;
 		}
 
 		pud_phys = pgtable_alloc(PUD_SHIFT);
-		p4d_populate(p4dp, pud_phys, p4dval);
+		pgd_populate(pgdp, pud_phys, pudval);
 	}
 
-	pudp = (pud_t *)pud_offset_phys(p4dp, addr);
+	pudp = (pud_t *)pud_offset_phys(pgdp, addr);
 	do {
 		next = pud_addr_end(addr, end);
 		alloc_init_pmd(pudp, addr, next, phys, prot, pgtable_alloc, flags);
 		phys += next - addr;
 	} while (pudp++, addr = next, addr != end);
-}
-
-static void alloc_init_p4d(pgd_t *pgdp, virt_addr_t addr, virt_addr_t end,
-						   phys_addr_t phys, pgprot_t prot,
-						   phys_addr_t (*pgtable_alloc)(int), int flags) {
-	virt_addr_t next;
-	pgd_t pgd = read_once(*pgdp);
-	p4d_t *p4dp;
-
-	if (pgd_none(pgd)) {
-		pgdval_t pgdval = PGD_TYPE_TABLE | PGD_TABLE_UXN;
-		phys_addr_t p4d_phys;
-
-		if (flags & NO_EXEC_MAPPINGS) {
-			pgdval |= PGD_TABLE_PXN;
-		}
-
-		p4d_phys = pgtable_alloc(P4D_SHIFT);
-		pgd_populate(pgdp, p4d_phys, pgdval);
-	}
-
-	p4dp = (p4d_t *)p4d_offset_phys(pgdp, addr);
-	do {
-		next = p4d_addr_end(addr, end);
-		alloc_init_pud(p4dp, addr, next, phys, prot, pgtable_alloc, flags);
-		phys += next - addr;
-	} while (p4dp++, addr = next, addr != end);
 }
 
 void create_pgd_mapping(pgd_t *pgdir, phys_addr_t phys, virt_addr_t virt,
@@ -136,7 +109,7 @@ void create_pgd_mapping(pgd_t *pgdir, phys_addr_t phys, virt_addr_t virt,
 
 	do {
 		next = pgd_addr_end(addr, end);
-		alloc_init_p4d(pgdp, addr, next, phys, prot, pgtable_alloc, flags);
+		alloc_init_pud(pgdp, addr, next, phys, prot, pgtable_alloc, flags);
 		phys += next - addr;
 	} while (pgdp++, addr = next, addr != end);
 }

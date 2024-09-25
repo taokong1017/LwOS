@@ -15,7 +15,7 @@
  * |               |       |       |       +---> [20:12] L3 index  PTE
  * |               |       |       +-----------> [29:21] L2 index  PMD
  * |               |       +-------------------> [38:30] L1 index  PUD
- * |               +---------------------------> [47:39] L0 index  L4P <-- PGD
+ * |               +---------------------------> [47:39] L0 index  PGD
  * +-------------------------------------------> [63] TTBR0/1
  */
 #ifdef CONFIG_4K_PAGE_SIZE
@@ -23,42 +23,9 @@
 #define PAGE_SIZE (1UL << PAGE_SHIFT)
 #endif
 
-#define PAGE_MASK (~(PAGE_SIZE - 1))
 #define VA_BITS 48
-
-/*
- * Number of page-table levels required to address 'va_bits' wide
- * address, without section mapping. We resolve the top (va_bits - PAGE_SHIFT)
- * bits with (PAGE_SHIFT - 3) bits at each page table level. Hence:
- *
- *  levels = DIV_ROUND_UP((va_bits - PAGE_SHIFT), (PAGE_SHIFT - 3))
- *
- * where DIV_ROUND_UP(n, d) => (((n) + (d) - 1) / (d))
- *
- * We cannot include linux/kernel.h which defines DIV_ROUND_UP here
- * due to build issues. So we open code DIV_ROUND_UP here:
- *
- *    ((((va_bits) - PAGE_SHIFT) + (PAGE_SHIFT - 3) - 1) / (PAGE_SHIFT - 3))
- *
- * which gets simplified as :
- */
-#define PGTABLE_LEVELS(va_bits) (((va_bits)-4) / (PAGE_SHIFT - 3))
-
-/*
- * Size mapped by an entry at level n ( -1 <= n <= 3)
- * We map (PAGE_SHIFT - 3) at all translation levels and PAGE_SHIFT bits
- * in the final page. The maximum number of translation levels supported by
- * the architecture is 5. Hence, starting at level n, we have further
- * ((4 - n) - 1) levels of translation excluding the offset within the page.
- * So, the total number of bits mapped by an entry at level n is :
- *
- *  ((4 - n) - 1) * (PAGE_SHIFT - 3) + PAGE_SHIFT
- *
- * Rearranging it a bit we get :
- *   (4 - n) * (PAGE_SHIFT - 3) + 3
- */
+#define PAGE_MASK (~(PAGE_SIZE - 1))
 #define PGTABLE_LEVEL_SHIFT(n) ((PAGE_SHIFT - 3) * (4 - (n)) + 3)
-
 #define PTRS_PER_PTE (1 << (PAGE_SHIFT - 3))
 
 /*
@@ -77,16 +44,11 @@
 #define PUD_MASK (~(PUD_SIZE - 1))
 #define PTRS_PER_PUD (1 << (PAGE_SHIFT - 3))
 
-#define P4D_SHIFT PGTABLE_LEVEL_SHIFT(0)
-#define P4D_SIZE (1UL << P4D_SHIFT)
-#define P4D_MASK (~(P4D_SIZE - 1))
-#define PTRS_PER_P4D (1 << (PAGE_SHIFT - 3))
-
 /*
  * PGDIR_SHIFT determines the size a top-level page table entry can map
  * (depending on the configuration, this level can be -1, 0, 1 or 2).
  */
-#define PGDIR_SHIFT PGTABLE_LEVEL_SHIFT(-1)
+#define PGDIR_SHIFT PGTABLE_LEVEL_SHIFT(0)
 #define PGDIR_SIZE (1UL << PGDIR_SHIFT)
 #define PGDIR_MASK (~(PGDIR_SIZE - 1))
 #define PTRS_PER_PGD (1 << (VA_BITS - PGDIR_SHIFT))
@@ -94,7 +56,7 @@
 /*
  * Hardware page table definitions.
  *
- * Level -1 descriptor (PGD).
+ * Level 0 descriptor (PGD).
  */
 #define PGD_TYPE_TABLE (((pgdval_t)(3)) << 0)
 #define PGD_TABLE_BIT (((pgdval_t)(1)) << 1)
@@ -103,34 +65,24 @@
 #define PGD_TABLE_UXN (((pgdval_t)(1)) << 60)
 
 /*
- * Level 0 descriptor (P4D).
- */
-#define P4D_TYPE_TABLE (((p4dval_t)(3)) << 0)
-#define P4D_TABLE_BIT (((p4dval_t)(1)) << 1)
-#define P4D_TYPE_MASK (((p4dval_t)(3)) << 0)
-#define P4D_TYPE_SECT (((p4dval_t)(1)) << 0)
-#define P4D_SECT_RDONLY (((p4dval_t)(1)) << 7) /* AP[2] */
-#define P4D_TABLE_PXN (((p4dval_t)(1)) << 59)
-#define P4D_TABLE_UXN (((p4dval_t)(1)) << 60)
-
-/*
  * Level 1 descriptor (PUD).
  */
 #define PUD_TYPE_TABLE (((pudval_t)(3)) << 0)
 #define PUD_TABLE_BIT (((pudval_t)(1)) << 1)
 #define PUD_TYPE_MASK (((pudval_t)(3)) << 0)
 #define PUD_TYPE_SECT (((pudval_t)(1)) << 0)
-#define PUD_SECT_RDONLY (((pudval_t)(1)) << 7)
 #define PUD_TABLE_PXN (((pudval_t)(1)) << 59)
 #define PUD_TABLE_UXN (((pudval_t)(1)) << 60)
 
 /*
  * Level 2 descriptor (PMD).
  */
-#define PMD_TYPE_MASK (((pmdval_t)(3)) << 0)
 #define PMD_TYPE_TABLE (((pmdval_t)(3)) << 0)
-#define PMD_TYPE_SECT (((pmdval_t)(1)) << 0)
 #define PMD_TABLE_BIT (((pmdval_t)(1)) << 1)
+#define PMD_TYPE_MASK (((pmdval_t)(3)) << 0)
+#define PMD_TYPE_SECT (((pmdval_t)(1)) << 0)
+#define PMD_TABLE_PXN (((pmdval_t)(1)) << 59)
+#define PMD_TABLE_UXN (((pmdval_t)(1)) << 60)
 
 /*
  * Section
@@ -141,15 +93,8 @@
 #define PMD_SECT_S (((pmdval_t)(3)) << 8)
 #define PMD_SECT_AF (((pmdval_t)(1)) << 10)
 #define PMD_SECT_NG (((pmdval_t)(1)) << 11)
-#define PMD_SECT_CONT (((pmdval_t)(1)) << 52)
 #define PMD_SECT_PXN (((pmdval_t)(1)) << 53)
 #define PMD_SECT_UXN (((pmdval_t)(1)) << 54)
-#define PMD_TABLE_PXN (((pmdval_t)(1)) << 59)
-#define PMD_TABLE_UXN (((pmdval_t)(1)) << 60)
-
-/*
- * AttrIndx[2:0] encoding (mapping attributes defined in the MAIR* registers).
- */
 #define PMD_ATTRINDX(t) (((pmdval_t)(t)) << 2)
 #define PMD_ATTRINDX_MASK (((pmdval_t)(7)) << 2)
 
@@ -171,7 +116,8 @@
 #define PTE_PXN (((pteval_t)(1)) << 53)	  /* Privileged XN */
 #define PTE_UXN (((pteval_t)(1)) << 54)	  /* User XN */
 
-#define PTE_ADDR_LOW ((((pteval_t)(1) << (50 - PAGE_SHIFT)) - 1) << PAGE_SHIFT)
+#define PTE_ADDR_LOW                                                           \
+	((((pteval_t)(1) << (VA_BITS - PAGE_SHIFT)) - 1) << PAGE_SHIFT)
 #define PTE_ATTRINDX(t) (((pteval_t)(t)) << 2)
 #define PTE_ATTRINDX_MASK (((pteval_t)(7)) << 2)
 

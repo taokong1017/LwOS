@@ -6,7 +6,6 @@
 typedef uint64_t pteval_t;
 typedef uint64_t pmdval_t;
 typedef uint64_t pudval_t;
-typedef uint64_t p4dval_t;
 typedef uint64_t pgdval_t;
 
 /*
@@ -29,12 +28,6 @@ typedef struct {
 } pud_t;
 #define pud_val(x) ((x).pud)
 #define pud(x) ((pud_t){(x)})
-
-typedef struct {
-	p4dval_t p4d;
-} p4d_t;
-#define p4d_val(x) ((x).p4d)
-#define p4d(x) ((p4d_t){(x)})
 
 typedef struct {
 	pgdval_t pgd;
