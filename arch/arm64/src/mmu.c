@@ -1,17 +1,21 @@
-
 #include <types.h>
-#include <pgtable.h>
+#include <menuconfig.h>
 #include <mem.h>
-#include <pgtable_types.h>
-#include <pgtable_prot.h>
+#include <mmu.h>
 #include <operate_regs.h>
 #include <sys_regs.h>
 #include <pfn.h>
+#include <stdio.h>
+#include <spin_lock.h>
 
-#define BIT(nr) (1UL << nr)
-#define NO_EXEC_MAPPINGS BIT(2) /* assumes FEAT_HPDS is not used */
+#define MMU_LOCKER "MMU_LOCKER"
 
 extern pgd_t init_pg_dir[];
+static uint64_t
+	page_tables[CONFIG_MEM_PARTITION_NUM * PAGE_TABLE_ENTRY_SIZE] ALIGNED(
+		PAGE_TABLE_ENTRY_SIZE * sizeof(uint64_t)) = {0};
+static uint32_t page_tables_used_count[CONFIG_MEM_PARTITION_NUM] = {0};
+SPIN_LOCK_DEFINE(mmu_locker, MMU_LOCKER);
 
 static void alloc_init_pte(pmd_t *pmdp, virt_addr_t addr, virt_addr_t end,
 						   phys_addr_t phys, pgprot_t prot,
@@ -95,6 +99,7 @@ void create_pgd_mapping(pgd_t *pgdir, phys_addr_t phys, virt_addr_t virt,
 						phys_addr_t (*pgtable_alloc)(int), int flags) {
 	virt_addr_t addr, end, next;
 	pgd_t *pgdp = pgd_offset_pgd(pgdir, virt);
+	assert(pgdir != NULL, "pgdir is NULL\n");
 
 	/*
 	 * If the virtual and physical address don't have the same offset

@@ -1,7 +1,8 @@
 #include <types.h>
 #include <tlb.h>
 #include <compiler.h>
-#include <pgtable_hwdef.h>
+#include <menuconfig.h>
+#include <mmu.h>
 
 #define tlbi_0(op, arg) __asm__("tlbi " #op "\n" ::)
 #define tlbi_1(op, arg) __asm__("tlbi " #op ", %0\n" : : "r"(arg))

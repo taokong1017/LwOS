@@ -2,9 +2,9 @@
 #include <limits.h>
 #include <pfn.h>
 #include <sys_regs.h>
-#include <pgtable.h>
+#include <menuconfig.h>
+#include <mmu.h>
 #include <mem.h>
-#include <pgtable_prot.h>
 #include <uart_pl011.h>
 #include <gic_v2.h>
 

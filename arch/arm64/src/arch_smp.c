@@ -5,13 +5,13 @@
 #include <percpu.h>
 #include <gic_v2.h>
 #include <arch_timer.h>
+#include <mmu.h>
 
 struct boot_params arch_boot_params = {
 	.cpu_id = 0, .mp_id = -1, .arg = NULL, .func = NULL};
 const uint64_t cpu_mp_ids[] = {0x0, 0x1, 0x2, 0x3};
 uint64_t cpu_master_mp_id = 0;
 extern void __start();
-extern void mmu_enable();
 extern void exec_enable();
 
 void arch_cpu_start(uint32_t cpu_id, arch_cpu_start_func func, void *arg) {

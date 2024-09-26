@@ -1,26 +1,24 @@
 #ifndef __ARM64_PGTABLE_HWDEF_H__
 #define __ARM64_PGTABLE_HWDEF_H__
 
-#include <pgtable_types.h>
-#include <menuconfig.h>
-
 /*
  * 4KB  Granule translate pagetable：
  * +-------+-------+-------+--------+------+-------+--------+--------+
  * |63   56|55   48|47   40|39   32|31   24|23   16|15     8|7      0|
  * +-------+-------+-------+-------+-------+-------+--------+--------+
- * |               |       |       |       |       |
- * |               |       |       |       |       v
- * |               |       |       |       |     [11:0]  Page Shift
- * |               |       |       |       +---> [20:12] L3 index  PTE
- * |               |       |       +-----------> [29:21] L2 index  PMD
- * |               |       +-------------------> [38:30] L1 index  PUD
- * |               +---------------------------> [47:39] L0 index  PGD
- * +-------------------------------------------> [63] TTBR0/1
+ * |                |       |        |        |       |
+ * |                |       |        |        |       |
+ * |                |       |        |        |       --> [11:0]  Page Shift
+ * |                |       |        |        +---------> [20:12] L3 index  PTE
+ * |                |       |        +------------------> [29:21] L2 index  PMD
+ * |                |       +---------------------------> [38:30] L1 index  PUD
+ * |                +-----------------------------------> [47:39] L0 index  PGD
+ * +----------------------------------------------------> [63] TTBR0/1
  */
 #ifdef CONFIG_4K_PAGE_SIZE
 #define PAGE_SHIFT 12
 #define PAGE_SIZE (1UL << PAGE_SHIFT)
+#define PAGE_TABLE_ENTRY_SIZE (1 << (PAGE_SHIFT - 3))
 #endif
 
 #define VA_BITS 48

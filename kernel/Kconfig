@@ -14,9 +14,10 @@ config CONFIG_USER_SPACE
 
 config CONFIG_MEM_PARTITION_NUM
 	int "Memory Partition Number"
-	default 1 if !CONFIG_USER_SPACE
-	default 16 if CONFIG_USER_SPACE
-	range 1 32
+    default 32 if CONFIG_USER_SPACE
+    default 1
+    range 1 32 if CONFIG_USER_SPACE
+    range 1 1 if !CONFIG_USER_SPACE
 	help
 		This represents the memory partition number.
 
