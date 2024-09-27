@@ -1,6 +1,6 @@
 #include <types.h>
 #include <menuconfig.h>
-#include <mem.h>
+#include <mem_mgr.h>
 #include <mmu.h>
 #include <operate_regs.h>
 #include <sys_regs.h>

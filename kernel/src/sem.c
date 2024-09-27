@@ -1,6 +1,6 @@
 #include <string.h>
 #include <sem.h>
-#include <mem.h>
+#include <mem_mgr.h>
 #include <log.h>
 #include <task_sched.h>
 

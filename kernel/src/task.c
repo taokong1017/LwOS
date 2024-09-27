@@ -1,7 +1,7 @@
 #include <types.h>
 #include <task.h>
 #include <errno.h>
-#include <mem.h>
+#include <mem_mgr.h>
 #include <string.h>
 #include <arch_task.h>
 #include <arch_spinlock.h>

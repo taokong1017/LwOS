@@ -5,7 +5,7 @@ obj-y := string.o \
 	tick.o \
 	task.o \
 	task_sched.o \
-	mem.o \
+	mem_mgr.o \
 	spin_lock.o \
 	timeout.o \
 	msgq.o \
@@ -16,7 +16,8 @@ obj-y := string.o \
 	kernel.o \
 	timer.o \
 	syscall_dispatch.o \
-	syscall.o
+	syscall.o \
+	mem_domain.o
 
 obj-$(CONFIG_SMP) += smp.o
 

@@ -4,7 +4,7 @@
 #include <sys_regs.h>
 #include <menuconfig.h>
 #include <mmu.h>
-#include <mem.h>
+#include <mem_mgr.h>
 #include <uart_pl011.h>
 #include <gic_v2.h>
 

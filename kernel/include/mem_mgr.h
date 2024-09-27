@@ -1,5 +1,5 @@
-#ifndef __MEMORY_H__
-#define __MEMORY_H__
+#ifndef __MEMORY_MGR_H__
+#define __MEMORY_MGR_H__
 
 #include <types.h>
 #include <errno.h>

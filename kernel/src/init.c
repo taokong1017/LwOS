@@ -4,7 +4,7 @@
 #include <arch_timer.h>
 #include <task_sched.h>
 #include <cpu.h>
-#include <mem.h>
+#include <mem_mgr.h>
 #include <cpu_ops_psci.h>
 #include <smp.h>
 
