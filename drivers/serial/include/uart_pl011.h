@@ -3,7 +3,7 @@
 
 #include <types.h>
 
-#define UART_REG_BASE (0x09000000)
+#define UART_REG_BASE (0x9000000)
 #define UART_REG_SIZE (0x1000)
 #define REG32(addr) ((volatile uint32_t *)(uintptr_t)(addr))
 #define UARTREG(base, reg) (*REG32((base) + (reg)))

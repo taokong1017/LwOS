@@ -126,7 +126,7 @@ static uint64_t *page_table_alloc() {
 	uint64_t *table = NULL;
 	uint32_t i = 0;
 
-	for (i = 0; i < CONFIG_MEM_PARTITION_NUM; i++) {
+	for (i = 0; i < CONFIG_PAGE_TABLE_MAX_NUM; i++) {
 		if (page_tables_used_count[i] == 0) {
 			table = &page_tables[i * PAGE_TABLE_ENTRY_SIZE];
 			page_tables_used_count[i] += 1;

@@ -4,7 +4,7 @@
 #include <mmu.h>
 
 typedef struct {
-	uint32_t attrs;
+	uint64_t attrs;
 } mem_partition_attr_t;
 
 struct arch_mem_domain {

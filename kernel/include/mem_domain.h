@@ -7,7 +7,8 @@
 #include <arch_mem_domain.h>
 
 struct mem_partition {
-	uintptr_t start;
+	virt_addr_t vaddr;
+	phys_addr_t paddr;
 	size_t size;
 	mem_partition_attr_t attr;
 };
