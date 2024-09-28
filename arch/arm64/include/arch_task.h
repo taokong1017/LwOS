@@ -2,6 +2,7 @@
 #define __ARM64_TASK_H__
 
 #include <types.h>
+#include <general.h>
 #include <fp_context.h>
 #include <compiler.h>
 #include <menuconfig.h>

@@ -1,5 +1,5 @@
-#ifndef __LOS_ERRNO_H__
-#define __LOS_ERRNO_H__
+#ifndef __ERRNO_H__
+#define __ERRNO_H__
 
 #include <types.h>
 

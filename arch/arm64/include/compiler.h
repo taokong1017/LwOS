@@ -87,7 +87,4 @@ static inline void __write_once_size(volatile void *p, void *res, int size) {
 		__u.__val;                                                             \
 	})
 
-#define ALIGNED(x) __attribute__((aligned(x)))
-#define forever() for (;;)
-
 #endif

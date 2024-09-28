@@ -3,6 +3,7 @@
 
 #include <types.h>
 #include <stdio.h>
+#include <general.h>
 
 #define LOG_LEVEL_FATAL 0
 #define LOG_LEVEL_ERROR 1

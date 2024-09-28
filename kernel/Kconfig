@@ -12,12 +12,17 @@ config CONFIG_USER_SPACE
 	help
 		this option enables to use user space running applications.
 
-config CONFIG_MEM_PARTITION_NUM
-	int "Memory Partition Number"
-    default 32 if CONFIG_USER_SPACE
-    default 1
-    range 1 32 if CONFIG_USER_SPACE
-    range 1 1 if !CONFIG_USER_SPACE
+config CONFIG_PAGE_TABLE_MAX_NUM
+	int "Page Table Maximum Number"
+	default 32 if CONFIG_USER_SPACE
+	default 1
+	range 1 32 if CONFIG_USER_SPACE
+	range 1 1 if !CONFIG_USER_SPACE
+
+config CONFIG_MEM_PARTITION_MAX_NUM
+	int "Memory Partition Maximum Number"
+	default 16
+	range 1 32
 	help
 		This represents the memory partition number.
 

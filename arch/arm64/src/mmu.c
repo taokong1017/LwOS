@@ -7,14 +7,17 @@
 #include <pfn.h>
 #include <stdio.h>
 #include <spin_lock.h>
+#include <log.h>
 
 #define MMU_LOCKER "MMU_LOCKER"
+#define MMU_TAG "MMU"
+#define PAGE_TABLE_COUNT_UNIT BIT(16)
 
 extern pgd_t init_pg_dir[];
 static uint64_t
-	page_tables[CONFIG_MEM_PARTITION_NUM * PAGE_TABLE_ENTRY_SIZE] ALIGNED(
+	page_tables[CONFIG_PAGE_TABLE_MAX_NUM * PAGE_TABLE_ENTRY_SIZE] ALIGNED(
 		PAGE_TABLE_ENTRY_SIZE * sizeof(uint64_t)) = {0};
-static uint32_t page_tables_used_count[CONFIG_MEM_PARTITION_NUM] = {0};
+static uint32_t page_tables_used_count[CONFIG_PAGE_TABLE_MAX_NUM] = {0};
 SPIN_LOCK_DEFINE(mmu_locker, MMU_LOCKER);
 
 static void alloc_init_pte(pmd_t *pmdp, virt_addr_t addr, virt_addr_t end,
@@ -117,6 +120,23 @@ void create_pgd_mapping(pgd_t *pgdir, phys_addr_t phys, virt_addr_t virt,
 		alloc_init_pud(pgdp, addr, next, phys, prot, pgtable_alloc, flags);
 		phys += next - addr;
 	} while (pgdp++, addr = next, addr != end);
+}
+
+static uint64_t *page_table_alloc() {
+	uint64_t *table = NULL;
+	uint32_t i = 0;
+
+	for (i = 0; i < CONFIG_MEM_PARTITION_NUM; i++) {
+		if (page_tables_used_count[i] == 0) {
+			table = &page_tables[i * PAGE_TABLE_ENTRY_SIZE];
+			page_tables_used_count[i] += 1;
+			log_debug(MMU_TAG, "allocate table[%d]: %p\n", i, table);
+			return table;
+		}
+	}
+
+	log_err(MMU_TAG, "CONFIG_MEM_PARTITION_NUM, too small");
+	return NULL;
 }
 
 void mmu_enable() {

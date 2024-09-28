@@ -1,6 +1,7 @@
 #include <cpu.h>
 #include <menuconfig.h>
 #include <offsets.h>
+#include <general.h>
 
 .globl __start
 .type __start, function

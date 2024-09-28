@@ -4,6 +4,7 @@
 #include <types.h>
 #include <cpu_defines.h>
 #include <compiler.h>
+#include <general.h>
 
 struct arch_regs {
 	/* X0 - X29 */

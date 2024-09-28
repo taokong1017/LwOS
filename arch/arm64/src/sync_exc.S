@@ -3,6 +3,7 @@
 #include <offsets.h>
 #include <cpu_defines.h>
 #include <cpu.h>
+#include <general.h>
 
 .globl syscall_func
 .type syscall_func, function

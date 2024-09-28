@@ -2,7 +2,6 @@
 #ifndef __ARM64_CPU_H__
 #define __ARM64_CPU_H__
 
-#define BIT(nr) (1UL << nr)
 #define DAIFSET_FIQ_BIT BIT(0)
 #define DAIFSET_IRQ_BIT BIT(1)
 #define DAIFSET_ABT_BIT BIT(2)

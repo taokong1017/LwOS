@@ -14,7 +14,7 @@ struct mem_partition {
 
 struct mem_domain {
 	struct arch_mem_domain arch_mem_domain;
-	struct mem_partition partitions[CONFIG_MEM_PARTITION_NUM];
+	struct mem_partition partitions[CONFIG_MEM_PARTITION_MAX_NUM];
 	uint32_t partition_num;
 	struct list_head mem_domain_node;
 };

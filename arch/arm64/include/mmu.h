@@ -7,7 +7,7 @@
 #include <pgtable.h>
 #include <pgtable_prot.h>
 
-#define BIT(nr) (1UL << nr)
+
 #define NO_EXEC_MAPPINGS BIT(2)
 
 struct mmu_pgtables {
