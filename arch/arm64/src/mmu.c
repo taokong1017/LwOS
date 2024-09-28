@@ -95,7 +95,7 @@ static void alloc_init_pud(pgd_t *pgdp, virt_addr_t addr, virt_addr_t end,
 }
 
 void create_pgd_mapping(pgd_t *pgdir, phys_addr_t phys, virt_addr_t virt,
-						phys_addr_t size, pgprot_t prot,
+						size_t size, pgprot_t prot,
 						phys_addr_t (*pgtable_alloc)(int), int flags) {
 	virt_addr_t addr, end, next;
 	pgd_t *pgdp = pgd_offset_pgd(pgdir, virt);

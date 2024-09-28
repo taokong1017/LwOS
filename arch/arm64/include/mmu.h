@@ -10,8 +10,13 @@
 #define BIT(nr) (1UL << nr)
 #define NO_EXEC_MAPPINGS BIT(2)
 
+struct mmu_pgtables {
+	uint64_t *page_table;
+	uint64_t ttbr0;
+};
+
 void create_pgd_mapping(pgd_t *pgdir, phys_addr_t phys, virt_addr_t virt,
-						phys_addr_t size, pgprot_t prot,
+						size_t size, pgprot_t prot,
 						phys_addr_t (*pgtable_alloc)(int), int flags);
 
 void mmu_enable();
