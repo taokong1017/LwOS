@@ -8,8 +8,9 @@ typedef struct {
 } mem_partition_attr_t;
 
 struct arch_mem_domain {
-	struct mmu_pgtables pgtables;
-	struct list_head node;
+	struct mmu_pgtable pgtable;
 };
+
+void arch_mem_domain_init(struct arch_mem_domain *arch_mem_domain);
 
 #endif

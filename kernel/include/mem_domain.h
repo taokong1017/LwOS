@@ -1,10 +1,18 @@
 #ifndef __MEM_DOMAIN_H__
 #define __MEM_DOMAIN_H__
 
+#include <errno.h>
 #include <list.h>
 #include <menuconfig.h>
 #include <mmu.h>
 #include <arch_mem_domain.h>
+
+#define MEM_DOMAIN_NAME_LEN 32
+
+#define ERRNO_MEM_DOMAIN_EMPTY ERRNO_OS_ERROR(MOD_ID_MEM_DOMAIN, 0x00)
+#define ERRNO_MEM_DOMAIN_FULL ERRNO_OS_ERROR(MOD_ID_MEM_DOMAIN, 0x01)
+#define ERRNO_MEM_DOMAIN_INVALID_NAME ERRNO_OS_ERROR(MOD_ID_MEM_DOMAIN, 0x02)
+#define ERRNO_MEM_DOMAIN_INVALID_RANGE ERRNO_OS_ERROR(MOD_ID_MEM_DOMAIN, 0x03)
 
 struct mem_partition {
 	virt_addr_t vaddr;
@@ -14,10 +22,15 @@ struct mem_partition {
 };
 
 struct mem_domain {
+	char name[MEM_DOMAIN_NAME_LEN];
 	struct arch_mem_domain arch_mem_domain;
 	struct mem_partition partitions[CONFIG_MEM_PARTITION_MAX_NUM];
 	uint32_t partition_num;
 	struct list_head mem_domain_node;
 };
+
+struct mmu_pgtable kernel_mem_domain_page_table_get();
+
+phys_addr_t page_table_alloc(size_t size);
 
 #endif

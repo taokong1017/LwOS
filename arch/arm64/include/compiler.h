@@ -2,6 +2,8 @@
 #define __ARM64_COMPILER_H
 
 #include <types.h>
+#include <stdio.h>
+#include <general.h>
 
 typedef int8_t __attribute__((__may_alias__)) __u8_alias_t;
 typedef uint16_t __attribute__((__may_alias__)) __u16_alias_t;
@@ -18,7 +20,7 @@ typedef uint64_t __attribute__((__may_alias__)) __u64_alias_t;
 #define code_unreachable() __builtin_unreachable()
 #define assert(flag, msg, ...)                                                 \
 	do {                                                                       \
-		if (!flag) {                                                           \
+		if (!(flag)) {                                                         \
 			printf(msg, ##__VA_ARGS__);                                        \
 			forever();                                                         \
 		}                                                                      \

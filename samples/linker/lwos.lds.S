@@ -48,9 +48,9 @@ SECTIONS
 	}
 
 	. = ALIGN(0x1000);
-	init_pg_dir = .;
-	. += 0x6000;
-	init_pg_end = .;
+	__page_table_pool_start = .;
+	. += 0x100000;
+	__page_table_pool_end = .;
 
 	. = ALIGN(0x1000);
 	__kernel_stack_start = .;

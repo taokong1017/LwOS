@@ -13,16 +13,16 @@
 #define MMU_TAG "MMU"
 #define PAGE_TABLE_COUNT_UNIT BIT(16)
 
-extern pgd_t init_pg_dir[];
 static uint64_t
 	page_tables[CONFIG_PAGE_TABLE_MAX_NUM * PAGE_TABLE_ENTRY_SIZE] ALIGNED(
 		PAGE_TABLE_ENTRY_SIZE * sizeof(uint64_t)) = {0};
 static uint32_t page_tables_used_count[CONFIG_PAGE_TABLE_MAX_NUM] = {0};
 SPIN_LOCK_DEFINE(mmu_locker, MMU_LOCKER);
+static uint8_t pgtable_next_asid = 0;
 
 static void alloc_init_pte(pmd_t *pmdp, virt_addr_t addr, virt_addr_t end,
 						   phys_addr_t phys, pgprot_t prot,
-						   phys_addr_t (*pgtable_alloc)(int), int flags) {
+						   phys_addr_t (*pgtable_alloc)(size_t), int flags) {
 	pmd_t pmd = read_once(*pmdp);
 	pte_t *ptep;
 
@@ -46,7 +46,7 @@ static void alloc_init_pte(pmd_t *pmdp, virt_addr_t addr, virt_addr_t end,
 
 static void alloc_init_pmd(pud_t *pudp, virt_addr_t addr, virt_addr_t end,
 						   phys_addr_t phys, pgprot_t prot,
-						   phys_addr_t (*pgtable_alloc)(int), int flags) {
+						   phys_addr_t (*pgtable_alloc)(size_t), int flags) {
 	virt_addr_t next;
 	pud_t pud = read_once(*pudp);
 	pmd_t *pmdp;
@@ -72,7 +72,7 @@ static void alloc_init_pmd(pud_t *pudp, virt_addr_t addr, virt_addr_t end,
 
 static void alloc_init_pud(pgd_t *pgdp, virt_addr_t addr, virt_addr_t end,
 						   phys_addr_t phys, pgprot_t prot,
-						   phys_addr_t (*pgtable_alloc)(int), int flags) {
+						   phys_addr_t (*pgtable_alloc)(size_t), int flags) {
 	virt_addr_t next;
 	pgd_t pgd = read_once(*pgdp);
 	pud_t *pudp;
@@ -99,7 +99,7 @@ static void alloc_init_pud(pgd_t *pgdp, virt_addr_t addr, virt_addr_t end,
 
 void create_pgd_mapping(pgd_t *pgdir, phys_addr_t phys, virt_addr_t virt,
 						size_t size, pgprot_t prot,
-						phys_addr_t (*pgtable_alloc)(int), int flags) {
+						phys_addr_t (*pgtable_alloc)(size_t), int flags) {
 	virt_addr_t addr, end, next;
 	pgd_t *pgdp = pgd_offset_pgd(pgdir, virt);
 	assert(pgdir != NULL, "pgdir is NULL\n");
@@ -122,7 +122,7 @@ void create_pgd_mapping(pgd_t *pgdir, phys_addr_t phys, virt_addr_t virt,
 	} while (pgdp++, addr = next, addr != end);
 }
 
-static uint64_t *page_table_alloc() {
+uint64_t *alloc_page_table() {
 	uint64_t *table = NULL;
 	uint32_t i = 0;
 
@@ -139,9 +139,17 @@ static uint64_t *page_table_alloc() {
 	return NULL;
 }
 
-void mmu_enable() {
+uint64_t alloc_page_table_asid() {
+	uint64_t asid = pgtable_next_asid;
+
+	pgtable_next_asid += 1;
+	pgtable_next_asid &= (1 << VM_ASID_BITS) - 1;
+
+	return asid << TTBR_ASID_SHIFT;
+}
+
+void mmu_enable(uint64_t ttbr0) {
 	uint64_t tcr = 0;
-	uint64_t ttbr0 = 0;
 	uint64_t sctlr = 0;
 
 	/* Set memory attribute */
@@ -154,7 +162,6 @@ void mmu_enable() {
 	write_tcr_el1(tcr);
 
 	/* Set translation table */
-	ttbr0 = (uint64_t)init_pg_dir;
 	write_ttbr0_el1(ttbr0);
 	isb();
 

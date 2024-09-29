@@ -6,7 +6,6 @@
 #include <task_sched.h>
 
 #define SYSCALL_TAG "SYSCALL"
-#define array_size(x) (sizeof(x) / sizeof((x)[0]))
 typedef uintptr_t (*syscall_handler_t)(uintptr_t arg1, uintptr_t arg2,
 									   uintptr_t arg3, uintptr_t arg4,
 									   uintptr_t arg5, uintptr_t arg6,
@@ -65,4 +64,4 @@ const syscall_handler_t syscall_table[SYSCALL_ID_LIMIT + 1] = {
 	[SYSCALL_ID_LIMIT] = default_syscall_handler,
 };
 
-uint32_t syscall_table_size_get() { return array_size(syscall_table); }
+uint32_t syscall_table_size_get() { return ARRAY_SIZE(syscall_table); }

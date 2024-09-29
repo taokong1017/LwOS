@@ -31,6 +31,7 @@ enum module_id {
 	MOD_ID_MEM,
 	MOD_ID_TIMER,
 	MOD_ID_PSCI,
+	MOD_ID_MEM_DOMAIN,
 };
 
 typedef uint32_t errno_t;

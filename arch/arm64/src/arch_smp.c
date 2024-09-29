@@ -6,6 +6,7 @@
 #include <gic_v2.h>
 #include <arch_timer.h>
 #include <mmu.h>
+#include <mem_domain.h>
 
 struct boot_params arch_boot_params = {
 	.cpu_id = 0, .mp_id = -1, .arg = NULL, .func = NULL};
@@ -34,12 +35,13 @@ void arch_cpu_start(uint32_t cpu_id, arch_cpu_start_func func, void *arg) {
 void arch_secondary_cpu_init() {
 	arch_cpu_start_func func = NULL;
 	void *arg = NULL;
+	struct mmu_pgtable pgtable = kernel_mem_domain_page_table_get();
 
+	mmu_enable(pgtable.ttbr0);
 	exec_enable();
 	arm_gic_init(false);
 	arch_timer_init(false);
 	percpu_init(arch_boot_params.cpu_id);
-	mmu_enable();
 
 	func = arch_boot_params.func;
 	arg = arch_boot_params.arg;

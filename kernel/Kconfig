@@ -21,8 +21,8 @@ config CONFIG_PAGE_TABLE_MAX_NUM
 
 config CONFIG_MEM_PARTITION_MAX_NUM
 	int "Memory Partition Maximum Number"
-	default 16
-	range 1 32
+	default 32
+	range 1 64
 	help
 		This represents the memory partition number.
 

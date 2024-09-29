@@ -11,7 +11,6 @@
 #include <percpu.h>
 #include <cpu.h>
 
-#define array_size(x) (sizeof(x) / sizeof((x)[0]))
 #define IS_VALID_ADDR(addr) (addr && addr != -1)
 
 extern uint64_t current_pc_get();
@@ -152,7 +151,7 @@ static void unwind_stack_walk(unwind_consume_func consume_state, void *cookie,
 	};
 	struct unwind_state state = {
 		.stacks = stacks,
-		.stacks_num = array_size(stacks),
+		.stacks_num = ARRAY_SIZE(stacks),
 	};
 
 	if (regs) {

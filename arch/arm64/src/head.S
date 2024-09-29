@@ -140,14 +140,11 @@ bss_loop_done:
 	msr SPSel, #1
 	mov sp, x3
 
-	/* set up early kernel memory map */
-	bl early_kernel_map
+	/* set up kernel memory map */
+	bl kernel_mem_domain_init
 
 	/* init uart */
 	bl uart_early_init
-
-	/* enable MMU */
-	bl mmu_enable
 
 	/* enable interrupt & exception */
 	bl exec_enable
