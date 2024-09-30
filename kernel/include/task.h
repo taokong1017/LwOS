@@ -6,6 +6,7 @@
 #include <errno.h>
 #include <timeout.h>
 #include <arch_task.h>
+#include <mem_domain.h>
 
 #define ID_TO_TASK(task_id) ((struct task *)task_id)
 #define CPU_AFFI_MASK(cpu_id) (1 << cpu_id)
@@ -113,6 +114,7 @@ struct task {
 	struct list_head pend_list; /* pend queue */
 	struct timeout timeout;
 	struct arch_task_context task_context;
+	struct mem_domain *mem_domain;
 	bool is_idle_task;
 	bool is_timeout;
 };
@@ -138,5 +140,6 @@ errno_t task_wait_locked(struct wait_queue *wq, uint64_t ticks,
 						 bool need_sched);
 errno_t task_wakeup_locked(struct wait_queue *wq);
 bool task_sig_handle();
+bool task_is_user(task_id_t task_id);
 
 #endif

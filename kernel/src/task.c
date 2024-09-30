@@ -663,3 +663,9 @@ bool task_sig_handle() {
 
 	return need_sched;
 }
+
+bool task_is_user(task_id_t task_id) {
+	struct task *task = ID_TO_TASK(task_id);
+
+	return task->flag & TASK_FLAG_USER;
+}
