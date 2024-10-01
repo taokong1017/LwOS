@@ -168,12 +168,7 @@ static void create_test_task3() {
 	return;
 }
 
-void main(void *arg0, void *arg1, void *arg2, void *arg3) {
-	(void)arg0;
-	(void)arg1;
-	(void)arg2;
-	(void)arg3;
-
+int main() {
 	printf("enter root task\n");
 	create_sem();
 	create_test_task1();
