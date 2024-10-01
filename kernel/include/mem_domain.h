@@ -13,6 +13,8 @@
 #define ERRNO_MEM_DOMAIN_FULL ERRNO_OS_ERROR(MOD_ID_MEM_DOMAIN, 0x01)
 #define ERRNO_MEM_DOMAIN_INVALID_NAME ERRNO_OS_ERROR(MOD_ID_MEM_DOMAIN, 0x02)
 #define ERRNO_MEM_DOMAIN_INVALID_RANGE ERRNO_OS_ERROR(MOD_ID_MEM_DOMAIN, 0x03)
+#define ERRNO_MEM_DOMAIN_SAME ERRNO_OS_ERROR(MOD_ID_MEM_DOMAIN, 0x04)
+#define ERRNO_MEM_DOMAIN_OVERLAP ERRNO_OS_ERROR(MOD_ID_MEM_DOMAIN, 0x05)
 
 struct mem_range {
 	char *name;
@@ -36,8 +38,12 @@ struct mem_domain {
 	struct list_head mem_domain_node;
 };
 
+errno_t mem_domain_init(struct mem_domain *domain, const char *name);
+errno_t mem_domain_ranges_add(struct mem_domain *domain,
+							  struct mem_range *ranges, uint32_t rangs_num);
+errno_t mem_domain_kernel_ranges_copy(struct mem_domain *domain);
+errno_t mem_domain_set_up(struct mem_domain *domain);
 struct mmu_pgtable kernel_mem_domain_page_table_get();
-
 phys_addr_t page_table_alloc(size_t size);
 
 #endif

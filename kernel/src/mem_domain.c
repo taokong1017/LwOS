@@ -86,8 +86,26 @@ static struct mem_range mem_ranges[] = {
 	},
 };
 
-errno_t mem_domain_add_range(struct mem_domain *domain,
-							 struct mem_range range) {
+static errno_t mem_domain_range_check(struct mem_domain *domain,
+									  struct mem_range range) {
+	uint32_t i = 0;
+
+	for (i = 0; i < domain->partition_num; i++) {
+		if ((((virt_addr_t)range.start < domain->partitions[i].vaddr) &&
+			 ((virt_addr_t)range.end > domain->partitions[i].vaddr)) ||
+			(((virt_addr_t)range.start <
+			  domain->partitions[i].vaddr + domain->partitions[i].size) &&
+			 ((virt_addr_t)range.end >
+			  domain->partitions[i].vaddr + domain->partitions[i].size))) {
+			return ERRNO_MEM_DOMAIN_OVERLAP;
+		}
+	}
+
+	return OK;
+}
+
+static errno_t mem_domain_range_add(struct mem_domain *domain,
+									struct mem_range range) {
 	uint32_t i = 0;
 
 	spin_lock(&mem_domain_locker);
@@ -105,6 +123,12 @@ errno_t mem_domain_add_range(struct mem_domain *domain,
 		return ERRNO_MEM_DOMAIN_FULL;
 	}
 
+	if (mem_domain_range_check(domain, range) != OK) {
+		spin_unlock(&mem_domain_locker);
+		log_err(MEM_DOMAIN_TAG, "Range[%s] is overlap\n", range.name);
+		return ERRNO_MEM_DOMAIN_OVERLAP;
+	}
+
 	i = domain->partition_num;
 	domain->partitions[i].vaddr = (virt_addr_t)range.start;
 	domain->partitions[i].paddr = (phys_addr_t)range.start;
@@ -114,6 +138,44 @@ errno_t mem_domain_add_range(struct mem_domain *domain,
 	spin_unlock(&mem_domain_locker);
 
 	return OK;
+}
+
+errno_t mem_domain_ranges_add(struct mem_domain *domain,
+							  struct mem_range *ranges, uint32_t rangs_num) {
+	uint32_t i = 0;
+
+	if (domain == NULL) {
+		log_err(MEM_DOMAIN_TAG, "Domain is NULL\n");
+		return ERRNO_MEM_DOMAIN_EMPTY;
+	}
+
+	if (ranges == NULL) {
+		log_err(MEM_DOMAIN_TAG, "Ranges is NULL\n");
+		return ERRNO_MEM_DOMAIN_INVALID_RANGE;
+	}
+
+	for (i = 0; i < rangs_num; i++) {
+		if (mem_domain_range_add(domain, ranges[i]) != OK) {
+			log_err(MEM_DOMAIN_TAG, "Add range[%s] failed\n", ranges[i].name);
+			return ERRNO_MEM_DOMAIN_FULL;
+		}
+	}
+
+	return OK;
+}
+
+errno_t mem_domain_kernel_ranges_copy(struct mem_domain *domain) {
+	if (domain == NULL) {
+		log_err(MEM_DOMAIN_TAG, "Domain is NULL\n");
+		return ERRNO_MEM_DOMAIN_EMPTY;
+	}
+
+	if (domain == &kernel_mem_domain) {
+		log_err(MEM_DOMAIN_TAG, "Domain is kernel domain\n");
+		return ERRNO_MEM_DOMAIN_SAME;
+	}
+
+	return mem_domain_ranges_add(domain, mem_ranges, ARRAY_SIZE(mem_ranges));
 }
 
 errno_t mem_domain_init(struct mem_domain *domain, const char *name) {
@@ -164,12 +226,9 @@ errno_t mem_domain_set_up(struct mem_domain *domain) {
 }
 
 void kernel_mem_domain_init() {
-	uint32_t i = 0;
-
 	mem_domain_init(&kernel_mem_domain, MEM_KERNEL_DOMAIN);
-	for (i = 0; i < ARRAY_SIZE(mem_ranges); i++) {
-		mem_domain_add_range(&kernel_mem_domain, mem_ranges[i]);
-	}
+	mem_domain_ranges_add(&kernel_mem_domain, mem_ranges,
+						  ARRAY_SIZE(mem_ranges));
 	mem_domain_set_up(&kernel_mem_domain);
 	mmu_enable(kernel_mem_domain.arch_mem_domain.pgtable.ttbr0);
 

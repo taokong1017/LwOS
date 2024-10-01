@@ -8,7 +8,7 @@
 #include <cpu_ops_psci.h>
 #include <smp.h>
 
-#define SHELL_LOGO "[LS Kernel]# "
+#define SHELL_LOGO "[LW shell] > "
 #define shell_logo_show() printf(SHELL_LOGO)
 #define HEAP_SIZE (0x10000000)
 extern void logo_show();
