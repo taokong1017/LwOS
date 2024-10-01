@@ -14,7 +14,6 @@ static task_id_t test_task1_id = 0;
 static task_id_t test_task2_id = 0;
 static task_id_t test_task3_id = 0;
 
-
 static void test_task1_entry(void *arg0, void *arg1, void *arg2, void *arg3) {
 	(void)arg0;
 	(void)arg1;
@@ -162,7 +161,7 @@ static void create_test_task3() {
 	return;
 }
 
-void main_task_entry(void *arg0, void *arg1, void *arg2, void *arg3) {
+void main(void *arg0, void *arg1, void *arg2, void *arg3) {
 	(void)arg0;
 	(void)arg1;
 	(void)arg2;

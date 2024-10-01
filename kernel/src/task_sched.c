@@ -18,7 +18,7 @@
 #define TASK_IS_LOCKED(task) (task->lock_cnt > 0)
 
 SPIN_LOCK_DEFINE(sched_spinlocker, TASK_SCHED_LOCKER);
-extern void main_task_entry(void *arg0, void *arg1, void *arg2, void *arg3);
+extern void main(void *arg0, void *arg1, void *arg2, void *arg3);
 extern void task_reset(struct task *task);
 
 struct prio_info {
@@ -188,8 +188,8 @@ void main_task_create(uint32_t cpu_id) {
 	task_id_t task_id = 0;
 	struct task *task = NULL;
 
-	task_create(&task_id, ROOT_TASK_NAME, main_task_entry, NULL, NULL, NULL,
-				NULL, TASK_STACK_DEFAULT_SIZE, TASK_DEFAULT_FLAG);
+	task_create(&task_id, ROOT_TASK_NAME, main, NULL, NULL, NULL, NULL,
+				TASK_STACK_DEFAULT_SIZE, TASK_DEFAULT_FLAG);
 	task = ID_TO_TASK(task_id);
 	task->priority = TASK_PRIORITY_HIGHEST;
 	task->status = TASK_STATUS_READY;

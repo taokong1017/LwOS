@@ -60,7 +60,7 @@ static void create_test_task1() {
 	return;
 }
 
-static void timer_oneshot_cb(void *arg) { 
+static void timer_oneshot_cb(void *arg) {
 	uint64_t *timer_count = (uint64_t *)arg;
 
 	(*timer_count)++;
@@ -83,7 +83,7 @@ static void create_timers() {
 	timer_start(timer_periodic_id);
 }
 
-void main_task_entry(void *arg0, void *arg1, void *arg2, void *arg3) {
+void main(void *arg0, void *arg1, void *arg2, void *arg3) {
 	(void)arg0;
 	(void)arg1;
 	(void)arg2;

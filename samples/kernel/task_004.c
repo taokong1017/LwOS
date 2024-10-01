@@ -167,7 +167,7 @@ static void create_test_task3() {
 	return;
 }
 
-void main_task_entry(void *arg0, void *arg1, void *arg2, void *arg3) {
+void main(void *arg0, void *arg1, void *arg2, void *arg3) {
 	(void)arg0;
 	(void)arg1;
 	(void)arg2;
