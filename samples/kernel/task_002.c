@@ -224,4 +224,6 @@ int main() {
 	create_test_task2();
 	create_test_task3();
 	create_test_task4();
+
+	return 0;
 }

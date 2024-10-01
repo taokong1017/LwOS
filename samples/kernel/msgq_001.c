@@ -189,4 +189,6 @@ int main() {
 	create_test_task1();
 	create_test_task2();
 	create_test_task3();
+
+	return 0;
 }

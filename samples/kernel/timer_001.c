@@ -87,4 +87,6 @@ int main() {
 	printf("enter root task\n");
 	create_timers();
 	create_test_task1();
+
+	return 0;
 }
