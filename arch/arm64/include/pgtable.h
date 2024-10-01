@@ -4,9 +4,6 @@
 #include <pgtable_types.h>
 #include <pgtable_hwdef.h>
 #include <compiler.h>
-
-#define POWER_MASK(x, mask) (((x) + (mask)) & ~(mask))
-#define ALIGN(x, a) POWER_MASK(x, (__typeof__(x))(a)-1)
 #define PAGE_ALIGN(addr) ALIGN(addr, PAGE_SIZE)
 
 #define pte_none(pte) (!pte_val(pte))

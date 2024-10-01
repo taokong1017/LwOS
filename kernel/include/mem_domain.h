@@ -14,6 +14,13 @@
 #define ERRNO_MEM_DOMAIN_INVALID_NAME ERRNO_OS_ERROR(MOD_ID_MEM_DOMAIN, 0x02)
 #define ERRNO_MEM_DOMAIN_INVALID_RANGE ERRNO_OS_ERROR(MOD_ID_MEM_DOMAIN, 0x03)
 
+struct mem_range {
+	char *name;
+	void *start;
+	void *end;
+	uint64_t attrs;
+};
+
 struct mem_partition {
 	virt_addr_t vaddr;
 	phys_addr_t paddr;

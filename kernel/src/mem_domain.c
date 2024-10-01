@@ -9,13 +9,6 @@
 #define MEM_DOMAIN_TAG "MEM_DOMAIN"
 #define MEM_KERNEL_DOMAIN "Kernel_Domain"
 
-struct mem_range {
-	char *name;
-	void *start;
-	void *end;
-	uint64_t attrs;
-};
-
 extern char __text_start[];
 extern char __text_end[];
 extern char __rodata_start[];
@@ -141,6 +134,7 @@ errno_t mem_domain_init(struct mem_domain *domain, const char *name) {
 	memset(domain, 0, sizeof(struct mem_domain));
 	strncpy(domain->name, name, MEM_DOMAIN_NAME_LEN);
 	list_add_tail(&domain->mem_domain_node, &mem_domain_root);
+	arch_mem_domain_init(&domain->arch_mem_domain);
 	spin_unlock(&mem_domain_locker);
 
 	return OK;
@@ -173,7 +167,6 @@ void kernel_mem_domain_init() {
 	uint32_t i = 0;
 
 	mem_domain_init(&kernel_mem_domain, MEM_KERNEL_DOMAIN);
-	arch_mem_domain_init(&kernel_mem_domain.arch_mem_domain);
 	for (i = 0; i < ARRAY_SIZE(mem_ranges); i++) {
 		mem_domain_add_range(&kernel_mem_domain, mem_ranges[i]);
 	}
