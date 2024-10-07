@@ -12,13 +12,13 @@ SZ = 'size'
 SRC = 'sources'
 section_regex = re.compile(r'.([A-Za-z0-9_]*)_(data|bss)')
 section_template = """
-.{name} ALIGN(0x1000):
+.{name} ALIGN({align_size}):
 {{
 	__{name}_bss_start = .;		/* define a global symbol at app bss start */
 	*(.{name}_bss)				/* app bss sections */
 	__{name}_bss_end = .;		/* define a global symbol at app bss end */
 
-	. = ALIGN(0x1000);
+	. = ALIGN({align_size});
 	__{name}_data_start = .;	/* define a global symbol at app data start */
 	*(.{name}_data)				/* app data sections */
 	__{name}_data_end = .;		/* define a global symbol at app data end */
@@ -30,12 +30,10 @@ def parse_args():
 	parser = argparse.ArgumentParser(
 		description=__doc__,
 		formatter_class=argparse.RawDescriptionHelpFormatter, allow_abbrev=False)
-	parser.add_argument("-d", "--directory", required=False, default=None,
-						help="Build directory")
-	parser.add_argument("-v", "--verbose", action="count", default=0,
-						help="Verbose Output")
-	parser.add_argument("-o", "--output", required=False,
-						help="Output ld file")
+	parser.add_argument("-d", "--directory", required=True, default=None, help="Build directory")
+	parser.add_argument("-v", "--verbose", required=False, default=0, help="Verbose Output")
+	parser.add_argument("-o", "--output", required=True, help="Output ld file")
+	parser.add_argument("-s", "--size", required=False, default=0x1000, help="Page size")
 	args = parser.parse_args()
 
 
@@ -86,7 +84,7 @@ def generate_linker(file, partitions):
 
 	if len(partitions) > 0:
 		for partition, item in partitions.items():
-			content += section_template.format(name=partition)
+			content += section_template.format(name=partition, align_size=args.size)
 
 	with open(file, "w") as f:
 		f.write(content)
