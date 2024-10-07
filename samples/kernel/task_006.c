@@ -10,10 +10,6 @@ APP_PARTITION_DEFINE(app_1);
 APP_DATA(app_1) int data = 1;
 APP_BSS(app_1) char array[4000] = {1};
 
-APP_PARTITION_DEFINE(app_2);
-APP_DATA(app_2) int data2 = 1;
-APP_BSS(app_2) char array2[8000] = {1};
-
 int main() {
 	printf("enter root task\n");
 	mem_domain_init(&app_mem_domain, "Task_006_Domain");

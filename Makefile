@@ -70,7 +70,7 @@ obj: gen
 	@echo "build obj success"
 
 gen: check
-	$(Q)python3 scripts/logo_gen.py -o $(LOGO)
+	$(Q)python3 scripts/gen_logo.py -o $(LOGO)
 ifeq ($(CONFIG_ARM64), y)
 	$(Q)$(CC) $(CFLAGS) -c $(BASE_DIR)/arch/arm64/src/offsets.c -o $(BASE_DIR)/arch/arm64/src/offsets.o
 	$(Q)python3 scripts/gen_offset_header.py -i $(BASE_DIR)/arch/arm64/src/offsets.o -o \
