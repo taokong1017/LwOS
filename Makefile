@@ -3,7 +3,8 @@ TARGET     = $(PROJECT).elf
 BASE_DIR   = $(CURDIR)
 CONFIG_DIR = $(BASE_DIR)/config
 SUB_DIRS   = arch kernel drivers samples
-LINKER     = $(BASE_DIR)/samples/linker/lwos.lds
+LINKER     = $(BASE_DIR)/samples/linker/lwos.ld
+APP_LD     = $(BASE_DIR)/samples/linker/app.ld
 CONFIG     :=
 
 CROSS_COMPILE :=
@@ -33,10 +34,6 @@ include scripts/Makefile.lib
 BUILD := -f scripts/Makefile.build obj
 CLEAN := -f scripts/Makefile.clean obj
 
-define MAKE_LDS
-	$(CPP) $(cpp_flags) -D__ASSEMBLY__  $(2) |grep -v "^#" > $(1)
-endef
-
 define MAKE_CMD
 	$(Q)for dir in $(1); do\
 		$(MAKE) $(BUILD)=$$dir; \
@@ -49,9 +46,11 @@ define MAKE_CLEAN_CMD
 	done
 endef
 
-.PHONY: all check menuconfig run dbg clean help obj defconfig gen $(LINKER)
+.PHONY: all check menuconfig run dbg clean help obj defconfig gen
 
-all: obj $(LINKER)
+all: obj
+	$(Q)python3 scripts/gen_app_ld.py -d $(BASE_DIR)/samples -o $(APP_LD)
+	$(Q)$(CPP) $(cpp_flags) -D__ASSEMBLY__  $(LINKER).S |grep -v "^#" > $(LINKER)
 	$(Q)$(LD) $(LDFLAGS) -T $(LINKER) -e __start -o $(TARGET) -Map=$(PROJECT).map \
 		$(strip $(filter-out %/offsets.o, $(call ALL_OBJS, $(srctree))))
 	$(Q)$(OBJDUMP) -d $(TARGET) > $(PROJECT).sym
@@ -66,24 +65,19 @@ ifeq ($(wildcard .config),)
 	$(error excute make menuconfig or make defconfig ***)
 endif
 
-obj: gen 
+obj: gen
 	$(Q)$(call MAKE_CMD, $(SUB_DIRS))
 	@echo "build obj success"
 
-$(LOGO):
+gen: check
 	$(Q)python3 scripts/logo_gen.py -o $(LOGO)
-
-gen: check $(LOGO)
 ifeq ($(CONFIG_ARM64), y)
 	$(Q)$(CC) $(CFLAGS) -c $(BASE_DIR)/arch/arm64/src/offsets.c -o $(BASE_DIR)/arch/arm64/src/offsets.o
 	$(Q)python3 scripts/gen_offset_header.py -i $(BASE_DIR)/arch/arm64/src/offsets.o -o \
 		$(BASE_DIR)/arch/arm64/include/offsets.h
 	$(Q)$(RM) $(BASE_DIR)/arch/arm64/src/offsets.o
 endif
-
-$(LINKER): %.lds: %.lds.S check
-	$(Q)$(call MAKE_LDS, $@, $<);
-	@echo "build linker success"
+	@echo "generate all success"
 
 run:
 	$(Q)$(QEMU_RUN) $(TARGET)
@@ -104,10 +98,10 @@ defconfig:
 	$(Q)make clean
 
 clean:
-	$(Q)$(RM) $(BASE_DIR)/samples/linker/lwos.lds $(BASE_DIR)/samples/linker/.lwos.lds*
+	$(Q)$(RM) $(BASE_DIR)/samples/linker/lwos.ld $(BASE_DIR)/samples/linker/.lwos.ld*
 	$(Q)$(RM) $(BASE_DIR)/arch/arm64/include/offsets.h
 	$(Q)$(call MAKE_CLEAN_CMD, $(SUB_DIRS))
-	$(Q)$(RM) $(TARGET) $(LOGO)
+	$(Q)$(RM) $(TARGET) $(LOGO) $(APP_LD) $(PROJECT).map $(PROJECT).sym $(PROJECT).stat
 	$(Q)$(RM) $(shell find $(SUB_DIRS) -name "*.o*")
 
 help:

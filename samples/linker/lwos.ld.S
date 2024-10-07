@@ -62,27 +62,5 @@ SECTIONS
 	. += (CONFIG_INTERRUPT_STACK_SIZE * CONFIG_CPUS_MAX_NUM);
 	__interrupt_stack_end = .;
 
-	.app_1 ALIGN(0x1000):
-	{
-		__app_1_bss_start = .;	/* define a global symbol at app bss start */
-		*(.app_1_bss)			/* app bss sections */
-		__app_1_bss_end = .;	/* define a global symbol at app bss end */
-
-		. = ALIGN(0x1000);
-		__app_1_data_start = .;	/* define a global symbol at app data start */
-		*(.app_1_data)			/* app data sections */
-		__app_1_data_end = .;	/* define a global symbol at app data end */
-	}
-
-	.app_2 ALIGN(0x1000):
-	{
-		__app_2_bss_start = .;	/* define a global symbol at app bss start */
-		*(.app_2_bss)			/* app bss sections */
-		__app_2_bss_end = .;	/* define a global symbol at app bss end */
-
-		. = ALIGN(0x1000);
-		__app_2_data_start = .;	/* define a global symbol at app data start */
-		*(.app_2_data)			/* app data sections */
-		__app_2_data_end = .;	/* define a global symbol at app data end */
-	}
+	#include <samples/linker/app.ld>
 }
