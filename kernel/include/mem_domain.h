@@ -44,6 +44,6 @@ errno_t mem_domain_ranges_add(struct mem_domain *domain,
 errno_t mem_domain_kernel_ranges_copy(struct mem_domain *domain);
 errno_t mem_domain_set_up(struct mem_domain *domain);
 struct mmu_pgtable kernel_mem_domain_page_table_get();
-phys_addr_t page_table_alloc(size_t size);
+phys_addr_t page_table_page_alloc(size_t size);
 
 #endif

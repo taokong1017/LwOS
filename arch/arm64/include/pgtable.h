@@ -4,6 +4,7 @@
 #include <pgtable_types.h>
 #include <pgtable_hwdef.h>
 #include <compiler.h>
+
 #define PAGE_ALIGN(addr) ALIGN(addr, PAGE_SIZE)
 
 #define pte_none(pte) (!pte_val(pte))
@@ -17,7 +18,8 @@
 	(pte_to_phys(pmd_pte(read_once(*(dir)))) + pte_index(addr) * sizeof(pte_t))
 
 #define pmd_offset_phys(dir, addr)                                             \
-	(pte_to_phys(pud_pte((read_once(*(dir))))) + pmd_index(addr) * sizeof(pmd_t))
+	(pte_to_phys(pud_pte((read_once(*(dir))))) +                               \
+	 pmd_index(addr) * sizeof(pmd_t))
 #define pmd_none(pmd) (!pmd_val(pmd))
 #define pmd_valid(pmd) pte_valid(pmd_pte(pmd))
 #define pmd_addr_end(addr, end)                                                \
@@ -67,7 +69,7 @@ static inline size_t pud_index(virt_addr_t address) {
 	return (address >> PUD_SHIFT) & (PTRS_PER_PUD - 1);
 }
 
-static inline void set_pte(pte_t *ptep, pte_t pte) {
+static inline void pte_set(pte_t *ptep, pte_t pte) {
 	write_once(*ptep, pte);
 
 	dsb(ishst);

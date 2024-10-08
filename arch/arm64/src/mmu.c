@@ -20,7 +20,7 @@ static uint32_t page_tables_used_count[CONFIG_PAGE_TABLE_MAX_NUM] = {0};
 SPIN_LOCK_DEFINE(mmu_locker, MMU_LOCKER);
 static uint8_t pgtable_next_asid = 0;
 
-static void alloc_init_pte(pmd_t *pmdp, virt_addr_t addr, virt_addr_t end,
+static void init_pte_alloc(pmd_t *pmdp, virt_addr_t addr, virt_addr_t end,
 						   phys_addr_t phys, pgprot_t prot,
 						   phys_addr_t (*pgtable_alloc)(size_t), int flags) {
 	pmd_t pmd = read_once(*pmdp);
@@ -33,18 +33,18 @@ static void alloc_init_pte(pmd_t *pmdp, virt_addr_t addr, virt_addr_t end,
 		if (flags & NO_EXEC_MAPPINGS) {
 			pmdval |= PMD_TABLE_PXN;
 		}
-		pte_phys = pgtable_alloc(PAGE_SHIFT);
+		pte_phys = pgtable_alloc(PAGE_SIZE);
 		pmd_populate(pmdp, pte_phys, pmdval);
 	}
 
 	ptep = (pte_t *)pte_offset_phys(pmdp, addr);
 	do {
-		set_pte(ptep, pfn_pte(phys_to_pfn(phys), prot));
+		pte_set(ptep, pfn_pte(phys_to_pfn(phys), prot));
 		phys += PAGE_SIZE;
 	} while (ptep++, addr += PAGE_SIZE, addr != end);
 }
 
-static void alloc_init_pmd(pud_t *pudp, virt_addr_t addr, virt_addr_t end,
+static void init_pmd_alloc(pud_t *pudp, virt_addr_t addr, virt_addr_t end,
 						   phys_addr_t phys, pgprot_t prot,
 						   phys_addr_t (*pgtable_alloc)(size_t), int flags) {
 	virt_addr_t next;
@@ -58,19 +58,19 @@ static void alloc_init_pmd(pud_t *pudp, virt_addr_t addr, virt_addr_t end,
 		if (flags & NO_EXEC_MAPPINGS) {
 			pudval |= PUD_TABLE_PXN;
 		}
-		pmd_phys = pgtable_alloc(PMD_SHIFT);
+		pmd_phys = pgtable_alloc(PAGE_SIZE);
 		pud_populate(pudp, pmd_phys, pudval);
 	}
 
 	pmdp = (pmd_t *)pmd_offset_phys(pudp, addr);
 	do {
 		next = pmd_addr_end(addr, end);
-		alloc_init_pte(pmdp, addr, next, phys, prot, pgtable_alloc, flags);
+		init_pte_alloc(pmdp, addr, next, phys, prot, pgtable_alloc, flags);
 		phys += next - addr;
 	} while (pmdp++, addr = next, addr != end);
 }
 
-static void alloc_init_pud(pgd_t *pgdp, virt_addr_t addr, virt_addr_t end,
+static void init_pud_alloc(pgd_t *pgdp, virt_addr_t addr, virt_addr_t end,
 						   phys_addr_t phys, pgprot_t prot,
 						   phys_addr_t (*pgtable_alloc)(size_t), int flags) {
 	virt_addr_t next;
@@ -78,26 +78,26 @@ static void alloc_init_pud(pgd_t *pgdp, virt_addr_t addr, virt_addr_t end,
 	pud_t *pudp;
 
 	if (pgd_none(pgd)) {
-		pudval_t pudval = PUD_TYPE_TABLE | PUD_TABLE_UXN;
+		pudval_t pudval = PGD_TYPE_TABLE | PGD_TABLE_UXN;
 		phys_addr_t pud_phys;
 
 		if (flags & NO_EXEC_MAPPINGS) {
 			pudval |= PUD_TABLE_PXN;
 		}
 
-		pud_phys = pgtable_alloc(PUD_SHIFT);
+		pud_phys = pgtable_alloc(PAGE_SIZE);
 		pgd_populate(pgdp, pud_phys, pudval);
 	}
 
 	pudp = (pud_t *)pud_offset_phys(pgdp, addr);
 	do {
 		next = pud_addr_end(addr, end);
-		alloc_init_pmd(pudp, addr, next, phys, prot, pgtable_alloc, flags);
+		init_pmd_alloc(pudp, addr, next, phys, prot, pgtable_alloc, flags);
 		phys += next - addr;
 	} while (pudp++, addr = next, addr != end);
 }
 
-void create_pgd_mapping(pgd_t *pgdir, phys_addr_t phys, virt_addr_t virt,
+void pgd_mapping_create(pgd_t *pgdir, phys_addr_t phys, virt_addr_t virt,
 						size_t size, pgprot_t prot,
 						phys_addr_t (*pgtable_alloc)(size_t), int flags) {
 	virt_addr_t addr, end, next;
@@ -117,12 +117,12 @@ void create_pgd_mapping(pgd_t *pgdir, phys_addr_t phys, virt_addr_t virt,
 
 	do {
 		next = pgd_addr_end(addr, end);
-		alloc_init_pud(pgdp, addr, next, phys, prot, pgtable_alloc, flags);
+		init_pud_alloc(pgdp, addr, next, phys, prot, pgtable_alloc, flags);
 		phys += next - addr;
 	} while (pgdp++, addr = next, addr != end);
 }
 
-uint64_t *alloc_page_table() {
+uint64_t *page_table_alloc() {
 	uint64_t *table = NULL;
 	uint32_t i = 0;
 
@@ -139,7 +139,7 @@ uint64_t *alloc_page_table() {
 	return NULL;
 }
 
-uint64_t alloc_page_table_asid() {
+uint64_t page_table_asid_alloc() {
 	uint64_t asid = pgtable_next_asid;
 
 	pgtable_next_asid += 1;

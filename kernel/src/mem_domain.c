@@ -216,9 +216,10 @@ errno_t mem_domain_set_up(struct mem_domain *domain) {
 	pgtable = &domain->arch_mem_domain.pgtable;
 	for (i = 0; i < domain->partition_num; i++) {
 		partition = &domain->partitions[i];
-		create_pgd_mapping((pgd_t *)pgtable->page_table, partition->paddr,
+		pgd_mapping_create((pgd_t *)pgtable->page_table, partition->paddr,
 						   partition->vaddr, partition->size,
-						   pgprot(partition->attr.attrs), page_table_alloc, 0);
+						   pgprot(partition->attr.attrs), page_table_page_alloc,
+						   0);
 	}
 	spin_unlock(&mem_domain_locker);
 
@@ -239,7 +240,7 @@ struct mmu_pgtable kernel_mem_domain_page_table_get() {
 	return kernel_mem_domain.arch_mem_domain.pgtable;
 }
 
-phys_addr_t page_table_alloc(size_t size) {
+phys_addr_t page_table_page_alloc(size_t size) {
 	size_t align_size = PAGE_ALIGN(size);
 	void *start_ptr = (void *)page_table_pool;
 	void *next_ptr = (void *)page_table_pool + align_size;

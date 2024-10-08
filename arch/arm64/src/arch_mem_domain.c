@@ -4,8 +4,8 @@
 #include <mmu.h>
 
 void arch_mem_domain_init(struct arch_mem_domain *arch_mem_domain) {
-	uint64_t *pgtable = alloc_page_table();
-	uint64_t asid = alloc_page_table_asid();
+	uint64_t *pgtable = page_table_alloc();
+	uint64_t asid = page_table_asid_alloc();
 
 	assert(pgtable != NULL, "Allocate page table failed\n");
 	arch_mem_domain->pgtable.page_table = pgtable;
