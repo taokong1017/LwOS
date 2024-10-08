@@ -51,6 +51,7 @@ endef
 all: obj
 	$(Q)python3 scripts/gen_app_ld.py -s 0x1000 -d $(BASE_DIR)/samples -o $(APP_LD)
 	$(Q)$(CPP) $(cpp_flags) -D__ASSEMBLY__  $(LINKER).S |grep -v "^#" > $(LINKER)
+	$(Q)$(RM) .$@.d
 	$(Q)$(LD) $(LDFLAGS) -T $(LINKER) -e __start -o $(TARGET) -Map=$(PROJECT).map \
 		$(strip $(filter-out %/offsets.o, $(call ALL_OBJS, $(srctree))))
 	$(Q)$(OBJDUMP) -d $(TARGET) > $(PROJECT).sym
@@ -102,7 +103,6 @@ clean:
 	$(Q)$(RM) $(BASE_DIR)/arch/arm64/include/offsets.h
 	$(Q)$(call MAKE_CLEAN_CMD, $(SUB_DIRS))
 	$(Q)$(RM) $(TARGET) $(LOGO) $(APP_LD) $(PROJECT).map $(PROJECT).sym $(PROJECT).stat
-	$(Q)$(RM) $(shell find $(SUB_DIRS) -name "*.o*")
 
 help:
 	@echo "make config:		make CROSS_COMPILE=~/aarch64-none-elf/bin/aarch64-none-elf- menuconfig"
