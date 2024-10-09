@@ -4,6 +4,7 @@
 #include <cpu_defines.h>
 #include <cpu.h>
 #include <general.h>
+#include <pgtable_hwdef.h>
 
 .globl syscall_func
 .type syscall_func, function
@@ -47,3 +48,38 @@ sync_func:
 
 inv:
 	b .
+
+/*
+ * int32_t buffer_validate(const void *addr, size_t size, int32_t write)
+ */
+.globl buffer_validate
+.type buffer_validate, function
+.section .text, "ax"
+buffer_validate:
+	add x1, x1, x0
+	mrs x3, daif
+	msr daifSet, #DAIFSET_IRQ_BIT
+
+loop:
+	cbnz w2, 1f
+	at S1E0R, x0
+	b  2f
+1:	at S1E0W, x0
+2:	orr x0, x0, #(PAGE_SIZE - 1)
+	add x0, x0, #1
+
+	isb
+	mrs  x4, PAR_EL1
+	tbnz x4, #0, no_permit
+
+	cmp x0, x1
+	blo loop
+
+	msr daif, x3
+	mov x0, #0
+	ret
+
+no_permit:
+	msr daif, x3
+	mov x0, #-1
+	ret

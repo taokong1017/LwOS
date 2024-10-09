@@ -251,6 +251,7 @@ phys_addr_t page_table_page_alloc(size_t size) {
 		return NULL;
 	}
 	page_table_pool = next_ptr;
+	memset(start_ptr, 0x00, align_size);
 
 	return (phys_addr_t)start_ptr;
 }
