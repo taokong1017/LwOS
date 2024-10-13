@@ -150,12 +150,12 @@ errno_t task_create(task_id_t *task_id, const char *name, task_entry_func entry,
 	return OK;
 }
 
-void task_entry_point(task_id_t task_id) {
+void task_kernel_entry_point(task_id_t task_id) {
 	struct task *task = ID_TO_TASK(task_id);
 
 	spin_unlock(&sched_spinlocker);
 	arch_irq_unlock();
-	log_debug(TASK_TAG, "task %s starts from entry point\n", task->name);
+	log_debug(TASK_TAG, "kernel task %s starts from entry point\n", task->name);
 	task->entry(task->args[0], task->args[1], task->args[2], task->args[3]);
 	task_suspend_self();
 	forever();
@@ -168,7 +168,7 @@ static void task_service_notify(task_id_t id, enum task_cmd_type cmd_type) {
 	msgq_send(percpu->msgq_id, &cmd, sizeof(cmd), MSGQ_WAIT_FOREVER);
 }
 
-errno_t task_prority_set(task_id_t task_id, uint32_t prioriy) {
+errno_t task_priority_set(task_id_t task_id, uint32_t prioriy) {
 	uint32_t key = 0;
 	struct task *task = ID_TO_TASK(task_id);
 
@@ -206,7 +206,7 @@ errno_t task_prority_set(task_id_t task_id, uint32_t prioriy) {
 	return OK;
 }
 
-errno_t task_prority_get(task_id_t task_id, uint32_t *prioriy) {
+errno_t task_priority_get(task_id_t task_id, uint32_t *prioriy) {
 	struct task *task = ID_TO_TASK(task_id);
 	uint32_t key = 0;
 
@@ -348,16 +348,10 @@ errno_t task_start(task_id_t task_id) {
 }
 
 task_id_t task_self_id() {
-	task_id_t task_id = 0;
+	task_id_t task_id = TASK_INVALID_ID;
 	uint32_t key = 0;
 
 	key = sched_spin_lock();
-
-	if (is_in_irq()) {
-		sched_spin_unlock(key);
-		return ERRNO_TASK_IN_IRQ_STATUS;
-	}
-
 	task_id = current_task_get()->id;
 	sched_spin_unlock(key);
 
@@ -668,3 +662,54 @@ bool task_is_user(task_id_t task_id) {
 
 	return task->flag & TASK_FLAG_USER;
 }
+
+#ifdef CONFIG_USER_SPACE
+errno_t task_create_with_stack(task_id_t *task_id, const char *name,
+							   task_entry_func entry, void *arg0, void *arg1,
+							   void *arg2, void *arg3, struct task *task,
+							   void *stack, uint32_t stack_size,
+							   uint32_t flag) {
+	void *stack_limit = NULL;
+	void *stack_ptr = NULL;
+
+	if (is_in_irq()) {
+		return ERRNO_TASK_IN_IRQ_STATUS;
+	}
+
+	errno_t err = task_params_check(task_id, name, entry, arg0, arg1, arg2,
+									arg3, stack_size, flag);
+	if (err) {
+		return err;
+	}
+
+	stack_limit = stack;
+	stack_ptr = (void *)((uintptr_t)stack_limit + stack_size);
+	if (!stack_limit) {
+		log_fatal(TASK_TAG, "allocate stack of task %s failed without memory\n",
+				  name);
+		return ERRNO_TASK_NO_MEMORY;
+	}
+
+	if (!task) {
+		log_fatal(TASK_TAG, "allocate task %s failed without memory\n", name);
+		return ERRNO_TASK_NO_MEMORY;
+	}
+
+	task_init(task, name, entry, arg0, arg1, arg2, arg3, stack_ptr, stack_size,
+			  flag);
+	arch_task_init(task->id);
+
+	*task_id = task->id;
+
+	return OK;
+}
+
+void task_user_entry_point(task_id_t task_id) {
+	struct task *task = ID_TO_TASK(task_id);
+
+	// TODO: syscall to unlock schedule locker
+	log_debug(TASK_TAG, "user task %s starts from entry point\n", task->name);
+	task->entry(task->args[0], task->args[1], task->args[2], task->args[3]);
+	forever();
+}
+#endif

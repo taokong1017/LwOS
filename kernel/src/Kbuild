@@ -22,5 +22,5 @@ obj-$(CONFIG_SMP) += \
 
 obj-$(CONFIG_USER_SPACE) += \
 	syscall_dispatch.o \
-	syscall.o
+	user_space.o
 

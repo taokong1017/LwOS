@@ -39,7 +39,7 @@ static void create_test_task1() {
 		return;
 	}
 
-	ret = task_prority_set(test_task1_id, 10 /* prioriy */);
+	ret = task_priority_set(test_task1_id, 10 /* prioriy */);
 	if (ret != OK) {
 		printf("set task %s priority failed\n", task_name);
 		return;

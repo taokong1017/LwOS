@@ -5,10 +5,12 @@
 
 #ifndef __ASSEMBLY__
 #include <types.h>
+#include <syscall.h>
+
 static inline uintptr_t arch_syscall_invoke6(uintptr_t arg1, uintptr_t arg2,
 											 uintptr_t arg3, uintptr_t arg4,
 											 uintptr_t arg5, uintptr_t arg6,
-											 uintptr_t call_id) {
+											 enum syscall_id call_id) {
 	register uint64_t ret __asm__("x0") = arg1;
 	register uint64_t r1 __asm__("x1") = arg2;
 	register uint64_t r2 __asm__("x2") = arg3;
@@ -29,7 +31,7 @@ static inline uintptr_t arch_syscall_invoke6(uintptr_t arg1, uintptr_t arg2,
 static inline uintptr_t arch_syscall_invoke5(uintptr_t arg1, uintptr_t arg2,
 											 uintptr_t arg3, uintptr_t arg4,
 											 uintptr_t arg5,
-											 uintptr_t call_id) {
+											 enum syscall_id call_id) {
 	register uint64_t ret __asm__("x0") = arg1;
 	register uint64_t r1 __asm__("x1") = arg2;
 	register uint64_t r2 __asm__("x2") = arg3;
@@ -48,7 +50,7 @@ static inline uintptr_t arch_syscall_invoke5(uintptr_t arg1, uintptr_t arg2,
 
 static inline uintptr_t arch_syscall_invoke4(uintptr_t arg1, uintptr_t arg2,
 											 uintptr_t arg3, uintptr_t arg4,
-											 uintptr_t call_id) {
+											 enum syscall_id call_id) {
 	register uint64_t ret __asm__("x0") = arg1;
 	register uint64_t r1 __asm__("x1") = arg2;
 	register uint64_t r2 __asm__("x2") = arg3;
@@ -66,7 +68,7 @@ static inline uintptr_t arch_syscall_invoke4(uintptr_t arg1, uintptr_t arg2,
 
 static inline uintptr_t arch_syscall_invoke3(uintptr_t arg1, uintptr_t arg2,
 											 uintptr_t arg3,
-											 uintptr_t call_id) {
+											 enum syscall_id call_id) {
 	register uint64_t ret __asm__("x0") = arg1;
 	register uint64_t r1 __asm__("x1") = arg2;
 	register uint64_t r2 __asm__("x2") = arg3;
@@ -82,7 +84,7 @@ static inline uintptr_t arch_syscall_invoke3(uintptr_t arg1, uintptr_t arg2,
 }
 
 static inline uintptr_t arch_syscall_invoke2(uintptr_t arg1, uintptr_t arg2,
-											 uintptr_t call_id) {
+											 enum syscall_id call_id) {
 	register uint64_t ret __asm__("x0") = arg1;
 	register uint64_t r1 __asm__("x1") = arg2;
 	register uint64_t r8 __asm__("x8") = call_id;
@@ -97,7 +99,7 @@ static inline uintptr_t arch_syscall_invoke2(uintptr_t arg1, uintptr_t arg2,
 }
 
 static inline uintptr_t arch_syscall_invoke1(uintptr_t arg1,
-											 uintptr_t call_id) {
+											 enum syscall_id call_id) {
 	register uint64_t ret __asm__("x0") = arg1;
 	register uint64_t r8 __asm__("x8") = call_id;
 
@@ -108,7 +110,7 @@ static inline uintptr_t arch_syscall_invoke1(uintptr_t arg1,
 	return ret;
 }
 
-static inline uintptr_t arch_syscall_invoke0(uintptr_t call_id) {
+static inline uintptr_t arch_syscall_invoke0(enum syscall_id call_id) {
 	register uint64_t ret __asm__("x0");
 	register uint64_t r8 __asm__("x8") = call_id;
 

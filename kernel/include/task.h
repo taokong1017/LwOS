@@ -20,7 +20,7 @@
 
 /* task default invalid ID definition */
 #define TASK_INVALID_CPUID 0xFFFF
-#define TASK_INVALID_ID 0
+#define TASK_INVALID_ID -1
 
 /* task name definition */
 #define TASK_NAME_LEN 32
@@ -129,8 +129,8 @@ errno_t task_resume(task_id_t task_id);
 errno_t task_suspend(task_id_t task_id);
 errno_t task_suspend_self();
 errno_t task_delay(uint64_t ticks);
-errno_t task_prority_set(task_id_t task_id, uint32_t prioriy);
-errno_t task_prority_get(task_id_t task_id, uint32_t *prioriy);
+errno_t task_priority_set(task_id_t task_id, uint32_t prioriy);
+errno_t task_priority_get(task_id_t task_id, uint32_t *prioriy);
 errno_t task_cpu_affi_set(task_id_t task_id, uint32_t cpu_affi);
 errno_t task_cpu_affi_get(task_id_t task_id, uint32_t *cpu_affi);
 task_id_t task_self_id();
@@ -141,5 +141,12 @@ errno_t task_wait_locked(struct wait_queue *wq, uint64_t ticks,
 errno_t task_wakeup_locked(struct wait_queue *wq);
 bool task_sig_handle();
 bool task_is_user(task_id_t task_id);
+
+#ifdef CONFIG_USER_SPACE
+errno_t task_create_with_stack(task_id_t *task_id, const char *name,
+							   task_entry_func entry, void *arg0, void *arg1,
+							   void *arg2, void *arg3, struct task *task,
+							   void *stack, uint32_t stack_size, uint32_t flag);
+#endif
 
 #endif
