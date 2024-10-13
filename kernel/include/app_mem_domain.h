@@ -4,6 +4,8 @@
 #include <types.h>
 #include <mem_domain.h>
 
+#ifdef CONFIG_USER_SPACE
+
 #define SECTION(segment) __attribute__((section(#segment)))
 #define APP_DATA(name) SECTION(.name##_data)
 #define APP_BSS(name) SECTION(.name##_bss)
@@ -28,4 +30,5 @@
 		.attrs = PAGE_SHARED,                                                  \
 	};
 
+#endif
 #endif

@@ -1,1 +1,2 @@
-obj-$(CONFIG_ARM64) = uart_pl011.o
+obj-$(CONFIG_ARM64) = \
+	uart_pl011.o

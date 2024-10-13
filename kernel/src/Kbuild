@@ -15,9 +15,12 @@ obj-y := string.o \
 	percpu.o \
 	kernel.o \
 	timer.o \
-	syscall_dispatch.o \
-	syscall.o \
 	mem_domain.o
 
-obj-$(CONFIG_SMP) += smp.o
+obj-$(CONFIG_SMP) += \
+	smp.o
+
+obj-$(CONFIG_USER_SPACE) += \
+	syscall_dispatch.o \
+	syscall.o
 
