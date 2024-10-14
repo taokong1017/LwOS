@@ -4,6 +4,7 @@
 #include <menuconfig.h>
 #include <types.h>
 #include <errno.h>
+#include <mem_domain.h>
 #include <app_mem_domain.h>
 #include <task.h>
 
