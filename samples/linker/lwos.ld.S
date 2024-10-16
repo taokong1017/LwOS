@@ -68,8 +68,11 @@ SECTIONS
 	. = ALIGN(0x1000);
 	__interrupt_stack_end = .;
 
+#ifdef CONFIG_USER_SPACE
 	. = ALIGN(0x1000);
 	__application_data_start = .;
 	#include <samples/linker/app.ld>
+	. = ALIGN(0x1000);
 	__application_data_end = .;
+#endif
 }

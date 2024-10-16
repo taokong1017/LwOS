@@ -16,10 +16,14 @@ void arch_task_init(task_id_t task_id) {
 	esf = (struct arch_esf_context *)(task->stack_ptr -
 									  sizeof(struct arch_esf_context));
 	esf->x0 = (uint64_t)task_id;
+#ifdef CONFIG_USER_SPACE
 	if (task_is_user(task_id)) {
 		esf->spsr = SPSR_MODE_EL0T | DAIF_FIQ_BIT | DAIF_IRQ_BIT;
 		esf->elr = (uint64_t)task_user_entry_point;
 	} else {
+#else
+	{
+#endif
 		esf->spsr = SPSR_MODE_EL1H | DAIF_FIQ_BIT | DAIF_IRQ_BIT;
 		esf->elr = (uint64_t)task_kernel_entry_point;
 	}

@@ -33,7 +33,7 @@ static void create_test_task1() {
 
 	strncpy(task_name, TEST_TASK1_NAME, TASK_NAME_LEN);
 	ret = task_create(&test_task1_id, task_name, test_task1_entry, NULL, NULL,
-					  NULL, NULL, TASK_STACK_DEFAULT_SIZE, TASK_FLAG_USER);
+					  NULL, NULL, TASK_STACK_DEFAULT_SIZE, TASK_FLAG_KERNEL);
 	if (ret != OK) {
 		printf("create task %s failed\n", task_name);
 		return;

@@ -2,42 +2,52 @@ menu "Kernel APP"
 
 config CONFIG_TASK_001
 	bool "Kernel TASK 001"
+	depends on !CONFIG_USER_SPACE
 	default n
 
 config CONFIG_TASK_002
 	bool "Kernel TASK 002"
+	depends on !CONFIG_USER_SPACE
 	default n
 
 config CONFIG_TASK_003
 	bool "Kernel TASK 003"
+	depends on !CONFIG_USER_SPACE
 	default n
 
 config CONFIG_TASK_004
 	bool "Kernel TASK 004"
+	depends on !CONFIG_USER_SPACE
 	default n
 
 config CONFIG_TASK_005
 	bool "Kernel TASK 005"
+	depends on !CONFIG_USER_SPACE
 	default n
 
 config CONFIG_TASK_006
 	bool "User TASK 006"
-	default y
+	depends on CONFIG_USER_SPACE
+	default n
 
 config CONFIG_TIMER_001
 	bool "Kernel Timer 001"
+	depends on !CONFIG_USER_SPACE
 	default n
 
 config CONFIG_MSGQ_001
 	bool "Kernel MSGQ 001"
+	depends on !CONFIG_USER_SPACE
 	default n
 
 config CONFIG_MUTEX_001
 	bool "Kernel MUTEX 001"
+	depends on !CONFIG_USER_SPACE
 	default n
 
 config CONFIG_SEM_001
 	bool "Kernel SEM 001"
+	depends on !CONFIG_USER_SPACE
 	default n
 
 endmenu

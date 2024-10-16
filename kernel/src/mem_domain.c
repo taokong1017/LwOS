@@ -86,12 +86,14 @@ static struct mem_range mem_ranges[] = {
 		.end = (void *)GIC_BASE + GIC_SIZE,
 		.attrs = PAGE_KERNEL,
 	},
+#ifdef CONFIG_USER_SPACE
 	{
 		.name = "Apps_Data",
 		.start = (void *)__application_data_start,
 		.end = (void *)__application_data_end,
 		.attrs = PAGE_KERNEL,
 	},
+#endif
 };
 
 static errno_t mem_domain_range_check(struct mem_domain *domain,
