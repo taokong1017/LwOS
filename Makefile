@@ -103,6 +103,7 @@ clean:
 	$(Q)$(RM) $(BASE_DIR)/arch/arm64/include/offsets.h
 	$(Q)$(call MAKE_CLEAN_CMD, $(SUB_DIRS))
 	$(Q)$(RM) $(TARGET) $(LOGO) $(APP_LD) $(PROJECT).map $(PROJECT).sym $(PROJECT).stat
+	$(Q)$(RM) $(shell find $(SUB_DIRS) -name "*.o*")
 
 help:
 	@echo "make config:		make CROSS_COMPILE=~/aarch64-none-elf/bin/aarch64-none-elf- menuconfig"

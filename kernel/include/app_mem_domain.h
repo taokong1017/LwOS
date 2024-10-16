@@ -30,5 +30,15 @@
 		.attrs = PAGE_SHARED,                                                  \
 	};
 
+#define app_mem_domain_init(app_domain, domain_name, name)                     \
+	do {                                                                       \
+		mem_domain_init(app_domain, domain_name);                              \
+		mem_domain_kernel_ranges_copy(app_domain);                             \
+		mem_domain_ranges_add(app_domain,                                      \
+							  (struct mem_range *)&name##_data_region, 1);     \
+		mem_domain_ranges_add(app_domain,                                      \
+							  (struct mem_range *)&name##_bss_region, 1);      \
+	} while (0)
+
 #endif
 #endif

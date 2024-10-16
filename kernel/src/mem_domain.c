@@ -23,6 +23,8 @@ extern char __interrupt_stack_start[];
 extern char __interrupt_stack_end[];
 extern char __page_table_pool_start[];
 extern char __page_table_pool_end[];
+extern char __application_data_start[];
+extern char __application_data_end[];
 static char *page_table_pool = __page_table_pool_start;
 static struct mem_domain kernel_mem_domain = {.name = MEM_KERNEL_DOMAIN,
 											  .partition_num = 0};
@@ -82,6 +84,12 @@ static struct mem_range mem_ranges[] = {
 		.name = "GICv2",
 		.start = (void *)GIC_BASE,
 		.end = (void *)GIC_BASE + GIC_SIZE,
+		.attrs = PAGE_KERNEL,
+	},
+	{
+		.name = "Apps_Data",
+		.start = (void *)__application_data_start,
+		.end = (void *)__application_data_end,
 		.attrs = PAGE_KERNEL,
 	},
 };

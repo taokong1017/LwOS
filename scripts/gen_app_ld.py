@@ -14,14 +14,16 @@ section_regex = re.compile(r'.([A-Za-z0-9_]*)_(data|bss)')
 section_template = """
 .{name} ALIGN({align_size}):
 {{
-	__{name}_bss_start = .;		/* define a global symbol at app bss start */
-	*(.{name}_bss)				/* app bss sections */
-	__{name}_bss_end = .;		/* define a global symbol at app bss end */
-
 	. = ALIGN({align_size});
 	__{name}_data_start = .;	/* define a global symbol at app data start */
 	*(.{name}_data)				/* app data sections */
+	. = ALIGN(0x1000);
 	__{name}_data_end = .;		/* define a global symbol at app data end */
+
+	__{name}_bss_start = .;		/* define a global symbol at app bss start */
+	*(.{name}_bss)				/* app bss sections */
+	. = ALIGN(0x1000);
+	__{name}_bss_end = .;		/* define a global symbol at app bss end */
 }}
 """
 

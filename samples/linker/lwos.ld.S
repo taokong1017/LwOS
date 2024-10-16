@@ -14,6 +14,7 @@ SECTIONS
 		*(.text)			/* .text sections (code) */
 		*(.text*)			/* .text* sections (code) */
 
+		. = ALIGN(0x1000);
 		__text_end = .;		/* define a global symbol at text end */
 	}
 
@@ -24,6 +25,7 @@ SECTIONS
 		*(.rodata)			/* .rodata sections (constants, strings, etc.) */
 		*(.rodata*)			/* .rodata* sections (constants, strings, etc.) */
 
+		. = ALIGN(0x1000);
 		__rodata_end = .;	/* define a global symbol at rodata end */
 	}
 
@@ -34,6 +36,7 @@ SECTIONS
 		*(.bss)				/* .bss sections */
 		*(.bss*)			/* .bss* sections */
 
+		. = ALIGN(0x1000);
 		__bss_end = .;		/* define a global symbol at bss end */
 	}
 
@@ -44,6 +47,7 @@ SECTIONS
 		*(.data)			/* .data sections */
 		*(.data*)			/* .data* sections */
 
+		. = ALIGN(0x1000);
 		__data_end = .;		/* define a global symbol at data end */
 	}
 
@@ -55,12 +59,17 @@ SECTIONS
 	. = ALIGN(0x1000);
 	__kernel_stack_start = .;
 	. += (CONFIG_KERNEL_STACK_SIZE * CONFIG_CPUS_MAX_NUM);
+	. = ALIGN(0x1000);
 	__kernel_stack_end = .;
 
 	. = ALIGN(0x1000);
 	__interrupt_stack_start = .;
 	. += (CONFIG_INTERRUPT_STACK_SIZE * CONFIG_CPUS_MAX_NUM);
+	. = ALIGN(0x1000);
 	__interrupt_stack_end = .;
 
+	. = ALIGN(0x1000);
+	__application_data_start = .;
 	#include <samples/linker/app.ld>
+	__application_data_end = .;
 }
