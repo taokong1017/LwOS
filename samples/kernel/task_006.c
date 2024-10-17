@@ -1,7 +1,7 @@
 #include <user_space.h>
 
 #define TASK_NAME "Task_006_1"
-#define TASK_STACK_SIZE 0x8000
+#define TASK_STACK_SIZE 0x2000
 static struct mem_domain app_mem_domain;
 APP_PARTITION_DEFINE(part1);
 APP_DATA(part1) task_id_t task_id = -1;
@@ -22,8 +22,11 @@ int main() {
 	mem_domain_set_up(&app_mem_domain);
 
 	/* 创建第一个分区任务 */
-	task_create_with_stack(&task_id, TASK_NAME, part_task_entry, NULL, NULL, NULL, NULL,
-						   &task, &stack, TASK_STACK_SIZE, TASK_FLAG_USER);
+	task_create_with_stack(&task_id, TASK_NAME, part_task_entry, NULL, NULL,
+						   NULL, NULL, &task, &stack, TASK_STACK_SIZE,
+						   TASK_FLAG_USER);
+	task_mem_domain_add(task_id, &app_mem_domain);
+	task_priority_set(task_id, 2);
 	task_start(task_id);
 
 	return 0;

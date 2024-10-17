@@ -20,6 +20,7 @@
 SPIN_LOCK_DEFINE(sched_spinlocker, TASK_SCHED_LOCKER);
 extern void main(void *arg0, void *arg1, void *arg2, void *arg3);
 extern void task_reset(struct task *task);
+extern struct mem_domain kernel_mem_domain;
 
 struct prio_info {
 	uint32_t prio;
@@ -181,6 +182,7 @@ void idle_task_create(uint32_t cpu_id) {
 	task->status = TASK_STATUS_READY;
 	task->cpu_affi = TASK_CPU_AFFI(cpu_id);
 	task->cpu_id = cpu_id;
+	task->mem_domain = &kernel_mem_domain;
 	sched_ready_queue_add(cpu_id, task);
 }
 
@@ -195,6 +197,7 @@ void main_task_create(uint32_t cpu_id) {
 	task->status = TASK_STATUS_READY;
 	task->cpu_affi = TASK_CPU_AFFI(cpu_id);
 	task->cpu_id = cpu_id;
+	task->mem_domain = &kernel_mem_domain;
 	sched_ready_queue_add(cpu_id, task);
 }
 
@@ -246,6 +249,7 @@ void system_task_create(uint32_t cpu_id) {
 	task->status = TASK_STATUS_READY;
 	task->cpu_affi = TASK_CPU_AFFI(cpu_id);
 	task->cpu_id = cpu_id;
+	task->mem_domain = &kernel_mem_domain;
 	sched_ready_queue_add(cpu_id, task);
 }
 

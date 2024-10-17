@@ -68,6 +68,14 @@ static errno_t task_params_check(task_id_t *task_id, const char *name,
 	return OK;
 }
 
+static void task_inherit_perm(struct task *task) {
+	struct task *current_task = current_task_get();
+
+	if ((current_task != NULL) && (TASK_IS_PERM_INHERIT(task))) {
+		task->mem_domain = current_task->mem_domain;
+	}
+}
+
 static void task_init(struct task *task, const char *name,
 					  task_entry_func entry, void *arg0, void *arg1, void *arg2,
 					  void *arg3, void *stack_ptr, uint32_t stack_size,
@@ -94,6 +102,7 @@ static void task_init(struct task *task, const char *name,
 	INIT_LIST_HEAD(&task->timeout.node);
 	INIT_LIST_HEAD(&task->task_list);
 	INIT_LIST_HEAD(&task->pend_list);
+	task_inherit_perm(task);
 }
 
 void task_reset(struct task *task) {
@@ -330,6 +339,11 @@ errno_t task_start(task_id_t task_id) {
 	if (task->status != TASK_STATUS_STOP) {
 		sched_spin_unlock(key);
 		return ERRNO_TASK_STATUS_INVALID;
+	}
+
+	if (task->mem_domain == NULL) {
+		sched_spin_unlock(key);
+		return ERRNO_TASK_MEM_DOMAIN_NULL;
 	}
 
 	task->cpu_id = mask_trailing_zeros(task->cpu_affi);
@@ -657,13 +671,29 @@ bool task_sig_handle() {
 	return need_sched;
 }
 
+errno_t task_mem_domain_add(task_id_t task_id, struct mem_domain *domain) {
+	struct task *task = ID_TO_TASK(task_id);
+
+	if (!task || task->id != task_id) {
+		return ERRNO_TASK_ID_INVALID;
+	}
+
+	if (!domain) {
+		return ERRNO_TASK_MEM_DOMAIN_NULL;
+	}
+
+	task->mem_domain = domain;
+
+	return OK;
+}
+
+#ifdef CONFIG_USER_SPACE
 bool task_is_user(task_id_t task_id) {
 	struct task *task = ID_TO_TASK(task_id);
 
 	return task->flag & TASK_FLAG_USER;
 }
 
-#ifdef CONFIG_USER_SPACE
 errno_t task_create_with_stack(task_id_t *task_id, const char *name,
 							   task_entry_func entry, void *arg0, void *arg1,
 							   void *arg2, void *arg3, struct task *task,

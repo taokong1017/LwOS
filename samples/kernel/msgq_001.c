@@ -49,7 +49,8 @@ static void create_test_task1() {
 
 	strncpy(task_name, TEST_TASK1_NAME, TASK_NAME_LEN);
 	ret = task_create(&test_task1_id, task_name, test_task1_entry, NULL, NULL,
-					  NULL, NULL, TASK_STACK_DEFAULT_SIZE, TASK_FLAG_KERNEL);
+					  NULL, NULL, TASK_STACK_DEFAULT_SIZE,
+					  TASK_FLAG_KERNEL | TASK_FLAG_INHERIT_PERM);
 	if (ret != OK) {
 		printf("create task %s failed\n", task_name);
 		return;
@@ -100,7 +101,8 @@ static void create_test_task2() {
 
 	strncpy(task_name, TEST_TASK2_NAME, TASK_NAME_LEN);
 	ret = task_create(&test_task2_id, task_name, test_task2_entry, NULL, NULL,
-					  NULL, NULL, TASK_STACK_DEFAULT_SIZE, TASK_FLAG_KERNEL);
+					  NULL, NULL, TASK_STACK_DEFAULT_SIZE,
+					  TASK_FLAG_KERNEL | TASK_FLAG_INHERIT_PERM);
 	if (ret != OK) {
 		printf("create task %s failed\n", task_name);
 		return;
@@ -156,7 +158,8 @@ static void create_test_task3() {
 
 	strncpy(task_name, TEST_TASK3_NAME, TASK_NAME_LEN);
 	ret = task_create(&test_task3_id, task_name, test_task3_entry, NULL, NULL,
-					  NULL, NULL, TASK_STACK_DEFAULT_SIZE, TASK_FLAG_KERNEL);
+					  NULL, NULL, TASK_STACK_DEFAULT_SIZE,
+					  TASK_FLAG_KERNEL | TASK_FLAG_INHERIT_PERM);
 	if (ret != OK) {
 		printf("create task %s failed\n", task_name);
 		return;

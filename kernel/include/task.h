@@ -17,6 +17,7 @@
 #define TASK_IS_SUSPEND(task) (task->status == TASK_STATUS_SUSPEND)
 #define TASK_IS_PEND(task) (task->status == TASK_STATUS_PEND)
 #define TASK_IS_RUNNING(task) (task->status == TASK_STATUS_RUNNING)
+#define TASK_IS_PERM_INHERIT(task) (task->flag & TASK_FLAG_INHERIT_PERM)
 
 /* task default invalid ID definition */
 #define TASK_INVALID_CPUID 0xFFFF
@@ -48,6 +49,7 @@
 #define TASK_FLAG_KERNEL 0x0002U
 #define TASK_FLAG_USER 0x0004U
 #define TASK_FLAG_DETACHED 0x0008U
+#define TASK_FLAG_INHERIT_PERM 0x0010U
 #define TASK_DEFAULT_FLAG (TASK_FLAG_SYSTEM | TASK_FLAG_KERNEL)
 #define TASK_FLAG_MASK                                                         \
 	(TASK_FLAG_SYSTEM | TASK_FLAG_KERNEL | TASK_FLAG_USER | TASK_FLAG_DETACHED)
@@ -75,6 +77,7 @@
 #define ERRNO_TASK_NO_SCHEDLE ERRNO_OS_ERROR(MOD_ID_TASK, 0x10)
 #define ERRNO_TASK_INVALID_TIMEOUT ERRNO_OS_ERROR(MOD_ID_TASK, 0x11)
 #define ERRNO_TASK_WILL_SUSPEND ERRNO_OS_ERROR(MOD_ID_TASK, 0x12)
+#define ERRNO_TASK_MEM_DOMAIN_NULL ERRNO_OS_ERROR(MOD_ID_TASK, 0x12)
 
 /* task cpu affinity */
 #define TASK_CPU_DEFAULT_AFFI 0x00000001U
@@ -141,6 +144,7 @@ errno_t task_wait_locked(struct wait_queue *wq, uint64_t ticks,
 errno_t task_wakeup_locked(struct wait_queue *wq);
 bool task_sig_handle();
 bool task_is_user(task_id_t task_id);
+errno_t task_mem_domain_add(task_id_t task_id, struct mem_domain *domain);
 
 #ifdef CONFIG_USER_SPACE
 errno_t task_create_with_stack(task_id_t *task_id, const char *name,

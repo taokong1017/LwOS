@@ -26,8 +26,8 @@ extern char __page_table_pool_end[];
 extern char __application_data_start[];
 extern char __application_data_end[];
 static char *page_table_pool = __page_table_pool_start;
-static struct mem_domain kernel_mem_domain = {.name = MEM_KERNEL_DOMAIN,
-											  .partition_num = 0};
+struct mem_domain kernel_mem_domain = {.name = MEM_KERNEL_DOMAIN,
+									   .partition_num = 0};
 LIST_HEAD(mem_domain_root);
 SPIN_LOCK_DEFINE(mem_domain_locker, "mem_domain_locker");
 
