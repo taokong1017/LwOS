@@ -109,6 +109,8 @@ static void show_regs(struct arch_regs *regs) {
 	printf("pc : 0x%016llx\n", regs->pc);
 	printf("lr : 0x%016llx\n", lr);
 	printf("sp : 0x%016llx\n", sp);
+	printf("esr: 0x%016llx\n", read_esr_el1());
+	printf("far: 0x%016llx\n", read_far_el1());
 
 	while (i >= 0) {
 		printf("x%-2d: 0x%016llx", i, regs->gprs[i]);
