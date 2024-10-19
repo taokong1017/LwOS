@@ -103,16 +103,17 @@
 #define PTE_TYPE_MASK (((pteval_t)(3)) << 0)
 #define PTE_TYPE_PAGE (((pteval_t)(3)) << 0)
 #define PTE_TABLE_BIT (((pteval_t)(1)) << 1)
-#define PTE_USER (((pteval_t)(1)) << 6)	  /* AP[1] */
-#define PTE_RDONLY (((pteval_t)(1)) << 7) /* AP[2] */
-#define PTE_SHARED (((pteval_t)(3)) << 8) /* SH[1:0], inner shareable */
-#define PTE_AF (((pteval_t)(1)) << 10)	  /* Access Flag */
-#define PTE_NG (((pteval_t)(1)) << 11)	  /* nG */
-#define PTE_GP (((pteval_t)(1)) << 50)	  /* BTI guarded */
-#define PTE_DBM (((pteval_t)(1)) << 51)	  /* Dirty Bit Management */
-#define PTE_CONT (((pteval_t)(1)) << 52)  /* Contiguous range */
-#define PTE_PXN (((pteval_t)(1)) << 53)	  /* Privileged XN */
-#define PTE_UXN (((pteval_t)(1)) << 54)	  /* User XN */
+#define PTE_USER (((pteval_t)(1)) << 6)		  /* AP[1] */
+#define PTE_RDONLY (((pteval_t)(1)) << 7)	  /* AP[2] */
+#define PTE_SHARED (((pteval_t)(3)) << 8)	  /* SH[1:0], inner shareable */
+#define PTE_AF (((pteval_t)(1)) << 10)		  /* Access Flag */
+#define PTE_NG (((pteval_t)(1)) << 11)		  /* nG */
+#define PTE_GP (((pteval_t)(1)) << 50)		  /* BTI guarded */
+#define PTE_DBM (((pteval_t)(1)) << 51)		  /* Dirty Bit Management */
+#define PTE_CONT (((pteval_t)(1)) << 52)	  /* Contiguous range */
+#define PTE_PXN (((pteval_t)(1)) << 53)		  /* Privileged XN */
+#define PTE_UXN (((pteval_t)(1)) << 54)		  /* User XN */
+#define PTE_PROT_NONE (((pteval_t)(1)) << 58) /* only when !PTE_VALID */
 
 #define PTE_ADDR_LOW                                                           \
 	((((pteval_t)(1) << (VA_BITS - PAGE_SHIFT)) - 1) << PAGE_SHIFT)

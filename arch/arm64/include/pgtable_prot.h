@@ -14,6 +14,9 @@
 
 #define PAGE_DEFAULT                                                           \
 	(PTE_TYPE_PAGE | PTE_AF | PTE_SHARED | PTE_ATTRINDX(MT_NORMAL))
+#define PAGE_NONE                                                              \
+	((PAGE_DEFAULT & ~PTE_VALID) | PTE_PROT_NONE | PTE_RDONLY | PTE_NG |       \
+	 PTE_PXN | PTE_UXN)
 #define PAGE_SHARED                                                            \
 	(PAGE_DEFAULT | PTE_USER | PTE_NG | PTE_PXN | PTE_UXN | PTE_WRITE)
 #define PAGE_SHARED_EXEC                                                       \

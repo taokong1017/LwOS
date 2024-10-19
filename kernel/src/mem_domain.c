@@ -33,6 +33,12 @@ SPIN_LOCK_DEFINE(mem_domain_locker, "mem_domain_locker");
 
 static struct mem_range kernel_mem_ranges[] = {
 	{
+		.name = "Zero_Page",
+		.start = 0,
+		.end = (void *)PAGE_SIZE,
+		.attrs = PAGE_NONE,
+	},
+	{
 		.name = "Kernel_Code",
 		.start = (void *)__text_start,
 		.end = (void *)__text_end,
