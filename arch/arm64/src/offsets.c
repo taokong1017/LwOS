@@ -5,6 +5,7 @@
 #include <percpu.h>
 #include <smccc.h>
 #include <arch_smp.h>
+#include <mem_domain.h>
 
 GEN_ABS_SYM_BEGIN(ARM64_TASK_SYMBOLE)
 GEN_NAMED_OFFSET_SYM(struct task, status, TASK_OF_STATUS);
@@ -12,6 +13,7 @@ GEN_NAMED_OFFSET_SYM(struct task, entry, TASK_OF_ENTRY);
 GEN_NAMED_OFFSET_SYM(struct task, args, TASK_OF_ARGS);
 GEN_NAMED_OFFSET_SYM(struct task, stack_ptr, TASK_OF_STACK_PTR);
 GEN_NAMED_OFFSET_SYM(struct task, task_context, TASK_OF_ARCH_TASK_CONTEXT);
+GEN_NAMED_OFFSET_SYM(struct task, mem_domain, TASK_OF_MEM_DOMAIN);
 GEN_NAMED_OFFSET_SYM(arch_task_context_t, callee_context,
 					 TASK_CONTEXT_OF_CALLEE_CONTEXT);
 GEN_NAMED_OFFSET_SYM(arch_callee_context_t, x0, CALLEE_CONTEXT_OF_X0_X1);
@@ -63,5 +65,11 @@ GEN_NAMED_OFFSET_SYM(struct boot_params, cpu_id, BOOT_PARAMS_OF_CPU_ID);
 GEN_NAMED_OFFSET_SYM(struct boot_params, mp_id, BOOT_PARAMS_OF_MP_ID);
 GEN_NAMED_OFFSET_SYM(struct boot_params, func, BOOT_PARAMS_OF_FUNC);
 GEN_NAMED_OFFSET_SYM(struct boot_params, arg, BOOT_PARAMS_OF_ARG);
+
+GEN_NAMED_OFFSET_SYM(struct mem_domain, arch_mem_domain,
+					 MEM_DOMAIN_OF_ARCH_MEM_DOMAIN);
+GEN_NAMED_OFFSET_SYM(struct arch_mem_domain, pgtable,
+					 ARCH_MEM_DOMAIN_OF_PGTABLE);
+GEN_NAMED_OFFSET_SYM(struct mmu_pgtable, ttbr0, MMU_PGTABLE_OF_TTBR0);
 
 GEN_ABS_SYM_END

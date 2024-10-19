@@ -10,6 +10,7 @@
 .type arch_task_context_switch, function
 .section .text, "ax"
 arch_task_context_switch:
+	/* save cpu registers */
 	stp x0, x1,   [x1, #ARCH_TASK_CONTEXT_X0_X1_OFFSET]
 	stp x2, x3,   [x1, #ARCH_TASK_CONTEXT_X2_X3_OFFSET]
 	stp x4, x5,   [x1, #ARCH_TASK_CONTEXT_X4_X5_OFFSET]
@@ -41,6 +42,17 @@ arch_task_context_switch:
 	bl arch_fpu_restore
 	ldp x0, x1, [sp], #16
 #endif
+	/* switch ttbr0_el1 */
+	sub x19, x0, #TASK_OF_ARCH_TASK_CONTEXT_OFFSET
+	add x19, x19, #TASK_OF_MEM_DOMAIN_OFFSET
+	ldr x19, [x19]
+	add x19, x19, #MEM_DOMAIN_OF_ARCH_MEM_DOMAIN_OFFSET
+	add x19, x19, #ARCH_MEM_DOMAIN_OF_PGTABLE_OFFSET
+	add x19, x19, #MMU_PGTABLE_OF_TTBR0_OFFSET
+	ldr x19, [x19]
+	msr ttbr0_el1, x19
+	bl tlb_all_flush
+	/* restore cpu registers */
 	ldp x30, x2,  [x0, #ARCH_TASK_CONTEXT_X30_SP_OFFSET]
 	mov sp, x2
 	ldp x2, x3,   [x0, #ARCH_TASK_CONTEXT_DAIF_NZCV_OFFSET]
@@ -90,6 +102,15 @@ arch_exc_exit:
 	ldp x0, x1, [sp, #ESF_CONTEXT_OF_SPSR_ELR_OFFSET]
 	msr spsr_el1, x0
 	msr elr_el1, x1
+	ldr x0, [sp, #ESF_CONTEXT_OF_X0_X1_OFFSET]
+	add x0, x0, #TASK_OF_MEM_DOMAIN_OFFSET
+	ldr x0, [x0]
+	add x0, x0, #MEM_DOMAIN_OF_ARCH_MEM_DOMAIN_OFFSET
+	add x0, x0, #ARCH_MEM_DOMAIN_OF_PGTABLE_OFFSET
+	add x0, x0, #MMU_PGTABLE_OF_TTBR0_OFFSET
+	ldr x0, [x0]
+	msr ttbr0_el1, x0
+	bl tlb_all_flush
 	ldp x0, x1, [sp, #ESF_CONTEXT_OF_X0_X1_OFFSET]
 	ldp x2, x3, [sp, #ESF_CONTEXT_OF_X2_X3_OFFSET]
 	ldp x4, x5, [sp, #ESF_CONTEXT_OF_X4_X5_OFFSET]

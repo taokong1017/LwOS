@@ -9,6 +9,7 @@
 #include <log.h>
 #include <percpu.h>
 #include <msgq.h>
+#include <arch_task.h>
 
 #define IDLE_TASK_NAME "idle_task"
 #define ROOT_TASK_NAME "main_task"
