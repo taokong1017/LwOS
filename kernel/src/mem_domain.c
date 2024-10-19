@@ -31,7 +31,7 @@ struct mem_domain kernel_mem_domain = {.name = MEM_KERNEL_DOMAIN,
 LIST_HEAD(mem_domain_root);
 SPIN_LOCK_DEFINE(mem_domain_locker, "mem_domain_locker");
 
-static struct mem_range mem_ranges[] = {
+static struct mem_range kernel_mem_ranges[] = {
 	{
 		.name = "Kernel_Code",
 		.start = (void *)__text_start,
@@ -86,6 +86,9 @@ static struct mem_range mem_ranges[] = {
 		.end = (void *)GIC_BASE + GIC_SIZE,
 		.attrs = PAGE_KERNEL,
 	},
+};
+
+static struct mem_range app_mem_ranges[] = {
 #ifdef CONFIG_USER_SPACE
 	{
 		.name = "Apps_Data",
@@ -185,7 +188,8 @@ errno_t mem_domain_kernel_ranges_copy(struct mem_domain *domain) {
 		return ERRNO_MEM_DOMAIN_SAME;
 	}
 
-	return mem_domain_ranges_add(domain, mem_ranges, ARRAY_SIZE(mem_ranges));
+	return mem_domain_ranges_add(domain, kernel_mem_ranges,
+								 ARRAY_SIZE(kernel_mem_ranges));
 }
 
 errno_t mem_domain_init(struct mem_domain *domain, const char *name) {
@@ -238,8 +242,10 @@ errno_t mem_domain_set_up(struct mem_domain *domain) {
 
 void kernel_mem_domain_init() {
 	mem_domain_init(&kernel_mem_domain, MEM_KERNEL_DOMAIN);
-	mem_domain_ranges_add(&kernel_mem_domain, mem_ranges,
-						  ARRAY_SIZE(mem_ranges));
+	mem_domain_ranges_add(&kernel_mem_domain, kernel_mem_ranges,
+						  ARRAY_SIZE(kernel_mem_ranges));
+	mem_domain_ranges_add(&kernel_mem_domain, app_mem_ranges,
+						  ARRAY_SIZE(app_mem_ranges));
 	mem_domain_set_up(&kernel_mem_domain);
 	mmu_enable(kernel_mem_domain.arch_mem_domain.pgtable.ttbr0);
 
