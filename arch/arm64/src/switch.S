@@ -87,6 +87,10 @@ arch_main_task_switch:
 	add x1, x0, TASK_OF_ARCH_TASK_CONTEXT_OFFSET
 	add x1, x1, TASK_CONTEXT_OF_CALLEE_CONTEXT_OFFSET
 	ldp x2, x3, [x1, CALLEE_CONTEXT_OF_X30_SP_OFFSET]
+	bl task_is_user
+	mov x1, #0x1
+	csel x1, xzr, x1, eq
+	msr SPSel, x1
 	mov sp, x3
 	blr x2
 	ret
