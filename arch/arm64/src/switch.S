@@ -43,14 +43,24 @@ arch_task_context_switch:
 	ldp x0, x1, [sp], #16
 #endif
 	/* switch ttbr0_el1 */
-	sub x19, x0, #TASK_OF_ARCH_TASK_CONTEXT_OFFSET
-	add x19, x19, #TASK_OF_MEM_DOMAIN_OFFSET
+	sub x1, x0, #TASK_OF_ARCH_TASK_CONTEXT_OFFSET
+	add x19, x1, #TASK_OF_MEM_DOMAIN_OFFSET
 	ldr x19, [x19]
 	add x19, x19, #MEM_DOMAIN_OF_ARCH_MEM_DOMAIN_OFFSET
 	add x19, x19, #ARCH_MEM_DOMAIN_OF_PGTABLE_OFFSET
 	add x19, x19, #MMU_PGTABLE_OF_TTBR0_OFFSET
 	ldr x19, [x19]
 	msr ttbr0_el1, x19
+
+	/* switch task stack */
+	add x1, x1, #TASK_OF_FLAG_OFFSET
+	ldr x1, [x1]
+	and x1, x1, #0x4 /* TASK_FLAG_USER */
+	cmp x1, #0
+	mov x1, #0x1
+	csel x1, x1, xzr, eq
+	msr SPSel, x1
+
 	/* restore cpu registers */
 	ldp x30, x2,  [x0, #ARCH_TASK_CONTEXT_X30_SP_OFFSET]
 	mov sp, x2
@@ -87,9 +97,12 @@ arch_main_task_switch:
 	add x1, x0, TASK_OF_ARCH_TASK_CONTEXT_OFFSET
 	add x1, x1, TASK_CONTEXT_OF_CALLEE_CONTEXT_OFFSET
 	ldp x2, x3, [x1, CALLEE_CONTEXT_OF_X30_SP_OFFSET]
-	bl task_is_user
+	add x1, x1, #TASK_OF_FLAG_OFFSET
+	ldr x1, [x1]
+	and x1, x1, #0x4 /* TASK_FLAG_USER */
+	cmp x1, #0
 	mov x1, #0x1
-	csel x1, xzr, x1, eq
+	csel x1, x1, xzr, eq
 	msr SPSel, x1
 	mov sp, x3
 	blr x2

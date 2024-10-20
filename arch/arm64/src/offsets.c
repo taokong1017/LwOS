@@ -11,6 +11,7 @@ GEN_ABS_SYM_BEGIN(ARM64_TASK_SYMBOLE)
 GEN_NAMED_OFFSET_SYM(struct task, status, TASK_OF_STATUS);
 GEN_NAMED_OFFSET_SYM(struct task, entry, TASK_OF_ENTRY);
 GEN_NAMED_OFFSET_SYM(struct task, args, TASK_OF_ARGS);
+GEN_NAMED_OFFSET_SYM(struct task, flag, TASK_OF_FLAG);
 GEN_NAMED_OFFSET_SYM(struct task, stack_ptr, TASK_OF_STACK_PTR);
 GEN_NAMED_OFFSET_SYM(struct task, task_context, TASK_OF_ARCH_TASK_CONTEXT);
 GEN_NAMED_OFFSET_SYM(struct task, mem_domain, TASK_OF_MEM_DOMAIN);

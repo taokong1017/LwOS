@@ -738,7 +738,6 @@ void task_user_entry_point(task_id_t task_id) {
 	struct task *task = ID_TO_TASK(task_id);
 
 	// TODO: syscall to unlock schedule locker
-	log_debug(TASK_TAG, "user task %s starts from entry point\n", task->name);
 	task->entry(task->args[0], task->args[1], task->args[2], task->args[3]);
 	forever();
 }

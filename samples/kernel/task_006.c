@@ -13,8 +13,6 @@ static void part_task_entry(void *arg0, void *arg1, void *arg2, void *arg3) {
 	(void)arg0;
 	(void)arg0;
 	(void)arg0;
-
-	forever();
 }
 
 int main() {
