@@ -20,14 +20,14 @@
 	const struct mem_range name##_data_region = {                              \
 		.start = (void *)&APP_DATA_START(name)[0],                             \
 		.end = (void *)&APP_DATA_END(name)[0],                                 \
-		.attrs = PAGE_SHARED,                                                  \
+		.attrs = MT_P_RW_U_RW,                                                 \
 	};                                                                         \
 	extern char APP_BSS_START(name)[];                                         \
 	extern char APP_BSS_END(name)[];                                           \
 	const struct mem_range name##_bss_region = {                               \
 		.start = (void *)&APP_BSS_START(name)[0],                              \
 		.end = (void *)&APP_BSS_END(name)[0],                                  \
-		.attrs = PAGE_SHARED,                                                  \
+		.attrs = MT_P_RW_U_RW,                                                 \
 	};
 
 #define app_mem_domain_init(app_domain, domain_name, name)                     \

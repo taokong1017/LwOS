@@ -33,64 +33,58 @@ SPIN_LOCK_DEFINE(mem_domain_locker, "mem_domain_locker");
 
 static struct mem_range kernel_mem_ranges[] = {
 	{
-		.name = "Zero_Page",
-		.start = 0,
-		.end = (void *)PAGE_SIZE,
-		.attrs = PAGE_NONE,
-	},
-	{
 		.name = "Kernel_Code",
 		.start = (void *)__text_start,
 		.end = (void *)__text_end,
-		.attrs = PAGE_KERNEL_ROX,
+		.attrs = MT_P_RX_U_RX,
 	},
 	{
 		.name = "Kernel_Ro_Data",
 		.start = (void *)__rodata_start,
 		.end = (void *)__rodata_end,
-		.attrs = PAGE_KERNEL_RO,
+		.attrs = MT_P_RO_U_RO,
 	},
 	{
 		.name = "Kernel_Bss",
 		.start = (void *)__bss_start,
 		.end = (void *)__bss_end,
-		.attrs = PAGE_KERNEL,
+		.attrs = MT_P_RW_U_NA,
 	},
 	{
 		.name = "Kernel_Data",
 		.start = (void *)__data_start,
 		.end = (void *)__data_end,
-		.attrs = PAGE_KERNEL,
+		.attrs = MT_P_RW_U_NA,
 	},
 	{
 		.name = "Page_Table_Pool",
 		.start = (void *)__page_table_pool_start,
 		.end = (void *)__page_table_pool_end,
-		.attrs = PAGE_KERNEL,
+		.attrs = MT_P_RW_U_NA,
 	},
 	{
 		.name = "Kernel_Stack",
 		.start = (void *)__kernel_stack_start,
 		.end = (void *)__kernel_stack_end,
-		.attrs = PAGE_KERNEL,
+		.attrs = MT_P_RW_U_NA,
 	},
 	{
 		.name = "Interrupt_Stack",
 		.start = (void *)__interrupt_stack_start,
 		.end = (void *)__interrupt_stack_end,
-		.attrs = PAGE_KERNEL,
+		.attrs = MT_P_RW_U_NA,
 	},
 	{
 		.name = "UART",
 		.start = (void *)UART_REG_BASE,
 		.end = (void *)UART_REG_BASE + UART_REG_SIZE,
-		.attrs = PAGE_KERNEL,
+		.attrs = MT_P_RW_U_NA,
 	},
 	{
 		.name = "GICv2",
 		.start = (void *)GIC_BASE,
 		.end = (void *)GIC_BASE + GIC_SIZE,
-		.attrs = PAGE_KERNEL,
+		.attrs = MT_P_RW_U_NA,
 	},
 };
 
@@ -100,7 +94,7 @@ static struct mem_range app_mem_ranges[] = {
 		.name = "Apps_Data",
 		.start = (void *)__application_data_start,
 		.end = (void *)__application_data_end,
-		.attrs = PAGE_KERNEL,
+		.attrs = MT_P_RW_U_RW,
 	},
 #endif
 };

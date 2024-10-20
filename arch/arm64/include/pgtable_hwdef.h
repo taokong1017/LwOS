@@ -103,17 +103,37 @@
 #define PTE_TYPE_MASK (((pteval_t)(3)) << 0)
 #define PTE_TYPE_PAGE (((pteval_t)(3)) << 0)
 #define PTE_TABLE_BIT (((pteval_t)(1)) << 1)
-#define PTE_USER (((pteval_t)(1)) << 6)		  /* AP[1] */
-#define PTE_RDONLY (((pteval_t)(1)) << 7)	  /* AP[2] */
-#define PTE_SHARED (((pteval_t)(3)) << 8)	  /* SH[1:0], inner shareable */
-#define PTE_AF (((pteval_t)(1)) << 10)		  /* Access Flag */
-#define PTE_NG (((pteval_t)(1)) << 11)		  /* nG */
-#define PTE_GP (((pteval_t)(1)) << 50)		  /* BTI guarded */
-#define PTE_DBM (((pteval_t)(1)) << 51)		  /* Dirty Bit Management */
-#define PTE_CONT (((pteval_t)(1)) << 52)	  /* Contiguous range */
-#define PTE_PXN (((pteval_t)(1)) << 53)		  /* Privileged XN */
-#define PTE_UXN (((pteval_t)(1)) << 54)		  /* User XN */
-#define PTE_PROT_NONE (((pteval_t)(1)) << 58) /* only when !PTE_VALID */
+#define PTE_NS_SHIFT 5U		 /* NS */
+#define PTE_AP_ELx_SHIFT 6U	 /* AP[1] */
+#define PTE_AP_PERM_SHIFT 7U /* AP[2] */
+#define PTE_SH_SHIFT 8U		 /* SH[1:0] */
+#define PTE_AF_SHIFT 10U	 /* Access Flag */
+#define PTE_NG_SHIFT 11U	 /* nG */
+#define PTE_GP_SHIFT 50U	 /* BTI guarded */
+#define PTE_DBM_SHIFT 51U	 /* Dirty Bit Management */
+#define PTE_PXN_SHIFT 53U	 /* Privileged XN */
+#define PTE_UXN_SHIFT 54U	 /* User XN */
+
+#define PTE_NS (1ULL << PTE_NS_SHIFT)
+#define PTE_S (0ULL << PTE_NS_SHIFT)
+#define PTE_AP_ELx (1ULL << PTE_AP_ELx_SHIFT)
+#define PTE_AP_EL_HIGHER (0ULL << PTE_AP_ELx_SHIFT)
+#define PTE_AP_RO (1ULL << PTE_AP_PERM_SHIFT)
+#define PTE_AP_RW (0ULL << PTE_AP_PERM_SHIFT)
+#define PTE_SH_NONE (0ULL << PTE_SH_SHIFT)
+#define PTE_SH_OUTER (2ULL << PTE_SH_SHIFT)
+#define PTE_SH_INNER (3ULL << PTE_SH_SHIFT)
+#define PTE_AF (1ULL << PTE_AF_SHIFT)
+#define PTE_NG (1ULL << PTE_NG_SHIFT)
+#define PTE_G (0ULL << PTE_NG_SHIFT)
+#define PTE_GP (1ULL << PTE_GP_SHIFT)
+#define PTE_NGP (0ULL << PTE_GP_SHIFT)
+#define PTE_DBM (1ULL << PTE_DBM_SHIFT)
+#define PTE_NDBM (0ULL << PTE_DBM_SHIFT)
+#define PTE_PXN (1ULL << PTE_PXN_SHIFT)
+#define PTE_PX (0ULL << PTE_PXN_SHIFT)
+#define PTE_UXN (1ULL << PTE_UXN_SHIFT)
+#define PTE_UX (0ULL << PTE_UXN_SHIFT)
 
 #define PTE_ADDR_LOW                                                           \
 	((((pteval_t)(1) << (VA_BITS - PAGE_SHIFT)) - 1) << PAGE_SHIFT)
