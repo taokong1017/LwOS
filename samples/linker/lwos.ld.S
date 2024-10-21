@@ -53,7 +53,7 @@ SECTIONS
 
 	. = ALIGN(0x1000);
 	__page_table_pool_start = .;
-	. += 0x2000000;
+	. += 0x400000;
 	__page_table_pool_end = .;
 
 	. = ALIGN(0x1000);

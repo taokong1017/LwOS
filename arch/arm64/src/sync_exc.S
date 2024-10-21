@@ -23,7 +23,9 @@ sync_func:
 #endif
 
 inv:
-	b .
+	mov x0, sp
+	bl el0t_64_sync_handler
+	ret
 
 #ifdef CONFIG_USER_SPACE
 .globl syscall_func
