@@ -51,6 +51,7 @@ arch_task_context_switch:
 	add x19, x19, #MMU_PGTABLE_OF_TTBR0_OFFSET
 	ldr x19, [x19]
 	msr ttbr0_el1, x19
+	isb
 
 	/* switch task stack */
 	add x1, x1, #TASK_OF_FLAG_OFFSET
@@ -126,6 +127,7 @@ arch_exc_exit:
 	add x0, x0, #MMU_PGTABLE_OF_TTBR0_OFFSET
 	ldr x0, [x0]
 	msr ttbr0_el1, x0
+	isb
 	ldp x0, x1, [sp, #ESF_CONTEXT_OF_X0_X1_OFFSET]
 	ldp x2, x3, [sp, #ESF_CONTEXT_OF_X2_X3_OFFSET]
 	ldp x4, x5, [sp, #ESF_CONTEXT_OF_X4_X5_OFFSET]

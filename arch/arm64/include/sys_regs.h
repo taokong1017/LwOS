@@ -4,25 +4,29 @@
 /* MAIR_ELx memory attributes */
 #define MAIR_ATTR_DEVICE_nGnRnE (0x00UL)
 #define MAIR_ATTR_DEVICE_nGnRE (0x04UL)
+#define MAIR_ATTR_DEVICE_GRE (0x0cUL)
 #define MAIR_ATTR_NORMAL_NC (0x44UL)
 #define MAIR_ATTR_NORMAL (0xffUL)
+#define MAIR_ATTR_NORMAL_WT (0xbbUL)
 
 /* Position the attr at the correct index */
 #define MAIR_ATTRIDX(attr, idx) ((attr) << ((idx)*8))
 
 /* Memory types available */
-#define MT_NORMAL 0
-#define MT_NORMAL_TAGGED 1
-#define MT_NORMAL_NC 2
-#define MT_DEVICE_nGnRnE 3
-#define MT_DEVICE_nGnRE 4
+#define MT_DEVICE_nGnRnE 0U
+#define MT_DEVICE_nGnRE 1U
+#define MT_DEVICE_GRE 2U
+#define MT_NORMAL_NC 3U
+#define MT_NORMAL 4U
+#define MT_NORMAL_WT 5U
 
 #define MAIR_EL1_SET                                                           \
 	(MAIR_ATTRIDX(MAIR_ATTR_DEVICE_nGnRnE, MT_DEVICE_nGnRnE) |                 \
 	 MAIR_ATTRIDX(MAIR_ATTR_DEVICE_nGnRE, MT_DEVICE_nGnRE) |                   \
+	 MAIR_ATTRIDX(MAIR_ATTR_DEVICE_GRE, MT_DEVICE_GRE) |                       \
 	 MAIR_ATTRIDX(MAIR_ATTR_NORMAL_NC, MT_NORMAL_NC) |                         \
 	 MAIR_ATTRIDX(MAIR_ATTR_NORMAL, MT_NORMAL) |                               \
-	 MAIR_ATTRIDX(MAIR_ATTR_NORMAL, MT_NORMAL_TAGGED))
+	 MAIR_ATTRIDX(MAIR_ATTR_NORMAL_WT, MT_NORMAL_WT))
 
 #define INIT_SCTLR_EL1_MMU_OFF                                                 \
 	(ENDIAN_SET_EL1 | SCTLR_EL1_LSMAOE | SCTLR_EL1_nTLSMD | SCTLR_EL1_EIS |    \

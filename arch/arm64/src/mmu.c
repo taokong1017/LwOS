@@ -156,9 +156,8 @@ void mmu_enable(uint64_t ttbr0) {
 	write_mair_el1(MAIR_EL1_SET);
 
 	/* Set translation control */
-	tcr = TCR_T0SZ(VA_BITS) | TCR_T1SZ(VA_BITS) | TCR_IRGN_WBWA |
-		  TCR_ORGN_WBWA | TCR_SHARED | TCR_TG0_4K | TCR_TG1_4K | TCR_ASID16 |
-		  TCR_TBI0 | TCR_A1 | TCR_TBI1 | TCR_TBID1;
+	tcr = TCR_T0SZ(VA_BITS) | TCR_IRGN_WBWA | TCR_ORGN_WBWA | TCR_SHARED |
+		  TCR_TG0_4K | TCR_TG1_4K | TCR_TBI0 | TCR_TBI1 | TCR_EPD1_DISABLE;
 	write_tcr_el1(tcr);
 
 	/* Set translation table */
