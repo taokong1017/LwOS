@@ -27,4 +27,6 @@ uint64_t *page_table_alloc();
 
 uint64_t page_table_asid_alloc();
 
+phys_addr_t va_to_pa_translate(uint64_t *pgtable_virt, virt_addr_t va);
+
 #endif

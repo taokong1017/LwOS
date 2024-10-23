@@ -18,7 +18,7 @@ static uint64_t
 		PAGE_TABLE_ENTRY_SIZE * sizeof(uint64_t)) = {0};
 static uint32_t page_tables_used_count[CONFIG_PAGE_TABLE_MAX_NUM] = {0};
 SPIN_LOCK_DEFINE(mmu_locker, MMU_LOCKER);
-static uint8_t pgtable_next_asid = 0;
+static uint8_t pgtable_next_asid = 1;
 
 static void init_pte_alloc(pmd_t *pmdp, virt_addr_t addr, virt_addr_t end,
 						   phys_addr_t phys, pgprot_t prot,
@@ -144,8 +144,59 @@ uint64_t page_table_asid_alloc() {
 
 	pgtable_next_asid += 1;
 	pgtable_next_asid &= (1 << VM_ASID_BITS) - 1;
+	if (pgtable_next_asid == 0) {
+		pgtable_next_asid = 1;
+	}
 
 	return asid << TTBR_ASID_SHIFT;
+}
+
+virt_addr_t phys_to_virt(phys_addr_t phys) { return phys; }
+
+phys_addr_t va_to_pa_translate(uint64_t *pgtable_virt, virt_addr_t va) {
+	phys_addr_t pa = 0;
+	uint64_t prot = 0;
+	pgd_t *pgdir = NULL;
+	pgd_t pgd;
+	pud_t pud;
+	pmd_t pmd;
+	pte_t pte;
+
+	if (!pgtable_virt) {
+		log_err(MMU_TAG, "pgtable_virt is NULL\n");
+		return pa;
+	}
+
+	pgdir = (pgd_t *)pgtable_virt;
+	pgd = *pgd_offset_pgd(pgdir, va); /* virtual address */
+	if (pgd_none(pgd)) {
+		log_err(MMU_TAG, "pgd value is NULL\n");
+		return pa;
+	}
+
+	pud = *((pud_t *)pud_offset_phys(&pgd, va)); /* physical address */
+	if (pud_none(pud(phys_to_virt(pud_val(pud))))) {
+		log_err(MMU_TAG, "pud value is NULL\n");
+		return pa;
+	}
+
+	pmd = *((pmd_t *)(pmd_offset_phys(&pud, va))); /* physical address */
+	if (pmd_none(pmd(phys_to_virt(pmd_val(pmd))))) {
+		log_err(MMU_TAG, "pmd value is NULL\n");
+		return pa;
+	}
+
+	pte = *((pte_t *)pte_offset_phys(&pmd, va)); /* physical address */
+	if (pte_none(pte(phys_to_virt(pte_val(pte))))) {
+		log_err(MMU_TAG, "pte value is NULL\n");
+		return pa;
+	}
+
+	pa = (pte_val(pte) & PTE_ADDR_LOW) + (va & (~PTE_ADDR_LOW));
+	prot = pte_val(pte) & (~PTE_ADDR_LOW);
+	printf("va 0x%p, pa: 0x%p, prot: 0x%p\n", va, pa, prot);
+
+	return pa;
 }
 
 void mmu_enable(uint64_t ttbr0) {
