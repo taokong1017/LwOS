@@ -130,7 +130,7 @@ uint64_t *page_table_alloc() {
 	for (i = 0; i < CONFIG_PAGE_TABLE_MAX_NUM; i++) {
 		if (page_tables_used_count[i] == 0) {
 			table = &page_tables[i * PAGE_TABLE_ENTRY_SIZE];
-			memset(table, 0x00, PAGE_TABLE_ENTRY_SIZE << 3);
+			memset(table, 0x00, PAGE_TABLE_ENTRY_SIZE * sizeof(uint64_t));
 			page_tables_used_count[i] += 1;
 			log_debug(MMU_TAG, "allocate table[%d]: %p\n", i, table);
 			return table;

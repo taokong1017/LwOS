@@ -25,8 +25,8 @@ config CONFIG_TASK_005
 	depends on !CONFIG_USER_SPACE
 	default n
 
-config CONFIG_TASK_006
-	bool "User TASK 006"
+config CONFIG_USER_TASK_001
+	bool "User TASK 001"
 	depends on CONFIG_USER_SPACE
 	default n
 
