@@ -8,6 +8,7 @@
 #include <stdio.h>
 #include <spin_lock.h>
 #include <log.h>
+#include <string.h>
 
 #define MMU_LOCKER "MMU_LOCKER"
 #define MMU_TAG "MMU"
@@ -27,11 +28,11 @@ static void init_pte_alloc(pmd_t *pmdp, virt_addr_t addr, virt_addr_t end,
 	pte_t *ptep;
 
 	if (pmd_none(pmd)) {
-		pmdval_t pmdval = PMD_TYPE_TABLE | PMD_TABLE_UXN;
+		pmdval_t pmdval = PMD_TYPE_TABLE;
 		phys_addr_t pte_phys;
 
 		if (flags & NO_EXEC_MAPPINGS) {
-			pmdval |= PMD_TABLE_PXN;
+			pmdval |= (PMD_TABLE_PXN | PMD_TABLE_UXN);
 		}
 		pte_phys = pgtable_alloc(PAGE_SIZE);
 		pmd_populate(pmdp, pte_phys, pmdval);
@@ -52,11 +53,11 @@ static void init_pmd_alloc(pud_t *pudp, virt_addr_t addr, virt_addr_t end,
 	pmd_t *pmdp;
 
 	if (pud_none(pud)) {
-		pudval_t pudval = PUD_TYPE_TABLE | PUD_TABLE_UXN;
+		pudval_t pudval = PUD_TYPE_TABLE;
 		phys_addr_t pmd_phys;
 
 		if (flags & NO_EXEC_MAPPINGS) {
-			pudval |= PUD_TABLE_PXN;
+			pudval |= (PUD_TABLE_PXN | PUD_TABLE_UXN);
 		}
 		pmd_phys = pgtable_alloc(PAGE_SIZE);
 		pud_populate(pudp, pmd_phys, pudval);
@@ -78,11 +79,11 @@ static void init_pud_alloc(pgd_t *pgdp, virt_addr_t addr, virt_addr_t end,
 	pud_t *pudp;
 
 	if (pgd_none(pgd)) {
-		pudval_t pudval = PGD_TYPE_TABLE | PGD_TABLE_UXN;
+		pudval_t pudval = PGD_TYPE_TABLE;
 		phys_addr_t pud_phys;
 
 		if (flags & NO_EXEC_MAPPINGS) {
-			pudval |= PUD_TABLE_PXN;
+			pudval |= PUD_TABLE_PXN | PGD_TABLE_UXN;
 		}
 
 		pud_phys = pgtable_alloc(PAGE_SIZE);
@@ -129,6 +130,7 @@ uint64_t *page_table_alloc() {
 	for (i = 0; i < CONFIG_PAGE_TABLE_MAX_NUM; i++) {
 		if (page_tables_used_count[i] == 0) {
 			table = &page_tables[i * PAGE_TABLE_ENTRY_SIZE];
+			memset(table, 0x00, PAGE_TABLE_ENTRY_SIZE << 3);
 			page_tables_used_count[i] += 1;
 			log_debug(MMU_TAG, "allocate table[%d]: %p\n", i, table);
 			return table;
@@ -187,14 +189,15 @@ phys_addr_t va_to_pa_translate(uint64_t *pgtable_virt, virt_addr_t va) {
 	}
 
 	pte = *((pte_t *)pte_offset_phys(&pmd, va)); /* physical address */
-	if (pte_none(pte(phys_to_virt(pte_val(pte))))) {
+	if (pte_none(pte)) {
 		log_err(MMU_TAG, "pte value is NULL\n");
 		return pa;
 	}
 
 	pa = (pte_val(pte) & PTE_ADDR_LOW) + (va & (~PTE_ADDR_LOW));
 	prot = pte_val(pte) & (~PTE_ADDR_LOW);
-	printf("va 0x%p, pa: 0x%p, prot: 0x%p\n", va, pa, prot);
+	log_debug(MMU_TAG, "translate va: 0x%p, pa: 0x%p, prot: 0x%p\n", va, pa,
+			  prot);
 
 	return pa;
 }
