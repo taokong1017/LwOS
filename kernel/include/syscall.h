@@ -2,6 +2,9 @@
 #define __SYSCALL_H__
 
 #include <types.h>
+#include <errno.h>
+
+#define ERRNO_SYSCALL_INVALID_ID ERRNO_OS_ERROR(MOD_ID_SYSCALL, 0x00)
 
 enum syscall_id {
 	SYSCALL_LOG_LEVEL_GET = 0,

@@ -19,7 +19,7 @@ int main() {
 	app_mem_domain_init(&app_mem_domain, "app1", app1);
 	mem_domain_set_up(&app_mem_domain);
 
-	/* 创建第一个分区任务 */
+	/* 创建用户态根任务 */
 	task_create_with_stack(&task_id, TASK_NAME, part_task_entry, NULL, NULL,
 						   NULL, NULL, &task, &stack, TASK_STACK_SIZE,
 						   TASK_FLAG_USER);
