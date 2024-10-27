@@ -341,3 +341,10 @@ void task_sched_start() {
 
 	code_unreachable();
 }
+
+errno_t task_sched_unlock() {
+	spin_unlock(&sched_spinlocker);
+	arch_irq_unlock();
+
+	return OK;
+}

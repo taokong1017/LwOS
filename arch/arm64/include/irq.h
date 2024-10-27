@@ -6,6 +6,7 @@
 #define IRQ_MAX_NUM 1020
 
 #ifndef __ASSEMBLY__
+#include <arch_regs.h>
 void arch_irq_enable(uint32_t irq);
 void arch_irq_disable(uint32_t irq);
 bool arch_irq_is_enabled(uint32_t irq);
@@ -18,6 +19,7 @@ uint32_t arch_irq_status();
 void arch_irq_restore(uint32_t key);
 bool arch_irq_locked();
 void arch_irq_unlock();
+void arch_irq_unlock_with_regs(struct arch_regs *regs);
 #endif
 
 #endif

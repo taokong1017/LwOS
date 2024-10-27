@@ -13,6 +13,7 @@
 #include <smp.h>
 #include <msgq.h>
 #include <task_cmd.h>
+#include <user_space.h>
 
 #define TASK_TO_ID(task) ((task_id_t)task)
 #define TASK_TAG "TASK"
@@ -737,7 +738,7 @@ errno_t task_create_with_stack(task_id_t *task_id, const char *name,
 void task_user_entry_point(task_id_t task_id) {
 	struct task *task = ID_TO_TASK(task_id);
 
-	// TODO: syscall to unlock schedule locker
+	user_task_sched_unlock();
 	task->entry(task->args[0], task->args[1], task->args[2], task->args[3]);
 	forever();
 }

@@ -64,3 +64,7 @@ errno_t user_task_priority_get(task_id_t task_id, uint32_t *prioriy) {
 errno_t user_task_self_id(task_id_t *task_id) {
 	return arch_syscall_invoke1((uintptr_t)task_id, SYSCALL_TASK_SELF_ID);
 }
+
+errno_t user_task_sched_unlock() {
+	return arch_syscall_invoke0(SYSCALL_TASK_SCHED_UNLOCK);
+}

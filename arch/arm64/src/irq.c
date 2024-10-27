@@ -55,3 +55,11 @@ uint32_t arch_irq_status() {
 	__asm__ __volatile__("mrs %0, daif" : "=r"(key) : : "memory");
 	return key;
 }
+
+void arch_irq_unlock_with_regs(struct arch_regs *regs) {
+	if (!regs) {
+		return;
+	}
+
+	regs->pstate &= ~(DAIF_FIQ_BIT | DAIF_IRQ_BIT);
+}
