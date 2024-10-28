@@ -118,7 +118,7 @@ static uintptr_t syscall_task_suspend(uintptr_t arg1, uintptr_t arg2,
 	(void)regs;
 	task_id_t task_id = (task_id_t)arg1;
 
-	return task_stop(task_id);
+	return task_suspend(task_id);
 }
 
 static uintptr_t syscall_task_resume(uintptr_t arg1, uintptr_t arg2,

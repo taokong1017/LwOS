@@ -740,6 +740,6 @@ void task_user_entry_point(task_id_t task_id) {
 
 	user_task_sched_unlock();
 	task->entry(task->args[0], task->args[1], task->args[2], task->args[3]);
-	forever();
+	user_task_suspend(task->id);
 }
 #endif
