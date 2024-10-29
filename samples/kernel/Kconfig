@@ -30,6 +30,11 @@ config CONFIG_USER_TASK_001
 	depends on CONFIG_USER_SPACE
 	default n
 
+config CONFIG_USER_TASK_002
+	bool "User TASK 002"
+	depends on CONFIG_USER_SPACE
+	default n
+
 config CONFIG_TIMER_001
 	bool "Kernel Timer 001"
 	depends on !CONFIG_USER_SPACE

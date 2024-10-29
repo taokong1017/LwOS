@@ -8,3 +8,4 @@ obj-$(CONFIG_MSGQ_001) := msgq_001.o
 obj-$(CONFIG_MUTEX_001) := mutex_001.o
 obj-$(CONFIG_SEM_001) := sem_001.o
 obj-$(CONFIG_USER_TASK_001) := user_task_001.o
+obj-$(CONFIG_USER_TASK_002) := user_task_002.o
