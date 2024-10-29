@@ -230,7 +230,7 @@ const syscall_handler_t syscall_table[SYSCALL_ID_LIMIT] = {
 	[SYSCALL_TASK_SCHED_UNLOCK] = syscall_task_sched_unlock,
 };
 
-uint32_t syscall_dispatch(struct arch_regs *regs) {
+void syscall_dispatch(struct arch_regs *regs) {
 	syscall_handler_t do_syscall = NULL;
 	uintptr_t arg1 = regs->gprs[0];
 	uintptr_t arg2 = regs->gprs[1];
@@ -241,13 +241,15 @@ uint32_t syscall_dispatch(struct arch_regs *regs) {
 	uint32_t syscall_id = regs->gprs[8];
 
 	if (syscall_id >= SYSCALL_ID_LIMIT) {
-		return ERRNO_SYSCALL_INVALID_ID;
+		regs->gprs[0] = ERRNO_SYSCALL_INVALID_ID;
+		return;
 	}
 
 	if (syscall_table[syscall_id] == NULL) {
 		do_syscall = default_syscall_handler;
 	}
 	do_syscall = syscall_table[syscall_id];
+	regs->gprs[0] = do_syscall(arg1, arg2, arg3, arg4, arg5, arg6, regs);
 
-	return do_syscall(arg1, arg2, arg3, arg4, arg5, arg6, regs);
+	return;
 }
