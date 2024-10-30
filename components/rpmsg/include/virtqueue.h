@@ -297,8 +297,4 @@ static inline int virtqueue_full(struct virtqueue *vq) {
  */
 void virtqueue_notification(struct virtqueue *vq);
 
-#ifdef __cplusplus
-}
-#endif
-
 #endif

@@ -4,10 +4,6 @@
 #include <types.h>
 #include <compiler.h>
 
-#if defined __cplusplus
-extern "C" {
-#endif
-
 /* This marks a buffer as continuing via the next field. */
 #define VRING_DESC_F_NEXT 1
 
@@ -166,9 +162,5 @@ static inline void vring_init(struct vring *vr, unsigned int num, uint8_t *p,
 									  sizeof(uint16_t) + align - 1) &
 									 ~(align - 1));
 }
-
-#ifdef __cplusplus
-}
-#endif
 
 #endif

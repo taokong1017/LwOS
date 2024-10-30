@@ -5,10 +5,6 @@
 #include <metal_atomic.h>
 #include <virtio.h>
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 #define INVALID_RPMSG_ID -1
 #define RPMSG_LOCATE_HDR(p)                                                    \
 	((struct rpmsg_hdr *)((unsigned char *)(p) - sizeof(struct rpmsg_hdr)))
@@ -235,9 +231,5 @@ rpmsg_id_t rpmsg_init(int32_t role, struct shm_mem_info shm,
  * @param id The RPMsg identifier to deinitialize
  */
 void rpmsg_deinit(rpmsg_id_t id);
-
-#ifdef __cplusplus
-}
-#endif
 
 #endif

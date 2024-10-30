@@ -5,10 +5,6 @@
 #include <metal_cache.h>
 #include <virtio.h>
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 #define RPMSG_NUM_VRINGS 2
 #define BUFFER_FLUSH(x, s) metal_cache_flush(x, s)
 #define BUFFER_INVALIDATE(x, s) metal_cache_invalidate(x, s)
@@ -147,9 +143,5 @@ void rpmsg_virtio_init_shm_pool(struct rpmsg_virtio_shm_pool *shpool,
  */
 void *rpmsg_virtio_shm_pool_get_buffer(struct rpmsg_virtio_shm_pool *shpool,
 									   size_t size);
-
-#ifdef __cplusplus
-}
-#endif
 
 #endif
