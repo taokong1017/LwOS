@@ -68,3 +68,25 @@ errno_t user_task_self_id(task_id_t *task_id) {
 errno_t user_task_sched_unlock() {
 	return arch_syscall_invoke0(SYSCALL_TASK_SCHED_UNLOCK);
 }
+
+errno_t user_msgq_create(const char *name, uint32_t max_msgs, uint32_t msg_size,
+						 msgq_id_t *id) {
+	return arch_syscall_invoke4((uintptr_t)name, max_msgs, msg_size,
+								(uintptr_t)id, SYSCALL_MSGQ_CREATE);
+}
+
+errno_t user_msgq_send(msgq_id_t id, const void *msg, uint32_t size,
+					   uint64_t timeout) {
+	return arch_syscall_invoke4((uintptr_t)id, (uintptr_t)msg, size, timeout,
+								SYSCALL_MSGQ_SEND);
+}
+
+errno_t user_msgq_receive(msgq_id_t id, void *msg, uint32_t *size,
+						  uint64_t timeout) {
+	return arch_syscall_invoke4((uintptr_t)id, (uintptr_t)msg, (uintptr_t)size,
+								timeout, SYSCALL_MSGQ_RECV);
+}
+
+errno_t user_msgq_destroy(msgq_id_t id) {
+	return arch_syscall_invoke1((uintptr_t)id, SYSCALL_MSGQ_DESTROY);
+}

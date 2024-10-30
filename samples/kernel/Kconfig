@@ -45,6 +45,11 @@ config CONFIG_MSGQ_001
 	depends on !CONFIG_USER_SPACE
 	default n
 
+config CONFIG_USER_MSGQ_001
+	bool "User MSGQ 001"
+	depends on CONFIG_USER_SPACE
+	default n
+
 config CONFIG_MUTEX_001
 	bool "Kernel MUTEX 001"
 	depends on !CONFIG_USER_SPACE

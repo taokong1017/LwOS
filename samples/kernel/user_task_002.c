@@ -22,9 +22,9 @@ APP_BSS(app2) char task_b_stack[TASK_STACK_SIZE] = {0};
 
 static void task_a_entry(void *arg0, void *arg1, void *arg2, void *arg3) {
 	(void)arg0;
-	(void)arg0;
-	(void)arg0;
-	(void)arg0;
+	(void)arg1;
+	(void)arg2;
+	(void)arg2;
 
 	forever() {
 		user_task_suspend(task_b_id);
@@ -39,18 +39,18 @@ static void task_a_entry(void *arg0, void *arg1, void *arg2, void *arg3) {
 
 static void task_b_entry(void *arg0, void *arg1, void *arg2, void *arg3) {
 	(void)arg0;
-	(void)arg0;
-	(void)arg0;
-	(void)arg0;
+	(void)arg1;
+	(void)arg2;
+	(void)arg3;
 
 	forever() { user_task_delay(1); }
 }
 
 static void user_task_entry(void *arg0, void *arg1, void *arg2, void *arg3) {
 	(void)arg0;
-	(void)arg0;
-	(void)arg0;
-	(void)arg0;
+	(void)arg1;
+	(void)arg2;
+	(void)arg3;
 
 	/* Create and start task A */
 	user_task_create(&task_a_id, TASK_A_NAME, task_a_entry, NULL, NULL, NULL,

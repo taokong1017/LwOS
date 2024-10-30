@@ -35,13 +35,10 @@ ret:
 	ret
 
 #ifdef CONFIG_USER_SPACE
-/*
- * int32_t buffer_validate(const void *addr, size_t size, int32_t write)
- */
-.globl buffer_validate
-.type buffer_validate, function
+.globl user_buffer_validate
+.type user_buffer_validate, function
 .section .text, "ax"
-buffer_validate:
+user_buffer_validate:
 	add x1, x1, x0
 	mrs x3, daif
 	msr daifSet, #DAIFSET_IRQ_BIT

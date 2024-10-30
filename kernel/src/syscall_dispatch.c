@@ -6,6 +6,8 @@
 #include <percpu.h>
 #include <task_sched.h>
 #include <irq.h>
+#include <msgq.h>
+#include <sync_exc.h>
 
 #define SYSCALL_TAG "SYSCALL"
 typedef uintptr_t (*syscall_handler_t)(uintptr_t arg1, uintptr_t arg2,
@@ -194,7 +196,80 @@ static uintptr_t syscall_task_sched_unlock(uintptr_t arg1, uintptr_t arg2,
 	(void)arg6;
 
 	arch_irq_unlock_with_regs(regs);
+
 	return task_sched_unlock();
+}
+
+static uintptr_t syscall_msgq_create(uintptr_t arg1, uintptr_t arg2,
+									 uintptr_t arg3, uintptr_t arg4,
+									 uintptr_t arg5, uintptr_t arg6,
+									 struct arch_regs *regs) {
+	(void)arg5;
+	(void)arg6;
+	const char *name = (const char *)arg1;
+	uint32_t max_msgs = (uint32_t)arg2;
+	uint32_t msg_size = (uint32_t)arg3;
+	msgq_id_t *id = (msgq_id_t *)arg4;
+
+	return msgq_create(name, max_msgs, msg_size, id);
+}
+
+static uintptr_t syscall_msgq_send(uintptr_t arg1, uintptr_t arg2,
+								   uintptr_t arg3, uintptr_t arg4,
+								   uintptr_t arg5, uintptr_t arg6,
+								   struct arch_regs *regs) {
+	(void)arg5;
+	(void)arg6;
+	msgq_id_t id = (msgq_id_t)arg1;
+	const void *msg = (const void *)arg2;
+	uint32_t size = (uint32_t)arg3;
+	uint64_t timeout = (uint64_t)arg4;
+	int32_t ret = 0;
+
+	if ((msg != NULL) && (size > 0)) {
+		ret = user_buffer_validate(msg, size, BUFFER_PERMIT_READ);
+		if (ret == -1) {
+			return ERRNO_MSGQ_INVALID_BUFFER;
+		}
+	}
+
+	return msgq_send(id, msg, size, timeout);
+}
+
+static uintptr_t syscall_msgq_receive(uintptr_t arg1, uintptr_t arg2,
+									  uintptr_t arg3, uintptr_t arg4,
+									  uintptr_t arg5, uintptr_t arg6,
+									  struct arch_regs *regs) {
+	(void)arg5;
+	(void)arg6;
+	msgq_id_t id = (msgq_id_t)arg1;
+	void *msg = (void *)arg2;
+	uint32_t *size = (uint32_t *)arg3;
+	uint64_t timeout = (uint64_t)arg4;
+	int32_t ret = 0;
+
+	if ((msg != NULL) && (size > 0)) {
+		ret = user_buffer_validate(msg, *size, BUFFER_PERMIT_WRITE);
+		if (ret == -1) {
+			return ERRNO_MSGQ_INVALID_BUFFER;
+		}
+	}
+
+	return msgq_receive(id, msg, size, timeout);
+}
+
+static uintptr_t syscall_msgq_destroy(uintptr_t arg1, uintptr_t arg2,
+									  uintptr_t arg3, uintptr_t arg4,
+									  uintptr_t arg5, uintptr_t arg6,
+									  struct arch_regs *regs) {
+	(void)arg2;
+	(void)arg3;
+	(void)arg4;
+	(void)arg5;
+	(void)arg6;
+	msgq_id_t id = (msgq_id_t)arg1;
+
+	return msgq_destroy(id);
 }
 
 static uintptr_t default_syscall_handler(uintptr_t arg1, uintptr_t arg2,
@@ -228,6 +303,10 @@ const syscall_handler_t syscall_table[SYSCALL_ID_LIMIT] = {
 	[SYSCALL_TASK_PRIO_GET] = syscall_task_prio_get,
 	[SYSCALL_TASK_SELF_ID] = syscall_task_self_id,
 	[SYSCALL_TASK_SCHED_UNLOCK] = syscall_task_sched_unlock,
+	[SYSCALL_MSGQ_CREATE] = syscall_msgq_create,
+	[SYSCALL_MSGQ_SEND] = syscall_msgq_send,
+	[SYSCALL_MSGQ_RECV] = syscall_msgq_receive,
+	[SYSCALL_MSGQ_DESTROY] = syscall_msgq_destroy,
 };
 
 void syscall_dispatch(struct arch_regs *regs) {
