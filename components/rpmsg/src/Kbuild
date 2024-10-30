@@ -1,0 +1,8 @@
+obj-y := \
+	metal_io.o \
+	metal_mutex.o \
+	metal_atomic.o \
+	rpmsg_virtio.o \
+	rpmsg.o \
+	virtio.o \
+	virtqueue.o

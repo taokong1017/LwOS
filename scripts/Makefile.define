@@ -15,7 +15,8 @@ CFLAGS += -g -Wall -Wunused-function -Wunused-variable -Wno-frame-address -fno-b
 
 INCLUDES := -I$(srctree)/sample/include \
 	-I$(srctree)/kernel/include \
-	-I$(srctree)
+	-I$(srctree) \
+	-I$(srctree)/components/rpmsg/include
 
 ifeq ($(CONFIG_BIG_ENDIANE),y)
 	CFLAGS += -mbig-endian

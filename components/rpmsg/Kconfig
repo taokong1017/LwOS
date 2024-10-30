@@ -1,0 +1,7 @@
+menu "RPMSG"
+
+config CONFIG_RPMSG
+	bool "Kernel RPMSG"
+	default n
+
+endmenu
