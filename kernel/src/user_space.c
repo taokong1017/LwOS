@@ -90,3 +90,21 @@ errno_t user_msgq_receive(msgq_id_t id, void *msg, uint32_t *size,
 errno_t user_msgq_destroy(msgq_id_t id) {
 	return arch_syscall_invoke1((uintptr_t)id, SYSCALL_MSGQ_DESTROY);
 }
+
+errno_t user_sem_create(const char *name, uint32_t count, uint32_t max_count,
+						sem_id_t *id) {
+	return arch_syscall_invoke4((uintptr_t)name, count, max_count,
+								(uintptr_t)id, SYSCALL_SEM_CREATE);
+}
+
+errno_t user_sem_take(sem_id_t id, uint64_t timeout) {
+	return arch_syscall_invoke2(id, timeout, SYSCALL_SEM_TAKE);
+}
+
+errno_t user_sem_give(sem_id_t id) {
+	return arch_syscall_invoke1(id, SYSCALL_SEM_GIVE);
+}
+
+errno_t user_sem_destroy(sem_id_t id) {
+	return arch_syscall_invoke1(id, SYSCALL_SEM_DESTROY);
+}

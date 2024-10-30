@@ -5,9 +5,10 @@
 #include <task.h>
 #include <percpu.h>
 #include <task_sched.h>
+#include <sync_exc.h>
 #include <irq.h>
 #include <msgq.h>
-#include <sync_exc.h>
+#include <sem.h>
 
 #define SYSCALL_TAG "SYSCALL"
 typedef uintptr_t (*syscall_handler_t)(uintptr_t arg1, uintptr_t arg2,
@@ -194,6 +195,7 @@ static uintptr_t syscall_task_sched_unlock(uintptr_t arg1, uintptr_t arg2,
 	(void)arg4;
 	(void)arg5;
 	(void)arg6;
+	(void)regs;
 
 	arch_irq_unlock_with_regs(regs);
 
@@ -206,6 +208,7 @@ static uintptr_t syscall_msgq_create(uintptr_t arg1, uintptr_t arg2,
 									 struct arch_regs *regs) {
 	(void)arg5;
 	(void)arg6;
+	(void)regs;
 	const char *name = (const char *)arg1;
 	uint32_t max_msgs = (uint32_t)arg2;
 	uint32_t msg_size = (uint32_t)arg3;
@@ -220,6 +223,7 @@ static uintptr_t syscall_msgq_send(uintptr_t arg1, uintptr_t arg2,
 								   struct arch_regs *regs) {
 	(void)arg5;
 	(void)arg6;
+	(void)regs;
 	msgq_id_t id = (msgq_id_t)arg1;
 	const void *msg = (const void *)arg2;
 	uint32_t size = (uint32_t)arg3;
@@ -242,6 +246,7 @@ static uintptr_t syscall_msgq_receive(uintptr_t arg1, uintptr_t arg2,
 									  struct arch_regs *regs) {
 	(void)arg5;
 	(void)arg6;
+	(void)regs;
 	msgq_id_t id = (msgq_id_t)arg1;
 	void *msg = (void *)arg2;
 	uint32_t *size = (uint32_t *)arg3;
@@ -267,9 +272,70 @@ static uintptr_t syscall_msgq_destroy(uintptr_t arg1, uintptr_t arg2,
 	(void)arg4;
 	(void)arg5;
 	(void)arg6;
+	(void)regs;
 	msgq_id_t id = (msgq_id_t)arg1;
 
 	return msgq_destroy(id);
+}
+
+static uintptr_t syscall_sem_create(uintptr_t arg1, uintptr_t arg2,
+									uintptr_t arg3, uintptr_t arg4,
+									uintptr_t arg5, uintptr_t arg6,
+									struct arch_regs *regs) {
+	(void)arg5;
+	(void)arg6;
+	(void)regs;
+	const char *name = (const char *)arg1;
+	uint32_t init_count = (uint32_t)arg3;
+	uint32_t max_count = (uint32_t)arg2;
+	sem_id_t *id = (sem_id_t *)arg4;
+
+	return sem_create(name, init_count, max_count, id);
+}
+
+static uintptr_t syscall_sem_take(uintptr_t arg1, uintptr_t arg2,
+								  uintptr_t arg3, uintptr_t arg4,
+								  uintptr_t arg5, uintptr_t arg6,
+								  struct arch_regs *regs) {
+	(void)arg3;
+	(void)arg4;
+	(void)arg5;
+	(void)arg6;
+	(void)regs;
+	sem_id_t id = (sem_id_t)arg1;
+	uint64_t timeout = (uint64_t)arg2;
+
+	return sem_take(id, timeout);
+}
+
+static uintptr_t syscall_sem_give(uintptr_t arg1, uintptr_t arg2,
+								  uintptr_t arg3, uintptr_t arg4,
+								  uintptr_t arg5, uintptr_t arg6,
+								  struct arch_regs *regs) {
+	(void)arg2;
+	(void)arg3;
+	(void)arg4;
+	(void)arg5;
+	(void)arg6;
+	(void)regs;
+	sem_id_t id = (sem_id_t)arg1;
+
+	return sem_give(id);
+}
+
+static uintptr_t syscall_sem_destroy(uintptr_t arg1, uintptr_t arg2,
+									 uintptr_t arg3, uintptr_t arg4,
+									 uintptr_t arg5, uintptr_t arg6,
+									 struct arch_regs *regs) {
+	(void)arg2;
+	(void)arg3;
+	(void)arg4;
+	(void)arg5;
+	(void)arg6;
+	(void)regs;
+	sem_id_t id = (sem_id_t)arg1;
+
+	return sem_destroy(id);
 }
 
 static uintptr_t default_syscall_handler(uintptr_t arg1, uintptr_t arg2,
@@ -282,6 +348,7 @@ static uintptr_t default_syscall_handler(uintptr_t arg1, uintptr_t arg2,
 	(void)arg4;
 	(void)arg5;
 	(void)arg6;
+	(void)regs;
 
 	log_info(SYSCALL_TAG, "enter default syscall handler\n");
 	forever();
@@ -307,6 +374,10 @@ const syscall_handler_t syscall_table[SYSCALL_ID_LIMIT] = {
 	[SYSCALL_MSGQ_SEND] = syscall_msgq_send,
 	[SYSCALL_MSGQ_RECV] = syscall_msgq_receive,
 	[SYSCALL_MSGQ_DESTROY] = syscall_msgq_destroy,
+	[SYSCALL_SEM_CREATE] = syscall_sem_create,
+	[SYSCALL_SEM_TAKE] = syscall_sem_take,
+	[SYSCALL_SEM_GIVE] = syscall_sem_give,
+	[SYSCALL_SEM_DESTROY] = syscall_sem_destroy,
 };
 
 void syscall_dispatch(struct arch_regs *regs) {

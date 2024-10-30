@@ -8,6 +8,7 @@
 #include <app_mem_domain.h>
 #include <task.h>
 #include <msgq.h>
+#include <sem.h>
 
 #ifdef CONFIG_USER_SPACE
 
@@ -32,7 +33,7 @@ errno_t user_task_self_id(task_id_t *task_id);
 /* user task sched module */
 errno_t user_task_sched_unlock();
 
-/* user msgq module */
+/* user message queue module */
 errno_t user_msgq_create(const char *name, uint32_t max_msgs, uint32_t msg_size,
 						 msgq_id_t *id);
 errno_t user_msgq_send(msgq_id_t id, const void *msg, uint32_t size,
@@ -40,6 +41,13 @@ errno_t user_msgq_send(msgq_id_t id, const void *msg, uint32_t size,
 errno_t user_msgq_receive(msgq_id_t id, void *msg, uint32_t *size,
 						  uint64_t timeout);
 errno_t user_msgq_destroy(msgq_id_t id);
+
+/* user semaphore module */
+errno_t user_sem_create(const char *name, uint32_t count, uint32_t max_count,
+						sem_id_t *id);
+errno_t user_sem_take(sem_id_t id, uint64_t timeout);
+errno_t user_sem_give(sem_id_t id);
+errno_t user_sem_destroy(sem_id_t id);
 
 #endif
 #endif
