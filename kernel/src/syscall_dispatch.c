@@ -9,6 +9,7 @@
 #include <irq.h>
 #include <msgq.h>
 #include <sem.h>
+#include <mutex.h>
 
 #define SYSCALL_TAG "SYSCALL"
 typedef uintptr_t (*syscall_handler_t)(uintptr_t arg1, uintptr_t arg2,
@@ -338,6 +339,66 @@ static uintptr_t syscall_sem_destroy(uintptr_t arg1, uintptr_t arg2,
 	return sem_destroy(id);
 }
 
+static uintptr_t syscall_mutex_create(uintptr_t arg1, uintptr_t arg2,
+									  uintptr_t arg3, uintptr_t arg4,
+									  uintptr_t arg5, uintptr_t arg6,
+									  struct arch_regs *regs) {
+	(void)arg3;
+	(void)arg4;
+	(void)arg5;
+	(void)arg6;
+	(void)regs;
+	const char *name = (const char *)arg1;
+	mutex_id_t *id = (mutex_id_t *)arg2;
+
+	return mutex_create(name, id);
+}
+
+static uintptr_t syscall_mutex_take(uintptr_t arg1, uintptr_t arg2,
+									uintptr_t arg3, uintptr_t arg4,
+									uintptr_t arg5, uintptr_t arg6,
+									struct arch_regs *regs) {
+	(void)arg3;
+	(void)arg4;
+	(void)arg5;
+	(void)arg6;
+	(void)regs;
+	mutex_id_t id = (mutex_id_t)arg1;
+	uint32_t timeout = (uint32_t)arg2;
+
+	return mutex_take(id, timeout);
+}
+
+static uintptr_t syscall_mutex_give(uintptr_t arg1, uintptr_t arg2,
+									uintptr_t arg3, uintptr_t arg4,
+									uintptr_t arg5, uintptr_t arg6,
+									struct arch_regs *regs) {
+	(void)arg2;
+	(void)arg3;
+	(void)arg4;
+	(void)arg5;
+	(void)arg6;
+	(void)regs;
+	mutex_id_t id = (mutex_id_t)arg1;
+
+	return mutex_give(id);
+}
+
+static uintptr_t syscall_mutex_destroy(uintptr_t arg1, uintptr_t arg2,
+									   uintptr_t arg3, uintptr_t arg4,
+									   uintptr_t arg5, uintptr_t arg6,
+									   struct arch_regs *regs) {
+	(void)arg2;
+	(void)arg3;
+	(void)arg4;
+	(void)arg5;
+	(void)arg6;
+	(void)regs;
+	mutex_id_t id = (mutex_id_t)arg1;
+
+	return mutex_destroy(id);
+}
+
 static uintptr_t default_syscall_handler(uintptr_t arg1, uintptr_t arg2,
 										 uintptr_t arg3, uintptr_t arg4,
 										 uintptr_t arg5, uintptr_t arg6,
@@ -378,6 +439,10 @@ const syscall_handler_t syscall_table[SYSCALL_ID_LIMIT] = {
 	[SYSCALL_SEM_TAKE] = syscall_sem_take,
 	[SYSCALL_SEM_GIVE] = syscall_sem_give,
 	[SYSCALL_SEM_DESTROY] = syscall_sem_destroy,
+	[SYSCALL_MUTEX_CREATE] = syscall_mutex_create,
+	[SYSCALL_MUTEX_TAKE] = syscall_mutex_take,
+	[SYSCALL_MUTEX_GIVE] = syscall_mutex_give,
+	[SYSCALL_MUTEX_DESTROY] = syscall_mutex_destroy,
 };
 
 void syscall_dispatch(struct arch_regs *regs) {

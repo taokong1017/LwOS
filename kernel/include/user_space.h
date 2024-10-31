@@ -9,6 +9,7 @@
 #include <task.h>
 #include <msgq.h>
 #include <sem.h>
+#include <mutex.h>
 
 #ifdef CONFIG_USER_SPACE
 
@@ -48,6 +49,12 @@ errno_t user_sem_create(const char *name, uint32_t count, uint32_t max_count,
 errno_t user_sem_take(sem_id_t id, uint64_t timeout);
 errno_t user_sem_give(sem_id_t id);
 errno_t user_sem_destroy(sem_id_t id);
+
+/* user mutex module */
+errno_t user_mutex_create(const char *name, mutex_id_t *id);
+errno_t user_mutex_take(mutex_id_t id, uint32_t timeout);
+errno_t user_mutex_give(mutex_id_t id);
+errno_t user_mutex_destroy(mutex_id_t id);
 
 #endif
 #endif

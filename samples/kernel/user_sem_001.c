@@ -57,14 +57,14 @@ static void user_task_entry(void *arg0, void *arg1, void *arg2, void *arg3) {
 					&user_sem_id);
 
 	/* Create and start task A */
-	user_task_create(&task_a_id, TASK_A_NAME, task_a_entry, user_sem_id, NULL,
+	user_task_create(&task_a_id, TASK_A_NAME, task_a_entry, (void *)user_sem_id, NULL,
 					 NULL, NULL, &task_a, &task_a_stack, TASK_STACK_SIZE,
 					 TASK_FLAG_USER | TASK_FLAG_INHERIT_PERM);
 	user_task_priority_set(task_a_id, TASK_PRIORITY_HIGHEST - 2);
 	user_task_start(task_a_id);
 
 	/* Create and start task B */
-	user_task_create(&task_b_id, TASK_B_NAME, task_b_entry, user_sem_id, NULL,
+	user_task_create(&task_b_id, TASK_B_NAME, task_b_entry, (void *)user_sem_id, NULL,
 					 NULL, NULL, &task_b, &task_b_stack, TASK_STACK_SIZE,
 					 TASK_FLAG_USER | TASK_FLAG_INHERIT_PERM);
 	user_task_priority_set(task_b_id, TASK_PRIORITY_HIGHEST - 1);

@@ -33,6 +33,7 @@
 #define ROUNDUP_SIZE(_r) (((_r) + MEM_ALIGN) & ~MEM_ALIGN)
 #define ROUNDDOWN_SIZE(_r) ((_r) & ~MEM_ALIGN)
 #define ROUNDUP(_x, _v) ((((~(_x)) + 1) & ((_v)-1)) + (_x))
+extern errno_t mutex_init(struct mutex *mutex, const char *name);
 
 struct free_ptr {
 	struct bhdr *prev;

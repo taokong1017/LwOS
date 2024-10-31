@@ -108,3 +108,20 @@ errno_t user_sem_give(sem_id_t id) {
 errno_t user_sem_destroy(sem_id_t id) {
 	return arch_syscall_invoke1(id, SYSCALL_SEM_DESTROY);
 }
+
+errno_t user_mutex_create(const char *name, mutex_id_t *id) {
+	return arch_syscall_invoke2((uintptr_t)name, (uintptr_t)id,
+								SYSCALL_MUTEX_CREATE);
+}
+
+errno_t user_mutex_take(mutex_id_t id, uint32_t timeout) {
+	return arch_syscall_invoke2(id, timeout, SYSCALL_MUTEX_TAKE);
+}
+
+errno_t user_mutex_give(mutex_id_t id) {
+	return arch_syscall_invoke1(id, SYSCALL_MUTEX_GIVE);
+}
+
+errno_t user_mutex_destroy(mutex_id_t id) {
+	return arch_syscall_invoke1(id, SYSCALL_MUTEX_DESTROY);
+}
