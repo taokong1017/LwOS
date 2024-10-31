@@ -286,8 +286,8 @@ static uintptr_t syscall_sem_create(uintptr_t arg1, uintptr_t arg2,
 	(void)arg6;
 	(void)regs;
 	const char *name = (const char *)arg1;
-	uint32_t init_count = (uint32_t)arg3;
-	uint32_t max_count = (uint32_t)arg2;
+	uint32_t init_count = (uint32_t)arg2;
+	uint32_t max_count = (uint32_t)arg3;
 	sem_id_t *id = (sem_id_t *)arg4;
 
 	return sem_create(name, init_count, max_count, id);

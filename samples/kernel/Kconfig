@@ -60,4 +60,9 @@ config CONFIG_SEM_001
 	depends on !CONFIG_USER_SPACE
 	default n
 
+config CONFIG_USER_SEM_001
+	bool "User SEM 001"
+	depends on CONFIG_USER_SPACE
+	default n
+
 endmenu
