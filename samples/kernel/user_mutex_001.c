@@ -33,7 +33,7 @@ static void task_a_entry(void *arg0, void *arg1, void *arg2, void *arg3) {
 	(void)arg1;
 	(void)arg2;
 	(void)arg3;
-	mutex_id_t mutex_id = (sem_id_t)arg0;
+	mutex_id_t mutex_id = (mutex_id_t)arg0;
 
 	forever() {
 		user_mutex_take(mutex_id, MUTEX_WAIT_FOREVER);
@@ -47,7 +47,7 @@ static void task_b_entry(void *arg0, void *arg1, void *arg2, void *arg3) {
 	(void)arg1;
 	(void)arg2;
 	(void)arg3;
-	mutex_id_t mutex_id = (sem_id_t)arg0;
+	mutex_id_t mutex_id = (mutex_id_t)arg0;
 
 	forever() {
 		user_mutex_take(mutex_id, MUTEX_WAIT_FOREVER);
