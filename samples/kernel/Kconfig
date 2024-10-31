@@ -55,6 +55,11 @@ config CONFIG_MUTEX_001
 	depends on !CONFIG_USER_SPACE
 	default n
 
+config CONFIG_USER_MUTEX_001
+	bool "User MUTEX 001"
+	depends on CONFIG_USER_SPACE
+	default n
+
 config CONFIG_SEM_001
 	bool "Kernel SEM 001"
 	depends on !CONFIG_USER_SPACE
