@@ -76,7 +76,6 @@ struct arch_task_context {
 #ifdef CONFIG_FPU_ENABLE
 	struct arch_fp_context fp_context;
 #endif
-	struct mmu_pgtable *pgtable;
 };
 
 typedef struct arch_task_context arch_task_context_t;

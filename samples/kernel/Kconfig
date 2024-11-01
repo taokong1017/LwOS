@@ -35,6 +35,13 @@ config CONFIG_USER_TASK_002
 	depends on CONFIG_USER_SPACE
 	default n
 
+config CONFIG_USER_TASK_003
+	bool "User TASK 003"
+	depends on CONFIG_USER_SPACE
+	default n
+	help
+		These are test tasks for two user spaces.
+
 config CONFIG_TIMER_001
 	bool "Kernel Timer 001"
 	depends on !CONFIG_USER_SPACE

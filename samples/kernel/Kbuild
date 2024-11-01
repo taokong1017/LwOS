@@ -9,6 +9,7 @@ obj-$(CONFIG_MUTEX_001) := mutex_001.o
 obj-$(CONFIG_SEM_001) := sem_001.o
 obj-$(CONFIG_USER_TASK_001) := user_task_001.o
 obj-$(CONFIG_USER_TASK_002) := user_task_002.o
+obj-$(CONFIG_USER_TASK_003) := user_task_003.o
 obj-$(CONFIG_USER_MSGQ_001) := user_msgq_001.o
 obj-$(CONFIG_USER_SEM_001) := user_sem_001.o
 obj-$(CONFIG_USER_MUTEX_001) := user_mutex_001.o
