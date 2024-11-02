@@ -135,7 +135,13 @@ void sched_spin_unlock(uint32_t key) {
 	spin_lock_restore(&sched_spinlocker, key);
 }
 
-void sched_spin_lock_dump() { spin_lock_dump(&sched_spinlocker); }
+void sched_spin_lock_dump() {
+#ifdef CONFIG_SPIN_LOCK_TRACE
+	spin_lock_dump(&sched_spinlocker);
+#else
+	log_info(TASK_SCHED_TAG, "spin lock trace is not enabled\n");
+#endif
+}
 
 void sched_ready_queue_remove(uint32_t cpu_id, struct task *task) {
 	prio_mq_remove(&percpu_get(cpu_id)->ready_queue.run_queue, task);

@@ -69,4 +69,10 @@ config CONFIG_INTERRUPT_STACK_SIZE
 
 endmenu
 
+config CONFIG_SPIN_LOCK_TRACE
+	bool "Enable Spin Lock Trace"
+	default n
+	help
+		This option enables to trace the spin lock. It's useful when debugging dead spin lock.
+
 endmenu
