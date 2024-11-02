@@ -26,6 +26,10 @@ typedef uint64_t __attribute__((__may_alias__)) __u64_alias_t;
 		}                                                                      \
 	} while (0)
 
+#define build_assert(expr)                                                     \
+	enum { __build_array_num = (!!expr) ? 1 : -1 };                            \
+	typedef char __build_array[__build_array_num] __attribute__((unused));
+
 static inline void __read_once_size(const volatile void *p, void *res,
 									int size) {
 	switch (size) {
