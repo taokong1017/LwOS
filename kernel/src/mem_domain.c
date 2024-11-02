@@ -5,6 +5,7 @@
 #include <log.h>
 #include <spin_lock.h>
 #include <string.h>
+#include <operate_regs.h>
 
 #define MEM_DOMAIN_TAG "MEM_DOMAIN"
 #define MEM_KERNEL_DOMAIN "Kernel_Domain"
@@ -271,3 +272,14 @@ phys_addr_t page_table_page_alloc(size_t size) {
 
 	return (phys_addr_t)start_ptr;
 }
+
+ttbr_t mem_domain_save() {
+	ttbr_t ttbr0_old = read_ttbr0_el1();
+	ttbr_t ttbr0_new = kernel_mem_domain_page_table_get().ttbr0;
+
+	write_ttbr0_el1(ttbr0_new);
+
+	return ttbr0_old;
+}
+
+void mem_domain_restore(ttbr_t ttbr) { write_ttbr0_el1(ttbr); }

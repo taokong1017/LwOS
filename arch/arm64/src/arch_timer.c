@@ -5,6 +5,7 @@
 #include <tick.h>
 #include <menuconfig.h>
 #include <compiler.h>
+#include <mem_domain.h>
 
 #define ARCH_TIMER_TAG "ARCH_TIMER"
 #define CYC_PER_TICK (arch_timer_freq_get() / CONFIG_TICKS_PER_SECOND)
@@ -48,10 +49,12 @@ void arch_timer_set_compare(uint64_t val) { write_cntv_cval_el0(val); }
 void arch_timer_compare_isr(const void *arg) {
 	(void)arg;
 
+	ttbr_t ttbr = mem_domain_save();
 	tick_announce();
 	arch_timer_set_compare(arch_timer_count() + CYC_PER_TICK);
 	arch_timer_enable(true);
 	arch_timer_set_irq_mask(false);
+	mem_domain_restore(ttbr);
 
 	return;
 }

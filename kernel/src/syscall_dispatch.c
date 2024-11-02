@@ -10,6 +10,7 @@
 #include <msgq.h>
 #include <sem.h>
 #include <mutex.h>
+#include <mem_domain.h>
 
 #define SYSCALL_TAG "SYSCALL"
 typedef uintptr_t (*syscall_handler_t)(uintptr_t arg1, uintptr_t arg2,
@@ -196,7 +197,6 @@ static uintptr_t syscall_task_sched_unlock(uintptr_t arg1, uintptr_t arg2,
 	(void)arg4;
 	(void)arg5;
 	(void)arg6;
-	(void)regs;
 
 	arch_irq_unlock_with_regs(regs);
 
@@ -454,6 +454,7 @@ void syscall_dispatch(struct arch_regs *regs) {
 	uintptr_t arg5 = regs->gprs[4];
 	uintptr_t arg6 = regs->gprs[5];
 	uint32_t syscall_id = regs->gprs[8];
+	ttbr_t ttbr = INVALID_TTBR;
 
 	if (syscall_id >= SYSCALL_ID_LIMIT) {
 		regs->gprs[0] = ERRNO_SYSCALL_INVALID_ID;
@@ -463,8 +464,11 @@ void syscall_dispatch(struct arch_regs *regs) {
 	if (syscall_table[syscall_id] == NULL) {
 		do_syscall = default_syscall_handler;
 	}
+
 	do_syscall = syscall_table[syscall_id];
+	ttbr = mem_domain_save();
 	regs->gprs[0] = do_syscall(arg1, arg2, arg3, arg4, arg5, arg6, regs);
+	mem_domain_restore(ttbr);
 
 	return;
 }
