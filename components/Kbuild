@@ -1,1 +1,2 @@
 subdir-$(CONFIG_RPMSG) += rpmsg
+subdir-$(CONFIG_SHELL) += shell

@@ -24,5 +24,5 @@ endmenu
 
 source "arch/Kconfig"
 source "kernel/Kconfig"
-source "samples/Kconfig"
 source "components/Kconfig"
+source "samples/Kconfig"

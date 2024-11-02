@@ -1,5 +1,6 @@
 menu "Components"
 
 source "components/rpmsg/Kconfig"
+source "components/shell/Kconfig"
 
 endmenu
