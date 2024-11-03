@@ -51,6 +51,22 @@ SECTIONS
 		__data_end = .;		/* define a global symbol at data end */
 	}
 
+	.shell ALIGN(0x1000):
+	{
+		__shell_cmd_start = .;	/* define shell command start */
+
+		__shell_root_start = .;
+		*(.shell.root*)			/* shell root command section */
+		__shell_root_end = .;
+
+		__shell_submodule_start = .;
+		*(.shell.submodule*)	/* .shell submodule section */
+		__shell_submodule_end = .;
+
+		. = ALIGN(0x1000);
+		__shell_cmd_end = .;	/* define shell command end */
+	}
+
 	. = ALIGN(0x1000);
 	__page_table_pool_start = .;
 	. += 0x400000;
