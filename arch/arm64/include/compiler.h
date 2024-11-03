@@ -26,9 +26,21 @@ typedef uint64_t __attribute__((__may_alias__)) __u64_alias_t;
 		}                                                                      \
 	} while (0)
 
-#define build_assert(expr)                                                     \
-	enum { __build_array_num = (!!expr) ? 1 : -1 };                            \
-	typedef char __build_array[__build_array_num] __attribute__((unused));
+#ifdef __COUNTER__
+#define static_assert(expr, msg)                                               \
+	do {                                                                       \
+		if (!(expr)) {                                                         \
+			_Static_assert(expr, #msg);                                        \
+		}                                                                      \
+	} while (0)
+#else
+#define static_assert(expr, msg)                                               \
+	do {                                                                       \
+		typedef char assert_t[(!!(expr)) ? 1 : -1];                            \
+		assert_t __##__FILE__##__LINE__##array;                                \
+		(void)__##__FILE__##__LINE__##array;                                   \
+	} while (0)
+#endif
 
 static inline void __read_once_size(const volatile void *p, void *res,
 									int size) {
