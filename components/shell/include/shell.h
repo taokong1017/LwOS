@@ -15,45 +15,37 @@
 	declare_align(type, type_align(type)) varname section_used()               \
 		section(secname)
 
-#define shell_cmd_init(expr, symbol, sub_cmd, help_info, cmd_handler, mand,    \
-					   opt)                                                    \
+#define shell_cmd_init(_expr, _syntax, _subcmd, _help, _handler, _mand, _opt)  \
 	{                                                                          \
-		.syntax = ((expr) ? (const char *)(#symbol) : ""),                     \
-		.help = ((expr) ? (const char *)help_info : NULL),                     \
-		.subcmd = ((const struct shell_entry *)((expr) ? sub_cmd : NULL)),     \
-		.handler = ((shell_cmd_handler)((expr) ? cmd_handler : NULL)),         \
-		.args = {                                                              \
-			.mandatory = (expr) ? mand : 0,                                    \
-			.optional = (expr) ? opt : 0                                       \
+		.syntax = ((_expr) ? (const char *)(#_syntax) : ""),                   \
+		.help = ((_expr) ? (const char *)_help : NULL),                        \
+		.subcmd = ((const struct shell_entry *)((_expr) ? _subcmd : NULL)),    \
+		.handler = ((shell_cmd_handler)((_expr) ? _handler : NULL)), .args = { \
+			.mandatory = (_expr) ? _mand : 0,                                  \
+			.optional = (_expr) ? _opt : 0                                     \
 		}                                                                      \
 	}
 
 #define shell_cmd_register_with_args(syntax, subcmd, help, handler, mandatory, \
 									 optional)                                 \
-	{                                                                          \
-		static const struct shell_entry shell_entry_##syntax = shell_cmd_init( \
-			true, syntax, subcmd, help, handler, mandatory, optional);         \
-		static const shell_iterable_section(struct shell_cmd_entry,            \
-											shell_cmd_##syntax,                \
-											shell_root_section) = {            \
-			.entry = &shell_entry_##syntax,                                    \
-		};                                                                     \
-	}
+	static const struct shell_entry shell_entry_##syntax = shell_cmd_init(     \
+		true, syntax, subcmd, help, handler, mandatory, optional);             \
+	static const shell_iterable_section(                                       \
+		struct shell_cmd_entry, shell_cmd_##syntax, shell_root_section) = {    \
+		.entry = &shell_entry_##syntax,                                        \
+	};
 
 #define shell_cmd_register(syntax, subcmd, help, handler)                      \
 	shell_cmd_register_with_args(syntax, subcmd, help, handler, 0, 0)
 
 #define shell_cmd_cond_register_with_args(cond, syntax, subcmd, help, handler, \
 										  mandatory, optional)                 \
-	{                                                                          \
-		static const struct shell_entry shell_entry_##syntax = shell_cmd_init( \
-			cond, syntax, subcmd, help, handler, mandatory, optional);         \
-		static const shell_iterable_section(struct shell_cmd_entry,            \
-											shell_cmd_##syntax,                \
-											shell_root_section) = {            \
-			.entry = &shell_entry_##syntax,                                    \
-		};                                                                     \
-	}
+	static const struct shell_entry shell_entry_##syntax = shell_cmd_init(     \
+		cond, syntax, subcmd, help, handler, mandatory, optional);             \
+	static const shell_iterable_section(                                       \
+		struct shell_cmd_entry, shell_cmd_##syntax, shell_root_section) = {    \
+		.entry = &shell_entry_##syntax,                                        \
+	};
 
 #define shell_cmd_cond_register(cond, syntax, subcmd, help, handler)           \
 	shell_cmd_cond_register_with_args(cond, syntax, subcmd, help, handler, 0, 0)
