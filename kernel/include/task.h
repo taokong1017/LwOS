@@ -120,7 +120,7 @@ struct task {
 	struct mem_domain *mem_domain;
 	bool is_idle_task;
 	bool is_timeout;
-};
+} ALIGNED(8);
 
 errno_t task_create(task_id_t *task_id, const char *name, task_entry_func entry,
 					void *arg0, void *arg1, void *arg2, void *arg3,
