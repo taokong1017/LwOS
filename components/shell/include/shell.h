@@ -27,14 +27,6 @@
 		}                                                                      \
 	}
 
-#define shell_cmd_arg(syntax, subcmd, help, handler, mand, opt)                \
-	shell_cmd_init(true, syntax, subcmd, help, handler, mand, opt)
-
-#define shell_cmd_set_end                                                      \
-	{                                                                          \
-		NULL, NULL, NULL, NULL, { 0, 0 }                                       \
-	}
-
 #define shell_cmd_register_with_args(syntax, subcmd, help, handler, mandatory, \
 									 optional)                                 \
 	static const struct shell_entry shell_entry_##syntax = shell_cmd_init(     \
@@ -52,6 +44,14 @@
 	static const struct shell_entry shell_##name[] = {__VA_ARGS__};            \
 	static const struct shell_cmd_entry name section(                          \
 		shell_sub_cmd_section) = {.entry = shell_##name};
+
+#define shell_subcmd_with_arg(syntax, subcmd, help, handler, mand, opt)        \
+	shell_cmd_init(true, syntax, subcmd, help, handler, mand, opt)
+
+#define shell_subcmd_set_end                                                   \
+	{                                                                          \
+		NULL, NULL, NULL, NULL, { 0, 0 }                                       \
+	}
 
 struct shell {
 	char prompt[SHELL_NAME_LEN];
