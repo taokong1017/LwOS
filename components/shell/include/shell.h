@@ -3,6 +3,7 @@
 
 #include <types.h>
 #include <general.h>
+#include <shell_history.h>
 
 #define SHELL_NAME_LEN 32
 
@@ -53,10 +54,7 @@
 		NULL, NULL, NULL, NULL, { 0, 0 }                                       \
 	}
 
-struct shell {
-	char prompt[SHELL_NAME_LEN];
-};
-
+struct shell;
 typedef int (*shell_cmd_handler)(const struct shell *shell, int argc,
 								 char *argv[]);
 
@@ -75,6 +73,21 @@ struct shell_entry {
 
 struct shell_cmd_entry {
 	const struct shell_entry *entry;
+};
+
+struct shell_transport {};
+
+struct shell_context {
+	char *cur_prompt;
+};
+
+struct shell {
+	char prompt[SHELL_NAME_LEN];
+
+	const struct shell_transport *transport;
+	struct shell_context *ctx;
+
+	struct shell_history *history;
 };
 
 #endif
