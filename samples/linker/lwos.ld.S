@@ -55,13 +55,13 @@ SECTIONS
 	{
 		__shell_cmd_start = .;	/* define shell command start */
 
-		__shell_root_start = .;
-		*(.shell.root*)			/* shell root command section */
-		__shell_root_end = .;
+		__shell_root_cmd_start = .;
+		*(.shell.root.cmd*)		/* shell root command section */
+		__shell_root_cmd_end = .;
 
-		__shell_submodule_start = .;
-		*(.shell.submodule*)	/* .shell submodule section */
-		__shell_submodule_end = .;
+		__shell_sub_cmd_start = .;
+		*(.shell.sub.cmd*)		/* .shell sub-command section */
+		__shell_sub_cmd_end = .;
 
 		. = ALIGN(0x1000);
 		__shell_cmd_end = .;	/* define shell command end */

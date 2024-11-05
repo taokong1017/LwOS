@@ -6,10 +6,11 @@
 
 #define SHELL_NAME_LEN 32
 
-#define shell_root_section ".shell.root"
+#define shell_root_cmd_section ".shell.root.cmd"
+#define shell_sub_cmd_section ".shell.sub.cmd"
 #define declare_align(type, align) type __attribute__((aligned(align)))
 #define section_used() __attribute__((__used__))
-#define section(segment) __attribute__((section(#segment)))
+#define section(segment) __attribute__((section(segment)))
 #define type_align(type) __alignof__(type)
 #define shell_iterable_section(type, varname, secname)                         \
 	declare_align(type, type_align(type)) varname section_used()               \
@@ -26,29 +27,31 @@
 		}                                                                      \
 	}
 
+#define shell_cmd_arg(syntax, subcmd, help, handler, mand, opt)                \
+	shell_cmd_init(true, syntax, subcmd, help, handler, mand, opt)
+
+#define shell_cmd_set_end                                                      \
+	{                                                                          \
+		NULL, NULL, NULL, NULL, { 0, 0 }                                       \
+	}
+
 #define shell_cmd_register_with_args(syntax, subcmd, help, handler, mandatory, \
 									 optional)                                 \
 	static const struct shell_entry shell_entry_##syntax = shell_cmd_init(     \
 		true, syntax, subcmd, help, handler, mandatory, optional);             \
-	static const shell_iterable_section(                                       \
-		struct shell_cmd_entry, shell_cmd_##syntax, shell_root_section) = {    \
+	static const shell_iterable_section(struct shell_cmd_entry,                \
+										shell_cmd_##syntax,                    \
+										shell_root_cmd_section) = {            \
 		.entry = &shell_entry_##syntax,                                        \
 	};
 
 #define shell_cmd_register(syntax, subcmd, help, handler)                      \
 	shell_cmd_register_with_args(syntax, subcmd, help, handler, 0, 0)
 
-#define shell_cmd_cond_register_with_args(cond, syntax, subcmd, help, handler, \
-										  mandatory, optional)                 \
-	static const struct shell_entry shell_entry_##syntax = shell_cmd_init(     \
-		cond, syntax, subcmd, help, handler, mandatory, optional);             \
-	static const shell_iterable_section(                                       \
-		struct shell_cmd_entry, shell_cmd_##syntax, shell_root_section) = {    \
-		.entry = &shell_entry_##syntax,                                        \
-	};
-
-#define shell_cmd_cond_register(cond, syntax, subcmd, help, handler)           \
-	shell_cmd_cond_register_with_args(cond, syntax, subcmd, help, handler, 0, 0)
+#define shell_subcmd_set_create(name, ...)                                     \
+	static const struct shell_entry shell_##name[] = {__VA_ARGS__};            \
+	static const struct shell_cmd_entry name section(                          \
+		shell_sub_cmd_section) = {.entry = shell_##name};
 
 struct shell {
 	char prompt[SHELL_NAME_LEN];
