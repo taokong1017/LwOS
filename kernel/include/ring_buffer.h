@@ -24,9 +24,9 @@ void ring_buf_reset(struct ring_buffer *buf);
 
 /* obtain a ring buffer status */
 bool ring_buffer_is_empty(struct ring_buffer *buf);
-uint32_t ring_buffer_free_space_get(struct ring_buffer *buf);
+uint32_t ring_buffer_free_size_get(struct ring_buffer *buf);
 uint32_t ring_buffer_capacity_get(struct ring_buffer *buf);
-uint32_t ring_buffer_size_get(struct ring_buffer *buf);
+uint32_t ring_buffer_used_size_get(struct ring_buffer *buf);
 
 /* put data to a ring buffer */
 uint32_t ring_buffer_put_claim(struct ring_buffer *buf, uint8_t **data,

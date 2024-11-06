@@ -23,19 +23,19 @@ bool ring_buffer_is_empty(struct ring_buffer *buf) {
 	return buf->get_head == buf->put_tail;
 }
 
-uint32_t ring_buffer_free_space_get(struct ring_buffer *buf) {
+uint32_t ring_buffer_free_size_get(struct ring_buffer *buf) {
 	return buf->size - (buf->put_head - buf->get_tail);
 }
 
 uint32_t ring_buffer_capacity_get(struct ring_buffer *buf) { return buf->size; }
 
-uint32_t ring_buffer_size_get(struct ring_buffer *buf) {
+uint32_t ring_buffer_used_size_get(struct ring_buffer *buf) {
 	return buf->put_tail - buf->get_head;
 }
 
 uint32_t ring_buffer_put_claim(struct ring_buffer *buf, uint8_t **data,
 							   uint32_t size) {
-	uint32_t free_space = 0;
+	uint32_t free_size = 0;
 	uint32_t wrap_size = 0;
 	int32_t base = 0;
 
@@ -47,8 +47,8 @@ uint32_t ring_buffer_put_claim(struct ring_buffer *buf, uint8_t **data,
 	}
 	wrap_size = buf->size - wrap_size;
 
-	free_space = ring_buffer_free_space_get(buf);
-	size = min(size, free_space);
+	free_size = ring_buffer_free_size_get(buf);
+	size = min(size, free_size);
 	size = min(size, wrap_size);
 
 	*data = &buf->buffer[buf->put_head - base];
@@ -58,11 +58,11 @@ uint32_t ring_buffer_put_claim(struct ring_buffer *buf, uint8_t **data,
 }
 
 bool ring_buffer_put_finish(struct ring_buffer *buf, uint32_t size) {
-	uint32_t finish_space = 0;
+	uint32_t finish_size = 0;
 	uint32_t wrap_size = 0;
 
-	finish_space = buf->put_head - buf->put_tail;
-	if (size <= finish_space) {
+	finish_size = buf->put_head - buf->put_tail;
+	if (size <= finish_size) {
 		return false;
 	}
 
@@ -80,8 +80,8 @@ bool ring_buffer_put_finish(struct ring_buffer *buf, uint32_t size) {
 uint32_t ring_buffer_put(struct ring_buffer *buf, const uint8_t *data,
 						 uint32_t size) {
 	uint8_t *dst = NULL;
-	uint32_t partial_size = 0U;
-	uint32_t total_size = 0U;
+	uint32_t partial_size = 0;
+	uint32_t total_size = 0;
 	bool ret = false;
 
 	do {
@@ -100,8 +100,9 @@ uint32_t ring_buffer_put(struct ring_buffer *buf, const uint8_t *data,
 
 uint32_t ring_buffer_get_claim(struct ring_buffer *buf, uint8_t **data,
 							   uint32_t size) {
-	uint32_t available_size, wrap_size;
-	int32_t base;
+	uint32_t used_size = 0;
+	uint32_t wrap_size = 0;
+	int32_t base = 0;
 
 	base = buf->get_base;
 	wrap_size = buf->get_head - base;
@@ -112,8 +113,8 @@ uint32_t ring_buffer_get_claim(struct ring_buffer *buf, uint8_t **data,
 	}
 	wrap_size = buf->size - wrap_size;
 
-	available_size = ring_buffer_size_get(buf);
-	size = min(size, available_size);
+	used_size = ring_buffer_used_size_get(buf);
+	size = min(size, used_size);
 	size = min(size, wrap_size);
 
 	*data = &buf->buffer[buf->get_head - base];
@@ -123,10 +124,11 @@ uint32_t ring_buffer_get_claim(struct ring_buffer *buf, uint8_t **data,
 }
 
 bool ring_buffer_get_finish(struct ring_buffer *buf, uint32_t size) {
-	uint32_t finish_space, wrap_size;
+	uint32_t finish_size = 0;
+	uint32_t wrap_size = 0;
 
-	finish_space = buf->get_head - buf->get_tail;
-	if (size <= finish_space) {
+	finish_size = buf->get_head - buf->get_tail;
+	if (size <= finish_size) {
 		return false;
 	}
 
@@ -172,7 +174,7 @@ uint32_t ring_buffer_peek(struct ring_buffer *buf, uint8_t *data,
 	uint32_t total_size = 0U;
 	bool ret = false;
 
-	size = min(size, ring_buffer_size_get(buf));
+	size = min(size, ring_buffer_used_size_get(buf));
 
 	do {
 		partial_size = ring_buffer_get_claim(buf, &src, size);
