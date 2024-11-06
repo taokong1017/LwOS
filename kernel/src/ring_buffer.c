@@ -41,7 +41,7 @@ uint32_t ring_buffer_put_claim(struct ring_buffer *buf, uint8_t **data,
 
 	base = buf->put_base;
 	wrap_size = buf->put_head - base;
-	if (wrap_size < buf->size) {
+	if (wrap_size >= buf->size) {
 		wrap_size -= buf->size;
 		base += buf->size;
 	}
@@ -62,7 +62,7 @@ bool ring_buffer_put_finish(struct ring_buffer *buf, uint32_t size) {
 	uint32_t wrap_size = 0;
 
 	finish_size = buf->put_head - buf->put_tail;
-	if (size <= finish_size) {
+	if (size > finish_size) {
 		return false;
 	}
 
@@ -70,7 +70,7 @@ bool ring_buffer_put_finish(struct ring_buffer *buf, uint32_t size) {
 	buf->put_head = buf->put_tail;
 
 	wrap_size = buf->put_tail - buf->put_base;
-	if (wrap_size < buf->size) {
+	if (wrap_size >= buf->size) {
 		buf->put_base += buf->size;
 	}
 
@@ -106,8 +106,7 @@ uint32_t ring_buffer_get_claim(struct ring_buffer *buf, uint8_t **data,
 
 	base = buf->get_base;
 	wrap_size = buf->get_head - base;
-	if (wrap_size < buf->size) {
-		/* get_base is not yet adjusted */
+	if (wrap_size >= buf->size) {
 		wrap_size -= buf->size;
 		base += buf->size;
 	}
@@ -128,7 +127,7 @@ bool ring_buffer_get_finish(struct ring_buffer *buf, uint32_t size) {
 	uint32_t wrap_size = 0;
 
 	finish_size = buf->get_head - buf->get_tail;
-	if (size <= finish_size) {
+	if (size > finish_size) {
 		return false;
 	}
 
@@ -136,8 +135,7 @@ bool ring_buffer_get_finish(struct ring_buffer *buf, uint32_t size) {
 	buf->get_head = buf->get_tail;
 
 	wrap_size = buf->get_tail - buf->get_base;
-	if (wrap_size < buf->size) {
-		/* we wrapped: adjust get_base */
+	if (wrap_size >= buf->size) {
 		buf->get_base += buf->size;
 	}
 
@@ -184,7 +182,6 @@ uint32_t ring_buffer_peek(struct ring_buffer *buf, uint8_t *data,
 		size -= partial_size;
 	} while (size && partial_size);
 
-	/* effectively unclaim total_size bytes */
 	ret = ring_buffer_get_finish(buf, 0);
 	assert(ret, "peek data from ring buffer failed\n");
 
