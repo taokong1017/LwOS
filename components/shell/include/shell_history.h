@@ -1,6 +1,10 @@
 #ifndef __SHELL_HISTORY_H__
 #define __SHELL_HISTORY_H__
 
-struct shell_history {};
+#include <ring_buffer.h>
+
+struct shell_history {
+	struct ring_buffer ring_buf;
+};
 
 #endif

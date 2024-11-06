@@ -15,7 +15,8 @@ obj-y := string.o \
 	percpu.o \
 	kernel.o \
 	timer.o \
-	mem_domain.o
+	mem_domain.o \
+	ring_buffer.o
 
 obj-$(CONFIG_SMP) += \
 	smp.o
