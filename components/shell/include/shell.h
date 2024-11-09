@@ -4,6 +4,7 @@
 #include <types.h>
 #include <general.h>
 #include <shell_history.h>
+#include <shell_transport_opts.h>
 
 #define SHELL_NAME_LEN 32
 
@@ -75,7 +76,10 @@ struct shell_cmd_entry {
 	const struct shell_entry *entry;
 };
 
-struct shell_transport {};
+struct shell_transport {
+	struct shell_transport_ops *transport_ops;
+	void *transport_context;
+};
 
 struct shell_context {
 	char *cur_prompt;
@@ -84,8 +88,8 @@ struct shell_context {
 struct shell {
 	char prompt[SHELL_NAME_LEN];
 
-	const struct shell_transport *transport;
-	struct shell_context *ctx;
+	struct shell_transport *shell_transport;
+	struct shell_context *shell_context;
 
 	struct shell_history *history;
 };
