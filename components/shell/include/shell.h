@@ -5,9 +5,11 @@
 #include <general.h>
 #include <shell_history.h>
 #include <shell_transport_opts.h>
+#include <menuconfig.h>
+#include <task.h>
 
 #define SHELL_NAME_LEN 32
-
+#define SHELL_TASK_NAME "Shell_Root"
 #define shell_root_cmd_section ".shell.root.cmd"
 #define shell_sub_cmd_section ".shell.sub.cmd"
 #define declare_align(type, align) type __attribute__((aligned(align)))
@@ -55,6 +57,12 @@
 		NULL, NULL, NULL, NULL, { 0, 0 }                                       \
 	}
 
+enum shell_state {
+	SHELL_STATE_UNINITIALIZED,
+	SHELL_STATE_INITIALIZED,
+	SHELL_STATE_ACTIVE,
+};
+
 struct shell;
 typedef int (*shell_cmd_handler)(const struct shell *shell, int argc,
 								 char *argv[]);
@@ -83,6 +91,17 @@ struct shell_transport {
 
 struct shell_context {
 	char *cur_prompt;
+	enum shell_state state;
+
+	struct shell_entry active_cmd;
+	struct shell_entry *selected_cmd;
+
+	char cmd_buff[CONFIG_SHELL_CMD_BUFFER_SIZE];
+	uint32_t cmd_buffer_length;
+	uint32_t cmd_buffer_position;
+
+	char temp_buff[CONFIG_SHELL_CMD_BUFFER_SIZE];
+	uint16_t cmd_tmp_buff_len;
 };
 
 struct shell {
@@ -92,6 +111,8 @@ struct shell {
 	struct shell_context *shell_context;
 
 	struct shell_history *history;
+
+	task_id_t shell_task_id;
 };
 
 #endif
