@@ -7,6 +7,7 @@
 #include <shell_transport_opts.h>
 #include <menuconfig.h>
 #include <task.h>
+#include <shell_printf.h>
 
 #define SHELL_NAME_LEN 32
 #define SHELL_TASK_NAME "Shell_Root"
@@ -110,7 +111,8 @@ struct shell {
 	struct shell_transport *shell_transport;
 	struct shell_context *shell_context;
 
-	struct shell_history *history;
+	struct shell_history *shell_history;
+	struct shell_printf *shell_printf;
 
 	task_id_t shell_task_id;
 };
