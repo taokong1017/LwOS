@@ -117,4 +117,7 @@ struct shell {
 	task_id_t shell_task_id;
 };
 
+/* Shell interface */
+void shell_show(struct shell *shell, const char *format, ...);
+
 #endif
