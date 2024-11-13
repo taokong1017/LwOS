@@ -79,12 +79,14 @@ void shell_history_add(struct shell_history *history, const uint8_t *cmd_line,
 	}
 
 	do {
-		/* Rest the history ring buffer */
+		/* Reset the history ring buffer */
 		if (ring_buffer_is_empty(&history->ring_buf)) {
 			ring_buf_reset(&history->ring_buf);
 		}
 
-		/* Attempt to access the storage space for historical command */
+		/*
+		 * Attempt to access the free ring buffer space for history command item
+		 */
 		claim_len = ring_buffer_put_claim(&history->ring_buf,
 										  (uint8_t **)&h_item, total_len);
 		if (claim_len < total_len) {
