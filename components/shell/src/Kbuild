@@ -1,4 +1,5 @@
 obj-y := \
 	shell.o \
 	shell_printf.o \
-	shell_history.o
+	shell_history.o \
+	shell_help.o
