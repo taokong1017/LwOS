@@ -8,6 +8,8 @@
 #include <menuconfig.h>
 #include <task.h>
 #include <shell_printf.h>
+#include <shell_vt100.h>
+#include <shell_types.h>
 
 #define SHELL_NAME_LEN 32
 #define SHELL_TASK_NAME "Shell_Root"
@@ -58,6 +60,8 @@
 		NULL, NULL, NULL, NULL, { 0, 0 }                                       \
 	}
 
+#define SHELL_NORMAL SHELL_VT100_COLOR_DEFAULT
+
 enum shell_state {
 	SHELL_STATE_UNINITIALIZED,
 	SHELL_STATE_INITIALIZED,
@@ -97,6 +101,8 @@ struct shell_context {
 	struct shell_entry active_cmd;
 	struct shell_entry *selected_cmd;
 
+	struct shell_vt100_context vt100_context;
+
 	char cmd_buff[CONFIG_SHELL_CMD_BUFFER_SIZE];
 	uint32_t cmd_buffer_length;
 	uint32_t cmd_buffer_position;
@@ -119,5 +125,6 @@ struct shell {
 
 /* Shell interface */
 void shell_show(struct shell *shell, const char *format, ...);
-
+void shell_color_show(struct shell *shell, enum shell_vt100_color color,
+					  const char *format, ...);
 #endif
