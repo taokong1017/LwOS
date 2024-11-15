@@ -5,16 +5,24 @@ config CONFIG_SHELL
 	default y
 	help
 		The shell is the common entry for user to interact with the kernel operation system.
-		It's also a command line interface to obtain system status and request system services.
+		It is also a command line interface to obtain system status and request system services.
 
 if CONFIG_SHELL
 
-config CONFIG_SHELL_CMD_BUFFER_SIZE
-	int "Shell Command Buffer Size"
-	default 128
-	range 128 512
-	help
-		The shell is capable of receiving the maximum allowable characters for a command input.
+	config CONFIG_SHELL_CMD_BUFFER_SIZE
+		int "Shell Command Buffer Size"
+		default 128
+		range 128 512
+		help
+			The shell is capable of receiving the maximum allowable characters for a command input.
+
+	config CONFIG_SHELL_CMD_SPACE_SIZE
+		int "Shell Command Space Size"
+		default 1
+		range 1 512
+		help
+			For shell safety, a space should be set between different shell command sections to
+			isolate them. Here, each "1" represents 8 bytes.
 
 endif
 

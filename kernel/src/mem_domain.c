@@ -16,6 +16,8 @@ extern char __rodata_start[];
 extern char __rodata_end[];
 extern char __data_start[];
 extern char __data_end[];
+extern char __shell_cmd_start[];
+extern char __shell_cmd_end[];
 extern char __bss_start[];
 extern char __bss_end[];
 extern char __kernel_stack_start[];
@@ -55,6 +57,12 @@ static struct mem_range kernel_mem_ranges[] = {
 		.name = "Kernel_Data",
 		.start = (void *)__data_start,
 		.end = (void *)__data_end,
+		.attrs = MT_P_RW_U_NA,
+	},
+	{
+		.name = "Shell",
+		.start = (void *)__shell_cmd_start,
+		.end = (void *)__shell_cmd_end,
 		.attrs = MT_P_RW_U_NA,
 	},
 	{
