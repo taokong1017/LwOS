@@ -2,8 +2,8 @@
 #define __ITERABLE_SECTION_H__
 
 #define concat(x, y) x##y
-#define type_section_start(section_name) concat(_##section_name, _start)
-#define type_section_end(section_name) concat(_##section_name, _end)
+#define type_section_start(section_name) concat(__##section_name, _start)
+#define type_section_end(section_name) concat(__##section_name, _end)
 
 #define type_section_start_extern(type, section_name)                          \
 	extern type type_section_start(section_name)[]
@@ -38,7 +38,7 @@
 #define type_section_get(type, section_name, index, dest)                      \
 	do {                                                                       \
 		type_section_start_extern(type, section_name);                         \
-		*(dest) = &type_section_start(section_name)[i];                        \
+		*(dest) = &type_section_start(section_name)[index];                    \
 	} while (0)
 
 /**

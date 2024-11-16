@@ -58,7 +58,7 @@ SECTIONS
 		__shell_root_cmd_start = .;
 		*(.shell.root.cmd*)		/* shell root command section */
 		__shell_root_cmd_end = .;
-		. += (8 * CONFIG_SHELL_CMD_SPACE);
+		. += (8 * CONFIG_SHELL_CMD_SPACE_SIZE);
 		__shell_sub_cmd_start = .;
 		*(.shell.sub.cmd*)		/* .shell sub-command section */
 		__shell_sub_cmd_end = .;

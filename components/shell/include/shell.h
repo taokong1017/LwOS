@@ -80,7 +80,7 @@ struct shell_args {
 struct shell_entry {
 	const char *syntax;
 	const char *help;
-	const struct shell_entry *subcmd;
+	const struct shell_cmd_entry *subcmd;
 	shell_cmd_handler handler;
 	struct shell_args args;
 } ALIGNED(8);
