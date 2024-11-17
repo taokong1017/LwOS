@@ -1,6 +1,26 @@
 #include <string.h>
 #include <shell_history.h>
 
+/*
+ * history item layout as follows:
+ * *********************************************************************
+ *  ******** history list front ********
+ *  |         ---------------          ^
+ *  |        |    command3   |         |
+ *  |     |   ---------------   ^      |
+ *  |     |   ---------------   |      |
+ *  |     |  |    command2   |  |      |
+ *  | next|   ---------------   | prev |
+ *  |     |   ---------------   |      |
+ *  |     v  |    command1   |  |      |
+ *  |         ---------------          |
+ *  |        |    command0   |         |
+ *  V         ---------------          |
+ *  down                               up
+ *  ******** history list end *********
+ * *********************************************************************
+ */
+
 #define cal_padding_bytes(total_len) ((~(total_len) + 1) & (sizeof(void *) - 1))
 #define invalid_dirction(direction)                                            \
 	((direction != SHELL_HISTORY_UP) && (direction != SHELL_HISTORY_DOWN))
@@ -117,7 +137,7 @@ void shell_history_add(struct shell_history *history, const uint8_t *cmd_line,
 bool shell_history_get(struct shell_history *history, uint8_t *buffer,
 					   size_t *len, enum shell_history_direction direction) {
 	struct shell_history_item *h_item = NULL;
-	struct list_head *next = NULL;
+	struct list_head *logical_next = NULL;
 
 	if (list_empty(&history->list) || invalid_dirction(direction)) {
 		return false;
@@ -128,19 +148,19 @@ bool shell_history_get(struct shell_history *history, uint8_t *buffer,
 			*len = 0;
 			return false;
 		}
-		next = history->current->prev;
-		h_item = list_entry(next, struct shell_history_item, inode);
+		logical_next = history->current->next;
+		h_item = list_entry(logical_next, struct shell_history_item, inode);
 	} else {
 		if (history->current == NULL) {
-			next = history->list.prev;
-			h_item = list_entry(next, struct shell_history_item, inode);
+			logical_next = history->list.prev;
+			h_item = list_entry(logical_next, struct shell_history_item, inode);
 		} else {
-			next = history->current->next;
-			h_item = list_entry(next, struct shell_history_item, inode);
+			logical_next = history->current->prev;
+			h_item = list_entry(logical_next, struct shell_history_item, inode);
 		}
 	}
 
-	if (next != &history->list) {
+	if (logical_next != &history->list) {
 		history->current = &h_item->inode;
 		memcpy(buffer, h_item->data, h_item->len);
 		*len = h_item->len;

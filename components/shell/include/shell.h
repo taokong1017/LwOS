@@ -27,7 +27,8 @@
 	{                                                                          \
 		.syntax = ((_expr) ? (const char *)(#_syntax) : ""),                   \
 		.help = ((_expr) ? (const char *)_help : NULL),                        \
-		.subcmd = ((const struct shell_entry *)((_expr) ? _subcmd : NULL)),    \
+		.subcmd =                                                              \
+			((const struct shell_cmd_entry *)((_expr) ? _subcmd : NULL)),      \
 		.handler = ((shell_cmd_handler)((_expr) ? _handler : NULL)), .args = { \
 			.mandatory = (_expr) ? _mand : 0,                                  \
 			.optional = (_expr) ? _opt : 0                                     \
@@ -69,8 +70,7 @@ enum shell_state {
 };
 
 struct shell;
-typedef int (*shell_cmd_handler)(const struct shell *shell, int argc,
-								 char *argv[]);
+typedef int (*shell_cmd_handler)(struct shell *shell, int argc, char *argv[]);
 
 struct shell_args {
 	uint8_t mandatory;
@@ -103,12 +103,12 @@ struct shell_context {
 
 	struct shell_vt100_context vt100_context;
 
-	char cmd_buff[CONFIG_SHELL_CMD_BUFFER_SIZE];
-	uint32_t cmd_buffer_length;
+	uint8_t cmd_buffer[CONFIG_SHELL_CMD_BUFFER_SIZE];
+	size_t cmd_buffer_length;
 	uint32_t cmd_buffer_position;
 
-	char temp_buff[CONFIG_SHELL_CMD_BUFFER_SIZE];
-	uint16_t cmd_tmp_buff_len;
+	uint8_t temp_buffer[CONFIG_SHELL_CMD_BUFFER_SIZE];
+	size_t temp_buffer_len;
 };
 
 struct shell {

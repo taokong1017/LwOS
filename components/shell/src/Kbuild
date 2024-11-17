@@ -4,4 +4,5 @@ obj-y := \
 	shell_history.o \
 	shell_help.o \
 	shell_ops.o \
-	shell_util.o
+	shell_util.o \
+	shell_cmd.o
