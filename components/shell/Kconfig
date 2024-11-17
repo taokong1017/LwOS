@@ -24,6 +24,18 @@ if CONFIG_SHELL
 			For shell safety, a space should be set between different shell command sections to
 			isolate them. Here, each "1" represents 8 bytes.
 
+	config CONFIG_SHELL_TERMINAL_WIDTH_SIZE
+		int "Shell Terminal Width Size"
+		default 80
+		help
+			The shell terminal initial width size.
+
+	config CONFIG_SHELL_TERMINAL_HEIGHT_SIZE
+		int "Shell Terminal Height Size"
+		default 25
+		help
+			The shell terminal height initial size.
+
 endif
 
 endmenu

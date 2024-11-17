@@ -30,7 +30,7 @@ static void shell_formatted_text_print(struct shell *shell, const char *str,
 	while (true) {
 		index = 0;
 		length = strlen(str) - offset;
-		if (length <= shell->shell_context->vt100_context.cons.terminal_wid -
+		if (length <= shell->shell_context->vt100_context.cons.terminal_width -
 						  terminal_offset) {
 			for (index = 0; index < length; index++) {
 				if (*(str + offset + index) == '\n') {
@@ -51,7 +51,7 @@ static void shell_formatted_text_print(struct shell *shell, const char *str,
 		 * String is longer than terminal line so text needs to
 		 * divide in the way to not divide words.
 		 */
-		length = shell->shell_context->vt100_context.cons.terminal_wid -
+		length = shell->shell_context->vt100_context.cons.terminal_width -
 				 terminal_offset;
 
 		while (true) {
@@ -64,7 +64,7 @@ static void shell_formatted_text_print(struct shell *shell, const char *str,
 			}
 
 			if ((index + terminal_offset) >=
-				shell->shell_context->vt100_context.cons.terminal_wid) {
+				shell->shell_context->vt100_context.cons.terminal_width) {
 				/* End of line reached. */
 				break;
 			}

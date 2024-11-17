@@ -26,8 +26,8 @@ struct shell_multiline_cons {
 	uint16_t cur_x_end; /* horizontal cursor position at the end of command */
 	uint16_t cur_y;		/* vertical cursor position in edited command */
 	uint16_t cur_y_end; /* vertical cursor position at the end of command */
-	uint16_t terminal_hei; /* terminal screen height */
-	uint16_t terminal_wid; /* terminal screen width */
+	uint16_t terminal_heiht; /* terminal screen height */
+	uint16_t terminal_width; /* terminal screen width */
 	uint8_t name_len;	   /* console name length */
 };
 
