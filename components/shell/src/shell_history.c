@@ -47,7 +47,7 @@ void shell_history_mode_exit(struct shell_history *history) {
 
 static void shell_history_item_add(struct shell_history *history,
 								   struct shell_history_item *item,
-								   const uint8_t *src, size_t len,
+								   const char *src, size_t len,
 								   uint32_t padding) {
 	item->len = len;
 	item->padding = padding;
@@ -70,7 +70,7 @@ static void shell_history_oldest_item_remove(struct shell_history *history) {
 	list_del_init(history->list.next);
 }
 
-void shell_history_add(struct shell_history *history, const uint8_t *cmd_line,
+void shell_history_add(struct shell_history *history, const char *cmd_line,
 					   size_t len) {
 	uint32_t total_len = len + offsetof(struct shell_history_item, data);
 	uint32_t padding = cal_padding_bytes(total_len);
@@ -134,7 +134,7 @@ void shell_history_add(struct shell_history *history, const uint8_t *cmd_line,
 	return;
 }
 
-bool shell_history_get(struct shell_history *history, uint8_t *buffer,
+bool shell_history_get(struct shell_history *history, char *buffer,
 					   size_t *len, enum shell_history_direction direction) {
 	struct shell_history_item *h_item = NULL;
 	struct list_head *logical_next = NULL;

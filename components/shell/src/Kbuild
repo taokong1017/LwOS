@@ -5,4 +5,5 @@ obj-y := \
 	shell_help.o \
 	shell_ops.o \
 	shell_util.o \
-	shell_cmd.o
+	shell_cmd.o \
+	shell_wildcard.o

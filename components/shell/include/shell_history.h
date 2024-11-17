@@ -19,9 +19,9 @@ enum shell_history_direction {
 void shell_history_init(struct shell_history *history);
 bool shell_history_is_active(struct shell_history *history);
 void shell_history_mode_exit(struct shell_history *history);
-void shell_history_add(struct shell_history *history, const uint8_t *cmd_line,
+void shell_history_add(struct shell_history *history, const char *cmd_line,
 					   size_t len);
-bool shell_history_get(struct shell_history *history, uint8_t *buffer,
+bool shell_history_get(struct shell_history *history, char *buffer,
 					   size_t *len, enum shell_history_direction direction);
 
 #endif

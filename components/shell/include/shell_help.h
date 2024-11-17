@@ -1,8 +1,8 @@
 #ifndef __SHELL_HELP_H__
 #define __SHELL_HELP_H__
 
-#include <shell.h>
-
+struct shell;
+struct shell_entry;
 void shell_help_cmd_print(struct shell *shell, const struct shell_entry *entry);
 void shell_help_subcmd_print(struct shell *shell,
 							 const struct shell_entry *entry,

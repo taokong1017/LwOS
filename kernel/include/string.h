@@ -146,4 +146,13 @@ int memcmp(const void *cs, const void *ct, size_t count);
  */
 char *strstr(const char *s1, const char *s2);
 
+/**
+ * @brief Searches for the first occurrence of a character in a string
+ * @param s: Pointer to the string to be searched
+ * @param c: The character to search for
+ * @return A pointer to the first occurrence of the character, or NULL if it's
+ * not found
+ */
+char *strchr(const char *s, int c);
+
 #endif

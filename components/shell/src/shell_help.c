@@ -1,9 +1,6 @@
 #include <string.h>
 #include <ctype.h>
-#include <shell_types.h>
-#include <shell_help.h>
-#include <shell_ops.h>
-#include <shell_util.h>
+#include <shell.h>
 
 #define max(a, b) ((a) > (b) ? (a) : (b))
 

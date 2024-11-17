@@ -1,6 +1,7 @@
-#include <shell_util.h>
+#include <shell.h>
 #include <iterable_section.h>
 #include <string.h>
+#include <ctype.h>
 
 void shell_transport_buffer_flush(struct shell *shell) {
 	shell_printf_flush(shell->shell_printf);
@@ -80,4 +81,56 @@ const struct shell_entry *shell_cmd_find(const struct shell_entry *parent,
 	}
 
 	return NULL;
+}
+
+void shell_spaces_trim(char *str) {
+	int32_t len = strlen(str);
+	int32_t shift = 0U;
+	int32_t i = 0;
+	int32_t j = 0;
+
+	if (!str || (len == 0U)) {
+		return;
+	}
+
+	for (i = 0; i < len - 1; i++) {
+		if (isspace((int)str[i]) != 0) {
+			for (j = i + 1; j < len; j++) {
+				if (isspace((int)str[j]) != 0) {
+					shift++;
+					continue;
+				}
+
+				if (shift > 0) {
+					memmove(&str[i + 1], &str[j], len - j + 1);
+					len -= shift;
+					shift = 0U;
+				}
+
+				break;
+			}
+		}
+	}
+}
+
+void shell_pattern_remove(char *buff, size_t *buff_len, const char *pattern) {
+	char *pattern_addr = strstr(buff, pattern);
+	uint32_t pattern_len = strlen(pattern);
+	uint32_t shift = 0;
+
+	if (!pattern_addr) {
+		return;
+	}
+
+	if (pattern_addr > buff) {
+		if (*(pattern_addr - 1) == ' ') {
+			pattern_len++;
+			pattern_addr--;
+		}
+	}
+
+	shift = strlen(pattern_addr) - pattern_len + 1; /* +1 for EOS */
+	*buff_len -= pattern_len;
+
+	memmove(pattern_addr, pattern_addr + pattern_len, shift);
 }

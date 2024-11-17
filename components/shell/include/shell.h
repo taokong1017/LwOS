@@ -3,13 +3,18 @@
 
 #include <types.h>
 #include <general.h>
-#include <shell_history.h>
-#include <shell_transport_opts.h>
 #include <menuconfig.h>
 #include <task.h>
+#include <shell_history.h>
+#include <shell_transport_opts.h>
 #include <shell_printf.h>
 #include <shell_vt100.h>
 #include <shell_types.h>
+#include <shell_help.h>
+#include <shell_wildcard.h>
+#include <shell_vt100.h>
+#include <shell_util.h>
+#include <shell_ops.h>
 
 #define SHELL_NAME_LEN 32
 #define SHELL_TASK_NAME "Shell_Root"
@@ -62,6 +67,10 @@
 	}
 
 #define SHELL_NORMAL SHELL_VT100_COLOR_DEFAULT
+#define SHELL_INFO SHELL_VT100_COLOR_GREEN
+#define SHELL_OPTION SHELL_VT100_COLOR_CYAN
+#define SHELL_WARNING SHELL_VT100_COLOR_YELLOW
+#define SHELL_ERROR SHELL_VT100_COLOR_RED
 
 enum shell_state {
 	SHELL_STATE_UNINITIALIZED,
@@ -103,11 +112,11 @@ struct shell_context {
 
 	struct shell_vt100_context vt100_context;
 
-	uint8_t cmd_buffer[CONFIG_SHELL_CMD_BUFFER_SIZE];
+	char cmd_buffer[CONFIG_SHELL_CMD_BUFFER_SIZE];
 	size_t cmd_buffer_length;
 	uint32_t cmd_buffer_position;
 
-	uint8_t temp_buffer[CONFIG_SHELL_CMD_BUFFER_SIZE];
+	char temp_buffer[CONFIG_SHELL_CMD_BUFFER_SIZE];
 	size_t temp_buffer_len;
 };
 
