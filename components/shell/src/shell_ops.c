@@ -16,6 +16,87 @@ void shell_op_cursor_horiz_move(struct shell *shell, int32_t delta) {
 	shell_show(shell, "\e[%d%c", delta, dir);
 }
 
+void shell_op_cursor_vert_move(struct shell *shell, int32_t delta) {
+	char dir = delta > 0 ? 'A' : 'B';
+
+	if (delta == 0) {
+		return;
+	}
+
+	if (delta < 0) {
+		delta = -delta;
+	}
+
+	shell_show(shell, "\e[%d%c", delta, dir);
+}
+
+bool shell_cmd_is_full_line(struct shell *shell) {
+	return ((shell->shell_context->cmd_buffer_length +
+			 strlen(shell->shell_context->cur_prompt)) %
+				shell->shell_context->vt100_context.cons.terminal_width ==
+			0U);
+}
+
+static void shell_prompt_print(struct shell *shell) {
+	shell_color_show(shell, SHELL_INFO, "%s", shell->shell_context->cur_prompt);
+}
+
+void shell_cmd_print(struct shell *shell) {
+	int beg_offset = 0;
+	int end_offset = 0;
+	int cmd_width = strlen(shell->shell_context->cmd_buffer);
+	int adjust = shell->shell_context->vt100_context.cons.name_len;
+	char ch = 0;
+
+	while (cmd_width >
+		   shell->shell_context->vt100_context.cons.terminal_width - adjust) {
+		end_offset +=
+			shell->shell_context->vt100_context.cons.terminal_width - adjust;
+		ch = shell->shell_context->cmd_buffer[end_offset];
+		shell->shell_context->cmd_buffer[end_offset] = '\0';
+
+		shell_show(shell, "%s\n",
+				   &shell->shell_context->cmd_buffer[beg_offset]);
+
+		shell->shell_context->cmd_buffer[end_offset] = ch;
+		cmd_width -=
+			(shell->shell_context->vt100_context.cons.terminal_width - adjust);
+		beg_offset = end_offset;
+		adjust = 0;
+	}
+
+	if (cmd_width > 0) {
+		shell_show(shell, "%s", &shell->shell_context->cmd_buffer[beg_offset]);
+	}
+}
+
+void shell_prompt_and_cmd_print(struct shell *shell) {
+	shell_prompt_print(shell);
+	shell_cmd_print(shell);
+	shell_op_cursor_position_synchronize(shell);
+}
+
+void shell_op_cursor_position_synchronize(struct shell *shell) {
+	struct shell_multiline_cons *cons =
+		&shell->shell_context->vt100_context.cons;
+	bool last_line = false;
+
+	shell_multiline_data_calc(cons, shell->shell_context->cmd_buffer_position,
+							  shell->shell_context->cmd_buffer_length);
+	last_line = (cons->cur_y == cons->cur_y_end);
+
+	if (shell_cmd_is_full_line(shell)) {
+		shell_cursor_next_line_move(shell);
+	}
+
+	if (last_line) {
+		shell_op_cursor_horiz_move(shell, cons->cur_x - cons->cur_x_end);
+	} else {
+		shell_op_cursor_vert_move(shell, cons->cur_y_end - cons->cur_y);
+		shell_op_cursor_horiz_move(shell, cons->cur_x - cons->cur_x_end);
+	}
+}
+
 void shell_cursor_next_line_move(struct shell *shell) {
 	shell_show(shell, "\n");
 }

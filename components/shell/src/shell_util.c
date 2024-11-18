@@ -134,3 +134,11 @@ void shell_pattern_remove(char *buff, size_t *buff_len, const char *pattern) {
 
 	memmove(pattern_addr, pattern_addr + pattern_len, shift);
 }
+
+void shell_multiline_data_calc(struct shell_multiline_cons *cons,
+							   uint16_t buff_pos, uint16_t buff_len) {
+	cons->cur_x = (buff_pos + cons->name_len) % cons->terminal_width + 1;
+	cons->cur_y = (buff_pos + cons->name_len) / cons->terminal_width + 1;
+	cons->cur_y_end = (buff_len + cons->name_len) / cons->terminal_width + 1;
+	cons->cur_x_end = (buff_len + cons->name_len) % cons->terminal_width + 1;
+}

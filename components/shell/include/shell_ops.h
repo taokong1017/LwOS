@@ -4,8 +4,11 @@
 #include <types.h>
 
 void shell_op_cursor_horiz_move(struct shell *shell, int32_t delta);
+void shell_op_cursor_vert_move(struct shell *shell, int32_t delta);
 void shell_cursor_next_line_move(struct shell *shell);
-
+bool shell_cmd_is_full_line(struct shell *shell);
+void shell_prompt_and_cmd_print(struct shell *shell);
+void shell_op_cursor_position_synchronize(struct shell *shell);
 void shell_vt100_color_set(struct shell *shell, enum shell_vt100_color color);
 void shell_vt100_colors_save(const struct shell *shell,
 							 struct shell_vt100_colors *color);
