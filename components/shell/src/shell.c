@@ -1,7 +1,5 @@
-#include <shell_printf.h>
 #include <shell.h>
 #include <string.h>
-#include <shell_ops.h>
 
 void shell_show(struct shell *shell, const char *format, ...) {
 	va_list args;
@@ -75,7 +73,7 @@ void shell_state_set(struct shell *shell, enum shell_state state) {
 	shell_prompt_and_cmd_print(shell);
 }
 
-enum shell_state state_get(const struct shell *shell) {
+enum shell_state shell_state_get(const struct shell *shell) {
 	return shell->shell_context->state;
 }
 
@@ -109,4 +107,40 @@ void shell_tab_item_print(struct shell *shell, const char *option,
 	}
 
 	shell_op_cursor_horiz_move(shell, diff);
+}
+
+void history_handle(struct shell *shell, bool up) {
+	size_t cmd_len = 0;
+	bool history_mode = false;
+
+	if (!shell_history_is_active(shell->shell_history)) {
+		if (up) {
+			cmd_len = strlen(shell->shell_context->cmd_buffer);
+			if (cmd_len) {
+				strncpy(shell->shell_context->temp_buffer,
+						shell->shell_context->cmd_buffer,
+						CONFIG_SHELL_CMD_BUFFER_SIZE);
+			} else {
+				shell->shell_context->temp_buffer[0] = '\0';
+			}
+		} else {
+			return;
+		}
+	}
+
+	history_mode = shell_history_get(shell->shell_history,
+									 shell->shell_context->cmd_buffer, &cmd_len,
+									 SHELL_HISTORY_UP);
+	if (!history_mode) {
+		strcpy(shell->shell_context->cmd_buffer,
+			   shell->shell_context->temp_buffer);
+		cmd_len = strlen(shell->shell_context->cmd_buffer);
+	}
+
+	shell_op_cursor_home_move(shell);
+	shell_show(shell, SHELL_VT100_CLEAREOS);
+	shell_cmd_print(shell);
+	shell->shell_context->cmd_buffer_position = cmd_len;
+	shell->shell_context->cmd_buffer_length = cmd_len;
+	shell_cursor_next_line_move(shell);
 }

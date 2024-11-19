@@ -101,6 +101,36 @@ void shell_cursor_next_line_move(struct shell *shell) {
 	shell_show(shell, "\n");
 }
 
+void shell_op_cursor_move(struct shell *shell, uint32_t val) {
+	struct shell_multiline_cons *cons =
+		&shell->shell_context->vt100_context.cons;
+	uint32_t new_pos = shell->shell_context->cmd_buffer_position + val;
+	int32_t row_span = 0;
+	int32_t col_span = 0;
+
+	shell_multiline_data_calc(cons, shell->shell_context->cmd_buffer_position,
+							  shell->shell_context->cmd_buffer_length);
+	/* Calculate the new cursor. */
+	row_span = shell_row_span_with_buffer_offsets_get(
+		&shell->shell_context->vt100_context.cons,
+		shell->shell_context->cmd_buffer_position, new_pos);
+	col_span = shell_column_span_with_buffer_offsets_get(
+		&shell->shell_context->vt100_context.cons,
+		shell->shell_context->cmd_buffer_position, new_pos);
+	shell_op_cursor_vert_move(shell, -row_span);
+	shell_op_cursor_horiz_move(shell, col_span);
+	shell->shell_context->cmd_buffer_position = new_pos;
+}
+
+void shell_op_cursor_home_move(struct shell *shell) {
+	shell_op_cursor_move(shell, -shell->shell_context->cmd_buffer_position);
+}
+
+void shell_op_cursor_end_move(struct shell *shell) {
+	shell_op_cursor_move(shell, shell->shell_context->cmd_buffer_length -
+									shell->shell_context->cmd_buffer_position);
+}
+
 void shell_vt100_color_set(struct shell *shell, enum shell_vt100_color color) {
 	if (color >= VT100_COLOR_END) {
 		return;

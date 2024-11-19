@@ -4,6 +4,14 @@
 #include <types.h>
 
 /**
+ * @brief Copies characters from a source string to a destination string
+ * @param dest: Pointer to the destination string
+ * @param src: Pointer to the source string
+ * @return A pointer to the destination string
+ */
+char *strcpy(char *dest, const char *src);
+
+/**
  * @brief Copies a specified number of bytes from a source memory area to a
  * destination memory area
  * @param dest: Pointer to the destination memory area

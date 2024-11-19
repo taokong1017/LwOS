@@ -136,9 +136,35 @@ void shell_pattern_remove(char *buff, size_t *buff_len, const char *pattern) {
 }
 
 void shell_multiline_data_calc(struct shell_multiline_cons *cons,
-							   uint16_t buff_pos, uint16_t buff_len) {
+							   uint32_t buff_pos, uint32_t buff_len) {
 	cons->cur_x = (buff_pos + cons->name_len) % cons->terminal_width + 1;
 	cons->cur_y = (buff_pos + cons->name_len) / cons->terminal_width + 1;
 	cons->cur_y_end = (buff_len + cons->name_len) / cons->terminal_width + 1;
 	cons->cur_x_end = (buff_len + cons->name_len) % cons->terminal_width + 1;
+}
+
+static uint32_t
+shell_line_num_with_buffer_offset_get(struct shell_multiline_cons *cons,
+									  uint32_t buffer_pos) {
+	return ((buffer_pos + cons->name_len) / cons->terminal_width);
+}
+
+static uint32_t
+shell_col_num_with_buffer_offset_get(struct shell_multiline_cons *cons,
+									 uint32_t buffer_pos) {
+	return (1 + ((buffer_pos + cons->name_len) % cons->terminal_width));
+}
+
+int32_t
+shell_column_span_with_buffer_offsets_get(struct shell_multiline_cons *cons,
+										  uint32_t offset1, uint32_t offset2) {
+	return shell_col_num_with_buffer_offset_get(cons, offset2) -
+		   shell_col_num_with_buffer_offset_get(cons, offset1);
+}
+
+int32_t
+shell_row_span_with_buffer_offsets_get(struct shell_multiline_cons *cons,
+									   uint32_t offset1, uint32_t offset2) {
+	return shell_line_num_with_buffer_offset_get(cons, offset2) -
+		   shell_line_num_with_buffer_offset_get(cons, offset1);
 }
