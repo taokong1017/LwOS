@@ -1,5 +1,9 @@
 #include <shell.h>
 #include <string.h>
+#include <menuconfig.h>
+#include <ctype.h>
+
+#define TAB_SPACES "  "
 
 void shell_show(struct shell *shell, const char *format, ...) {
 	va_list args;
@@ -77,13 +81,9 @@ enum shell_state shell_state_get(const struct shell *shell) {
 	return shell->shell_context->state;
 }
 
-struct shell_entry *shell_selected_cmd_get(const struct shell *shell) {
-	return shell->shell_context->selected_cmd;
-}
-
 void shell_tab_item_print(struct shell *shell, const char *option,
 						  uint16_t longest_option) {
-	static const char *tab = "  ";
+	static const char *tab = TAB_SPACES;
 	uint16_t columns = 0;
 	uint16_t diff = 0;
 
@@ -109,7 +109,50 @@ void shell_tab_item_print(struct shell *shell, const char *option,
 	shell_op_cursor_horiz_move(shell, diff);
 }
 
-void history_handle(struct shell *shell, bool up) {
+static uint32_t completion_space_get(const struct shell *shell) {
+	uint32_t space = (CONFIG_SHELL_CMD_BUFFER_SIZE - 1) -
+					 shell->shell_context->cmd_buffer_length;
+
+	return space;
+}
+
+static bool shell_tab_prepare(struct shell *shell, const struct shell_entry **cmd,
+							  char ***argv, int32_t *argc,
+							  int32_t *complete_arg_idx) {
+	uint32_t space = completion_space_get(shell);
+	int32_t search_argc = 0;
+
+	if (space == 0) {
+		return false;
+	}
+
+	memcpy(shell->shell_context->temp_buffer, shell->shell_context->cmd_buffer,
+		   shell->shell_context->cmd_buffer_position);
+	shell->shell_context
+		->temp_buffer[shell->shell_context->cmd_buffer_position] = '\0';
+
+	shell_make_argv(argc, *argv, shell->shell_context->temp_buffer,
+					CONFIG_SHELL_ARGC_MAX);
+	if (*argc > CONFIG_SHELL_ARGC_MAX) {
+		return false;
+	}
+
+	(*argv)[*argc] = NULL;
+	space = (shell->shell_context->cmd_buffer_position > 0)
+				? isspace((int)shell->shell_context->cmd_buffer
+							  [shell->shell_context->cmd_buffer_position - 1])
+				: 0;
+	search_argc = space ? *argc : *argc - 1;
+	*cmd = shell_get_last_command(NULL, search_argc, *argv, complete_arg_idx);
+
+	if ((*cmd == NULL) && (search_argc != 0)) {
+		return false;
+	}
+
+	return true;
+}
+
+void shell_history_handle(struct shell *shell, bool up) {
 	size_t cmd_len = 0;
 	bool history_mode = false;
 
@@ -143,4 +186,18 @@ void history_handle(struct shell *shell, bool up) {
 	shell->shell_context->cmd_buffer_position = cmd_len;
 	shell->shell_context->cmd_buffer_length = cmd_len;
 	shell_cursor_next_line_move(shell);
+}
+
+void shell_tab_handle(struct shell *shell) {
+	char *argv[CONFIG_SHELL_ARGC_MAX + 1] = {NULL};
+	const struct shell_entry *cmd = NULL;
+	int32_t arg_index = 0;
+	bool tab_possible = false;
+	int32_t argc = 0;
+
+	tab_possible =
+		shell_tab_prepare(shell, &cmd, (char ***)&argv, &argc, &arg_index);
+	if (!tab_possible) {
+		return;
+	}
 }

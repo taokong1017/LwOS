@@ -35,6 +35,13 @@ if CONFIG_SHELL
 		default 25
 		help
 			The shell terminal height initial size.
+	
+	config CONFIG_SHELL_ARGC_MAX
+		int "Maximum Arguments Number"
+		range 3 32
+		default 10
+		help
+			Maximum number of arguments that can build a command.
 
 endif
 

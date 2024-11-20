@@ -71,6 +71,7 @@
 #define SHELL_OPTION SHELL_VT100_COLOR_CYAN
 #define SHELL_WARNING SHELL_VT100_COLOR_YELLOW
 #define SHELL_ERROR SHELL_VT100_COLOR_RED
+#define SHELL_CMD_ROOT_LEVEL 0
 
 enum shell_state {
 	SHELL_STATE_UNINITIALIZED,
@@ -108,7 +109,6 @@ struct shell_context {
 	enum shell_state state;
 
 	struct shell_entry active_cmd;
-	struct shell_entry *selected_cmd;
 
 	struct shell_vt100_context vt100_context;
 

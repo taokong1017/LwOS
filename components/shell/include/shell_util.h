@@ -22,4 +22,9 @@ shell_column_span_with_buffer_offsets_get(struct shell_multiline_cons *cons,
 int32_t
 shell_row_span_with_buffer_offsets_get(struct shell_multiline_cons *cons,
 									   uint32_t offset1, uint32_t offset2);
+
+char shell_make_argv(int32_t *argc, char **argv, char *cmd, uint32_t max_argc);
+const struct shell_entry *
+shell_get_last_command(const struct shell_entry *entry, int32_t argc,
+					   char *argv[], int32_t *match_arg);
 #endif
