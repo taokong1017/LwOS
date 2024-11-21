@@ -138,7 +138,7 @@ void shell_help_subcmd_print(struct shell *shell,
 							 const struct shell_entry *parent,
 							 const char *description) {
 	const struct shell_entry *entry = NULL;
-	uint32_t max_len = 0U;
+	uint32_t max_len = 0;
 	uint32_t index = 0;
 
 	/* Search for the longest subcommand to print */

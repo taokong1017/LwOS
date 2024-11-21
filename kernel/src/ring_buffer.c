@@ -145,8 +145,8 @@ bool ring_buffer_get_finish(struct ring_buffer *buf, uint32_t size) {
 uint32_t ring_buffer_get(struct ring_buffer *buf, uint8_t *data,
 						 uint32_t size) {
 	uint8_t *src = NULL;
-	uint32_t partial_size = 0U;
-	uint32_t total_size = 0U;
+	uint32_t partial_size = 0;
+	uint32_t total_size = 0;
 	bool ret = false;
 
 	do {
@@ -168,8 +168,8 @@ uint32_t ring_buffer_get(struct ring_buffer *buf, uint8_t *data,
 uint32_t ring_buffer_peek(struct ring_buffer *buf, uint8_t *data,
 						  uint32_t size) {
 	uint8_t *src = NULL;
-	uint32_t partial_size = 0U;
-	uint32_t total_size = 0U;
+	uint32_t partial_size = 0;
+	uint32_t total_size = 0;
 	bool ret = false;
 
 	size = min(size, ring_buffer_used_size_get(buf));

@@ -85,7 +85,7 @@ const struct shell_entry *shell_cmd_find(const struct shell_entry *parent,
 
 void shell_spaces_trim(char *str) {
 	int32_t len = strlen(str);
-	int32_t shift = 0U;
+	int32_t shift = 0;
 	int32_t i = 0;
 	int32_t j = 0;
 
@@ -104,7 +104,7 @@ void shell_spaces_trim(char *str) {
 				if (shift > 0) {
 					memmove(&str[i + 1], &str[j], len - j + 1);
 					len -= shift;
-					shift = 0U;
+					shift = 0;
 				}
 
 				break;
@@ -214,9 +214,9 @@ static char shell_internal_make_argv(char **ppcmd, uint8_t c) {
 
 			if (t == '0') {
 				uint8_t i;
-				uint8_t v = 0U;
+				uint8_t v = 0;
 
-				for (i = 2U; i < (2 + 3); i++) {
+				for (i = 2; i < (2 + 3); i++) {
 					t = *(cmd + i);
 
 					if (t >= '0' && t <= '7') {
@@ -235,9 +235,9 @@ static char shell_internal_make_argv(char **ppcmd, uint8_t c) {
 
 			if (t == 'x') {
 				uint8_t i;
-				uint8_t v = 0U;
+				uint8_t v = 0;
 
-				for (i = 2U; i < (2 + 2); i++) {
+				for (i = 2; i < (2 + 2); i++) {
 					t = *(cmd + i);
 
 					if (t >= '0' && t <= '9') {
