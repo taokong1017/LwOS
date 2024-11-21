@@ -131,6 +131,58 @@ void shell_op_cursor_end_move(struct shell *shell) {
 									shell->shell_context->cmd_buffer_position);
 }
 
+static void reprint_from_cursor(struct shell *shell, uint32_t diff,
+								bool data_removed) {
+	if (data_removed) {
+		shell_show(shell, SHELL_VT100_CLEAREOS);
+	}
+
+	shell_color_show(
+		shell, SHELL_NORMAL, "%s",
+		&shell->shell_context
+			 ->cmd_buffer[shell->shell_context->cmd_buffer_position]);
+	shell->shell_context->cmd_buffer_position =
+		shell->shell_context->cmd_buffer_length;
+
+	if (shell_cmd_is_full_line(shell)) {
+		if (((data_removed) && (diff > 0)) || (!data_removed)) {
+			shell_cursor_next_line_move(shell);
+		}
+	}
+
+	shell_op_cursor_move(shell, -diff);
+}
+
+static void shell_data_insert(struct shell *shell, const char *data,
+							  uint32_t len) {
+	uint32_t after = shell->shell_context->cmd_buffer_length -
+					 shell->shell_context->cmd_buffer_position;
+	char *curr_pos =
+		&shell->shell_context
+			 ->cmd_buffer[shell->shell_context->cmd_buffer_position];
+
+	if ((shell->shell_context->cmd_buffer_length + len) >=
+		CONFIG_SHELL_CMD_BUFFER_SIZE) {
+		return;
+	}
+
+	memmove(curr_pos + len, curr_pos, after);
+	memcpy(curr_pos, data, len);
+	shell->shell_context->cmd_buffer_length += len;
+	shell->shell_context->cmd_buffer[shell->shell_context->cmd_buffer_length] =
+		'\0';
+	reprint_from_cursor(shell, after, false);
+}
+
+void shell_op_completion_insert(struct shell *shell, const char * compl,
+								uint32_t compl_len) {
+	shell_data_insert(shell, compl, compl_len);
+}
+
+void shell_op_char_insert(struct shell *shell, char data) {
+	shell_data_insert(shell, &data, 1);
+}
+
 void shell_vt100_color_set(struct shell *shell, enum shell_vt100_color color) {
 	if (color >= VT100_COLOR_END) {
 		return;
