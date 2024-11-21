@@ -10,6 +10,7 @@ void shell_op_cursor_move(struct shell *shell, uint32_t val);
 void shell_op_cursor_home_move(struct shell *shell);
 void shell_op_cursor_end_move(struct shell *shell);
 void shell_op_cursor_position_synchronize(struct shell *shell);
+void shell_op_cursor_word_move(struct shell *sh, int32_t val);
 void shell_op_completion_insert(struct shell *shell, const char * compl,
 								uint32_t compl_len);
 void shell_op_char_insert(struct shell *shell, char data);

@@ -1,6 +1,7 @@
 #include <shell.h>
 #include <shell_ops.h>
 #include <string.h>
+#include <ctype.h>
 
 void shell_op_cursor_horiz_move(struct shell *shell, int32_t delta) {
 	char dir = delta > 0 ? 'C' : 'D';
@@ -129,6 +130,49 @@ void shell_op_cursor_home_move(struct shell *shell) {
 void shell_op_cursor_end_move(struct shell *shell) {
 	shell_op_cursor_move(shell, shell->shell_context->cmd_buffer_length -
 									shell->shell_context->cmd_buffer_position);
+}
+
+static uint32_t shell_shift_calc(const char *str, uint32_t pos, uint32_t len,
+								 int32_t sign) {
+	bool found = false;
+	uint32_t ret = 0;
+	uint32_t index = 0;
+
+	while (true) {
+		index = pos + ret * sign;
+		if (((index == 0U) && (sign < 0)) || ((index == len) && (sign > 0))) {
+			break;
+		}
+		if (isalnum((int)str[index]) != 0) {
+			found = true;
+		} else {
+			if (found) {
+				break;
+			}
+		}
+		ret++;
+	}
+
+	return ret;
+}
+
+void shell_op_cursor_word_move(struct shell *shell, int32_t val) {
+	int32_t shift = 0;
+	int32_t sign = 0;
+
+	if (val < 0) {
+		val = -val;
+		sign = -1;
+	} else {
+		sign = 1;
+	}
+
+	while (val--) {
+		shift = shell_shift_calc(shell->shell_context->cmd_buffer,
+								 shell->shell_context->cmd_buffer_position,
+								 shell->shell_context->cmd_buffer_length, sign);
+		shell_op_cursor_move(shell, sign * shift);
+	}
 }
 
 static void reprint_from_cursor(struct shell *shell, uint32_t diff,

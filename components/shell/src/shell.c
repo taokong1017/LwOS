@@ -355,3 +355,11 @@ void shell_tab_handle(struct shell *shell) {
 		shell_partial_autocomplete(shell, cmd, argv[arg_index], first, count);
 	}
 }
+
+void alt_metakeys_handle(struct shell *shell, char data) {
+	if (data == SHELL_VT100_ASCII_ALT_B) {
+		shell_op_cursor_word_move(shell, -1);
+	} else if (data == SHELL_VT100_ASCII_ALT_F) {
+		shell_op_cursor_word_move(shell, 1);
+	}
+}
