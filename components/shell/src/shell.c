@@ -166,7 +166,7 @@ static void shell_completion_candidates_find(
 	uint32_t incompl_cmd_len = strlen(incompl_cmd);
 	uint32_t index = 0;
 
-	*longest = 0U;
+	*longest = 0;
 	*count = 0;
 
 	while ((candidate = shell_cmd_get(cmd, index)) != NULL) {
