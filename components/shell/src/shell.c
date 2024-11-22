@@ -356,10 +356,53 @@ void shell_tab_handle(struct shell *shell) {
 	}
 }
 
-void alt_metakeys_handle(struct shell *shell, char data) {
+void shell_alt_metakeys_handle(struct shell *shell, char data) {
 	if (data == SHELL_VT100_ASCII_ALT_B) {
 		shell_op_cursor_word_move(shell, -1);
 	} else if (data == SHELL_VT100_ASCII_ALT_F) {
 		shell_op_cursor_word_move(shell, 1);
+	}
+}
+
+void shell_ctrl_metakeys_handle(struct shell *shell, char data) {
+	switch (data) {
+	case SHELL_VT100_ASCII_CTRL_A: /* CTRL + A */
+		shell_op_cursor_home_move(shell);
+		break;
+	case SHELL_VT100_ASCII_CTRL_B: /* CTRL + B */
+		shell_op_cursor_left_arrow(shell);
+		break;
+	case SHELL_VT100_ASCII_CTRL_C: /* CTRL + C */
+		shell_op_cursor_end_move(shell);
+		if (!shell_cursor_is_in_empty_line(shell)) {
+			shell_cursor_next_line_move(shell);
+		}
+		shell_state_set(shell, SHELL_STATE_ACTIVE);
+		break;
+	case SHELL_VT100_ASCII_CTRL_D: /* CTRL + D */
+		shell_op_char_delete(shell);
+		break;
+	case SHELL_VT100_ASCII_CTRL_E: /* CTRL + E */
+		shell_op_cursor_end_move(shell);
+		break;
+	case SHELL_VT100_ASCII_CTRL_F: /* CTRL + F */
+		shell_op_cursor_right_arrow(shell);
+		break;
+	case SHELL_VT100_ASCII_CTRL_K: /* CTRL + K */
+		shell_op_cursor_from_delete(shell);
+		break;
+	case SHELL_VT100_ASCII_CTRL_L: /* CTRL + L */
+		shell_show(shell, SHELL_VT100_CURSORHOME);
+		shell_show(shell, SHELL_VT100_CLEARSCREEN);
+		shell_prompt_and_cmd_print(shell);
+		break;
+
+	case SHELL_VT100_ASCII_CTRL_N: /* CTRL + N */
+		shell_history_handle(shell, false);
+		break;
+
+	case SHELL_VT100_ASCII_CTRL_P: /* CTRL + P */
+		shell_history_handle(shell, true);
+		break;
 	}
 }

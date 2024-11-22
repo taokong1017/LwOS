@@ -38,6 +38,13 @@ bool shell_cmd_is_full_line(struct shell *shell) {
 			0U);
 }
 
+bool shell_cursor_is_in_empty_line(struct shell *shell) {
+	return ((shell->shell_context->cmd_buffer_position +
+			 strlen(shell->shell_context->cur_prompt)) %
+				shell->shell_context->vt100_context.cons.terminal_width ==
+			0U);
+}
+
 static void shell_prompt_print(struct shell *shell) {
 	shell_color_show(shell, SHELL_INFO, "%s", shell->shell_context->cur_prompt);
 }
@@ -130,6 +137,27 @@ void shell_op_cursor_home_move(struct shell *shell) {
 void shell_op_cursor_end_move(struct shell *shell) {
 	shell_op_cursor_move(shell, shell->shell_context->cmd_buffer_length -
 									shell->shell_context->cmd_buffer_position);
+}
+
+void shell_op_cursor_left_arrow(struct shell *shell) {
+	if (shell->shell_context->cmd_buffer_position > 0) {
+		shell_op_cursor_move(shell, -1);
+	}
+}
+
+void shell_op_cursor_right_arrow(struct shell *shell) {
+	if (shell->shell_context->cmd_buffer_position <
+		shell->shell_context->cmd_buffer_length) {
+		shell_op_cursor_move(shell, 1);
+	}
+}
+
+void shell_op_cursor_from_delete(struct shell *shell) {
+	shell->shell_context->cmd_buffer_length =
+		shell->shell_context->cmd_buffer_position;
+	shell->shell_context
+		->cmd_buffer[shell->shell_context->cmd_buffer_position] = '\0';
+	shell_show(shell, SHELL_VT100_CLEAREOS);
 }
 
 static uint32_t shell_shift_calc(const char *str, uint32_t pos, uint32_t len,
@@ -225,6 +253,21 @@ void shell_op_completion_insert(struct shell *shell, const char * compl,
 
 void shell_op_char_insert(struct shell *shell, char data) {
 	shell_data_insert(shell, &data, 1);
+}
+
+void shell_op_char_delete(struct shell *shell) {
+	uint32_t diff = shell->shell_context->cmd_buffer_length -
+					shell->shell_context->cmd_buffer_position;
+	char *str = &shell->shell_context
+					 ->cmd_buffer[shell->shell_context->cmd_buffer_position];
+
+	if (diff == 0U) {
+		return;
+	}
+
+	memmove(str, str + 1, diff);
+	--shell->shell_context->cmd_buffer_length;
+	reprint_from_cursor(shell, --diff, true);
 }
 
 void shell_vt100_color_set(struct shell *shell, enum shell_vt100_color color) {
