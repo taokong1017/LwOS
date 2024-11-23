@@ -25,9 +25,10 @@ void shell_wildcard_prepare(struct shell *shell) {
 		strlen(shell->shell_context->temp_buffer) + 1; /* +1 for EOS */
 }
 
-static enum shell_wildcard_status command_add(char *buff, size_t *buff_len,
-											  char const *cmd,
-											  char const *pattern) {
+static enum shell_wildcard_status shell_command_add(char *buff,
+													size_t *buff_len,
+													char const *cmd,
+													char const *pattern) {
 	uint32_t cmd_len = strlen(cmd);
 	char *completion_addr;
 	uint32_t shift;
@@ -52,9 +53,9 @@ static enum shell_wildcard_status command_add(char *buff, size_t *buff_len,
 	return SHELL_WILDCARD_ADDED;
 }
 
-static enum shell_wildcard_status commands_expand(struct shell *shell,
-												  const struct shell_entry *cmd,
-												  const char *pattern) {
+static enum shell_wildcard_status
+shell_commands_expand(struct shell *shell, const struct shell_entry *cmd,
+					  const char *pattern) {
 	enum shell_wildcard_status ret_val = SHELL_WILDCARD_NO_MATCH_FOUND;
 	const struct shell_entry *entry = NULL;
 	int32_t index = 0;
@@ -63,9 +64,9 @@ static enum shell_wildcard_status commands_expand(struct shell *shell,
 	while ((entry = shell_cmd_get(cmd, index++)) != NULL) {
 
 		if (fnmatch(pattern, entry->syntax, 0) == 0) {
-			ret_val = command_add(shell->shell_context->temp_buffer,
-								  &shell->shell_context->temp_buffer_len,
-								  entry->syntax, pattern);
+			ret_val = shell_command_add(shell->shell_context->temp_buffer,
+										&shell->shell_context->temp_buffer_len,
+										entry->syntax, pattern);
 			if (ret_val == SHELL_WILDCARD_MISSING_SPACE) {
 				shell_color_show(
 					shell, SHELL_WARNING,
@@ -98,7 +99,7 @@ enum shell_wildcard_status shell_wildcard_process(struct shell *shell,
 		return SHELL_WILDCARD_NOT_FOUND;
 	}
 
-	return commands_expand(shell, cmd, pattern);
+	return shell_commands_expand(shell, cmd, pattern);
 }
 
 void shell_wildcard_finalize(struct shell *shell) {

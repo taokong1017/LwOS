@@ -39,7 +39,7 @@ const struct shell_entry *shell_root_cmd_find(const char *syntax) {
 	return NULL;
 }
 
-static bool is_section_subcmd(const struct shell_cmd_entry *cmd_entry) {
+static bool shell_is_section_subcmd(const struct shell_cmd_entry *cmd_entry) {
 	type_section_start_extern(struct shell_cmd_entry, shell_sub_cmd);
 	type_section_end_extern(struct shell_cmd_entry, shell_sub_cmd);
 
@@ -58,7 +58,7 @@ const struct shell_entry *shell_cmd_get(const struct shell_entry *parent,
 				   : NULL;
 	}
 
-	if (is_section_subcmd(parent->subcmd)) {
+	if (shell_is_section_subcmd(parent->subcmd)) {
 		entry_list = (const struct shell_cmd_entry *)parent->subcmd;
 		if (entry_list[index].entry->syntax != NULL) {
 			entry = entry_list[index].entry;
