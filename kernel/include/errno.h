@@ -33,6 +33,7 @@ enum module_id {
 	MOD_ID_PSCI,
 	MOD_ID_MEM_DOMAIN,
 	MOD_ID_SYSCALL,
+	MOD_ID_SHELL,
 };
 
 typedef uint32_t errno_t;

@@ -15,6 +15,7 @@
 #include <shell_vt100.h>
 #include <shell_util.h>
 #include <shell_ops.h>
+#include <errno.h>
 
 #define SHELL_NAME_LEN 32
 #define SHELL_TASK_NAME "Shell_Root"
@@ -72,6 +73,11 @@
 #define SHELL_WARNING SHELL_VT100_COLOR_YELLOW
 #define SHELL_ERROR SHELL_VT100_COLOR_RED
 #define SHELL_CMD_ROOT_LEVEL 0
+
+#define ERRNO_SHELL_EMPTY_PTR ERRNO_OS_ERROR(MOD_ID_SHELL, 0x00)
+#define ERRNO_SHELL_EMPTY_CMD ERRNO_OS_ERROR(MOD_ID_SHELL, 0x01)
+#define ERRNO_SHELL_NO_EXEC ERRNO_OS_ERROR(MOD_ID_SHELL, 0x02)
+#define ERRNO_SHELL_HELP_PRINT ERRNO_OS_ERROR(MOD_ID_SHELL, 0x03)
 
 enum shell_state {
 	SHELL_STATE_UNINITIALIZED,

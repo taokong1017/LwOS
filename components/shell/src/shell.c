@@ -5,7 +5,9 @@
 #include <limits.h>
 
 #define TAB_SPACES "  "
+#define SHELL_MSG_TOO_MANY_ARGS "Too many arguments in the command.\n"
 #define max(a, b) ((a) > (b) ? (a) : (b))
+#define in_rage(val, min, max) ((val) >= (min) && (val) <= (max))
 
 void shell_show(struct shell *shell, const char *format, ...) {
 	va_list args;
@@ -405,4 +407,171 @@ void shell_ctrl_metakeys_handle(struct shell *shell, char data) {
 		shell_history_handle(shell, true);
 		break;
 	}
+}
+
+static errno_t shell_cmd_do_execute(struct shell *shell, int32_t argc,
+									char **argv,
+									const struct shell_entry *help_entry) {
+	int32_t ret = 0;
+	uint8_t mandatory = 0;
+	uint8_t optional = 0;
+
+	if (shell->shell_context->active_cmd.handler == NULL) {
+		if (help_entry != NULL) {
+			if (help_entry->help == NULL) {
+				return ERRNO_SHELL_NO_EXEC;
+			}
+			if (help_entry->help != shell->shell_context->active_cmd.help) {
+				shell->shell_context->active_cmd = *help_entry;
+			}
+			shell_internal_help_print(shell);
+			return ERRNO_SHELL_HELP_PRINT;
+		} else {
+			return ERRNO_SHELL_NO_EXEC;
+		}
+	}
+
+	if (shell->shell_context->active_cmd.args.mandatory) {
+		mandatory = shell->shell_context->active_cmd.args.mandatory;
+		optional = shell->shell_context->active_cmd.args.optional;
+		ret = in_rage(argc, mandatory, (mandatory + optional));
+	}
+
+	if (!ret) {
+		ret = shell->shell_context->active_cmd.handler(shell, argc,
+													   (char **)argv);
+	}
+
+	return ret;
+}
+
+static void active_cmd_prepare(struct shell_entry *entry,
+							   struct shell_entry *active_cmd,
+							   struct shell_entry *help_entry, uint32_t *level,
+							   uint32_t *handler_level, uint32_t *args_left) {
+	if (entry->handler) {
+		*active_cmd = *entry;
+		*handler_level = *level;
+		if (entry->subcmd == NULL) {
+			*args_left = entry->args.mandatory - 1;
+		}
+	}
+
+	if (entry->help) {
+		*help_entry = *entry;
+	}
+}
+
+errno_t shell_cmd_interal_execute(struct shell *shell) {
+	struct shell_entry *entry = NULL;
+	struct shell_entry help_entry = {.help = NULL};
+	struct shell_entry *parent = NULL;
+	enum shell_wildcard_status status;
+	bool wildcard_found = false;
+	bool has_last_handler = false;
+	char *argv[CONFIG_SHELL_ARGC_MAX + 1] = {0};
+	char **argvp = &argv[0];
+	char *cmd_buf = shell->shell_context->cmd_buffer;
+	char quote = 0;
+	uint32_t cmd_level = 0;
+	uint32_t cmd_with_handler_level = 0;
+	uint32_t args_left = U32_MAX;
+	int32_t argc = 0;
+
+	shell_op_cursor_end_move(shell);
+	if (!shell_cursor_is_in_empty_line(shell)) {
+		shell_cursor_next_line_move(shell);
+	}
+
+	memset(&shell->shell_context->active_cmd, 0,
+		   sizeof(shell->shell_context->active_cmd));
+	shell_cmd_space_trim(shell);
+	shell_history_add(shell->shell_history, shell->shell_context->cmd_buffer,
+					  shell->shell_context->cmd_buffer_length);
+
+	shell_wildcard_prepare(shell);
+
+	while ((argc != 1) && (cmd_level < CONFIG_SHELL_ARGC_MAX) &&
+		   args_left > 0) {
+		quote = shell_make_argv(&argc, argvp, cmd_buf, 2);
+		cmd_buf = (char *)argvp[1];
+
+		if (argc == 0) {
+			return -ERRNO_SHELL_NO_EXEC;
+		} else if ((argc == 1) && (quote != 0)) {
+			shell_color_show(shell, SHELL_ERROR, "not terminated: %c\n", quote);
+			return -ERRNO_SHELL_NO_EXEC;
+		}
+
+		if (cmd_level > 0) {
+			if (shell_help_cmd_is_request(argvp[0])) {
+				if (help_entry.help) {
+					shell->shell_context->active_cmd = help_entry;
+					shell_internal_help_print(shell);
+					return ERRNO_SHELL_HELP_PRINT;
+				}
+			}
+			status = shell_wildcard_process(shell, entry, argvp[0]);
+			if (status == SHELL_WILDCARD_NO_MATCH_FOUND) {
+				break;
+			}
+			if (status != SHELL_WILDCARD_NOT_FOUND) {
+				++cmd_level;
+				wildcard_found = true;
+				continue;
+			}
+		}
+
+		if (has_last_handler == false) {
+			entry = (struct shell_entry *)shell_cmd_find(parent, argvp[0]);
+		}
+
+		argvp++;
+		args_left--;
+
+		if (entry) {
+			active_cmd_prepare(entry, &shell->shell_context->active_cmd,
+							   &help_entry, &cmd_level, &cmd_with_handler_level,
+							   &args_left);
+			parent = entry;
+		} else {
+			has_last_handler = true;
+		}
+
+		if (args_left || (argc == 2)) {
+			cmd_level++;
+		}
+	}
+
+	if ((cmd_level >= CONFIG_SHELL_ARGC_MAX) && (argc == 2)) {
+		shell_color_show(shell, SHELL_ERROR, "%s\n", SHELL_MSG_TOO_MANY_ARGS);
+		return ERRNO_SHELL_NO_EXEC;
+	}
+
+	if (wildcard_found) {
+		shell_wildcard_finalize(shell);
+	}
+
+	return shell_cmd_do_execute(shell, argc - cmd_with_handler_level,
+								&argv[cmd_with_handler_level], &help_entry);
+}
+
+errno_t shell_cmd_execute(struct shell *shell, const char *cmd) {
+	uint32_t cmd_len = strlen(cmd);
+
+	if (!cmd || !shell) {
+		return ERRNO_SHELL_EMPTY_PTR;
+	}
+
+	if (cmd_len == 0) {
+		return ERRNO_SHELL_EMPTY_CMD;
+	}
+
+	strcpy(shell->shell_context->cmd_buffer, cmd);
+	shell->shell_context->cmd_buffer_length = cmd_len;
+	shell->shell_context->cmd_buffer_position = cmd_len;
+	shell_cmd_interal_execute(shell);
+	shell_cmd_buffer_clear(shell);
+
+	return OK;
 }

@@ -83,13 +83,45 @@ const struct shell_entry *shell_cmd_find(const struct shell_entry *parent,
 	return NULL;
 }
 
+static void shell_buffer_space_trim(char *buffer, size_t *length) {
+	uint32_t i = 0;
+
+	if (buffer[0] == '\0') {
+		return;
+	}
+
+	while (isspace((int)buffer[*length - 1]) != 0) {
+		*length -= 1;
+		if (*length == 0) {
+			buffer[0] = '\0';
+			return;
+		}
+	}
+	buffer[*length] = '\0';
+
+	while (isspace((int)buffer[i++]) != 0) {
+	}
+
+	if (--i > 0) {
+		memmove(buffer, buffer + i, (*length + 1) - i); /* +1 for '\0' */
+		*length = *length - i;
+	}
+}
+
+void shell_cmd_space_trim(struct shell *shell) {
+	shell_buffer_space_trim(shell->shell_context->cmd_buffer,
+							&shell->shell_context->cmd_buffer_length);
+	shell->shell_context->cmd_buffer_position =
+		shell->shell_context->cmd_buffer_length;
+}
+
 void shell_spaces_trim(char *str) {
 	int32_t len = strlen(str);
 	int32_t shift = 0;
 	int32_t i = 0;
 	int32_t j = 0;
 
-	if (!str || (len == 0U)) {
+	if (!str || (len == 0)) {
 		return;
 	}
 

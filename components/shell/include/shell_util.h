@@ -10,6 +10,7 @@ const struct shell_entry *shell_cmd_get(const struct shell_entry *parent,
 										uint32_t index);
 const struct shell_entry *shell_cmd_find(const struct shell_entry *parent,
 										 const char *cmd_str);
+void shell_cmd_space_trim(struct shell *shell);
 
 void shell_spaces_trim(char *str);
 void shell_pattern_remove(char *buff, size_t *buff_len, const char *pattern);
