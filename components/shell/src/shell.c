@@ -3,12 +3,15 @@
 #include <menuconfig.h>
 #include <ctype.h>
 #include <limits.h>
+#include <arch_atomic.h>
 
 #define TAB_SPACES "  "
 #define SHELL_MSG_TOO_MANY_ARGS "Too many arguments in the command.\n"
+#define ASCII_MAX_CHAR 127
 #define max(a, b) ((a) > (b) ? (a) : (b))
 #define min(a, b) ((a) < (b) ? (a) : (b))
 #define in_rage(val, min, max) ((val) >= (min) && (val) <= (max))
+#define is_valid_assic_char(c) (in_rage(c, 0, ASCII_MAX_CHAR))
 
 void shell_show(struct shell *shell, const char *format, ...) {
 	va_list args;
@@ -86,8 +89,8 @@ enum shell_state shell_state_get(const struct shell *shell) {
 	return shell->shell_context->state;
 }
 
-void shell_line_hexdump(struct shell *shell, int32_t offset,
-						const char *data, uint32_t len) {
+void shell_line_hexdump(struct shell *shell, int32_t offset, const char *data,
+						uint32_t len) {
 	int32_t index = 0;
 	char ch = 0;
 
@@ -628,4 +631,143 @@ errno_t shell_cmd_execute(struct shell *shell, const char *cmd) {
 	shell_cmd_buffer_clear(shell);
 
 	return OK;
+}
+
+static void shell_receive_state_change(struct shell *shell,
+									   enum shell_receive_state state) {
+	shell->shell_context->receive_state = state;
+}
+
+static bool shell_new_line_process(struct shell *shell, char data) {
+	atomic_t last_nl_char = 0;
+
+	if ((data != '\r') && (data != '\n')) {
+		atomic_set(&shell->shell_context->last_nl_char, 0);
+		return false;
+	}
+
+	last_nl_char = atomic_get(&shell->shell_context->last_nl_char);
+	if ((last_nl_char == 0) || (data == last_nl_char)) {
+		atomic_set(&shell->shell_context->last_nl_char, data);
+		return true;
+	}
+
+	return false;
+}
+
+static void shell_state_process(struct shell *shell) {
+	int32_t count = 0;
+	char data;
+
+	while (true) {
+		count = shell->shell_transport->transport_ops->read(
+			shell->shell_transport, &data, 1);
+		if (count <= 0) {
+			return;
+		}
+
+		if (!is_valid_assic_char(data)) {
+			continue;
+		}
+
+		switch (shell->shell_context->receive_state) {
+		case SHELL_RECEIVE_DEFAULT:
+			if (shell_new_line_process(shell, data)) {
+				if (!shell->shell_context->cmd_buffer_length) {
+					shell_history_mode_exit(shell->shell_history);
+					shell_cursor_next_line_move(shell);
+				} else {
+					shell_cmd_interal_execute(shell);
+				}
+				shell_state_set(shell, SHELL_STATE_ACTIVE);
+				continue;
+			}
+
+			switch (data) {
+			case SHELL_VT100_ASCII_ESC: /* ESCAPE */
+				shell_receive_state_change(shell, SHELL_RECEIVE_ESC);
+				break;
+			case SHELL_VT100_ASCII_BSPACE: /* BACKSPACE */
+			case SHELL_VT100_ASCII_DEL:	   /* DELETE */
+				shell_op_char_backspace(shell);
+				break;
+			case '\t': /* TAB */
+				shell_tab_handle(shell);
+				break;
+			case '\0':
+				break;
+			default:
+				if (isprint((int)data) != 0) {
+					shell_op_char_insert(shell, data);
+				} else {
+					shell_ctrl_metakeys_handle(shell, data);
+				}
+				break;
+			}
+			break;
+
+		case SHELL_RECEIVE_ESC:
+			if (data == '[') {
+				shell_receive_state_change(shell, SHELL_RECEIVE_ESC_SEQ);
+				break;
+			} else {
+				shell_alt_metakeys_handle(shell, data);
+			}
+			shell_receive_state_change(shell, SHELL_RECEIVE_DEFAULT);
+			break;
+
+		case SHELL_RECEIVE_ESC_SEQ:
+			shell_receive_state_change(shell, SHELL_RECEIVE_DEFAULT);
+			switch (data) {
+			case 'A': /* UP arrow */
+				shell_history_handle(shell, true);
+				break;
+			case 'B': /* DOWN arrow */
+				shell_history_handle(shell, false);
+				break;
+			case 'C': /* RIGHT arrow */
+				shell_op_cursor_right_arrow(shell);
+				break;
+			case 'D': /* LEFT arrow */
+				shell_op_cursor_left_arrow(shell);
+				break;
+			case 'F': /* END Button */
+				shell_op_cursor_end_move(shell);
+				break;
+			case 'H': /* HOME Button */
+				shell_op_cursor_home_move(shell);
+				break;
+			}
+			break;
+
+		default:
+			shell_receive_state_change(shell, SHELL_RECEIVE_DEFAULT);
+			break;
+		}
+	}
+
+	shell_transport_buffer_flush(shell);
+}
+
+void shell_entry(struct shell *shell) {
+	errno_t ret = OK;
+
+	while (true) {
+		ret = sem_take(shell->shell_sem_id, SEM_WAIT_FOREVER);
+		if (ret != OK) {
+			continue;
+		}
+
+		switch (shell->shell_context->state) {
+		case SHELL_STATE_UNINITIALIZED:
+		case SHELL_STATE_INITIALIZED:
+			break;
+
+		case SHELL_STATE_ACTIVE:
+			shell_state_process(shell);
+			break;
+		default:
+			break;
+		}
+	}
 }

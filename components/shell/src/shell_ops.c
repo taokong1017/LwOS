@@ -270,6 +270,16 @@ void shell_op_char_delete(struct shell *shell) {
 	reprint_from_cursor(shell, --diff, true);
 }
 
+void shell_op_char_backspace(struct shell *shell) {
+	if ((shell->shell_context->cmd_buffer_length == 0) ||
+		(shell->shell_context->cmd_buffer_position == 0)) {
+		return;
+	}
+
+	shell_op_cursor_move(shell, -1);
+	shell_op_char_delete(shell);
+}
+
 void shell_vt100_color_set(struct shell *shell, enum shell_vt100_color color) {
 	if (color >= VT100_COLOR_END) {
 		return;

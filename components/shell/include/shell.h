@@ -16,6 +16,8 @@
 #include <shell_util.h>
 #include <shell_ops.h>
 #include <errno.h>
+#include <sem.h>
+#include <arch_atomic.h>
 
 #define SHELL_NAME_LEN 32
 #define SHELL_TASK_NAME "Shell_Root"
@@ -85,6 +87,12 @@ enum shell_state {
 	SHELL_STATE_ACTIVE,
 };
 
+enum shell_receive_state {
+	SHELL_RECEIVE_DEFAULT,
+	SHELL_RECEIVE_ESC,
+	SHELL_RECEIVE_ESC_SEQ,
+};
+
 struct shell;
 typedef int (*shell_cmd_handler)(struct shell *shell, int argc, char *argv[]);
 
@@ -112,7 +120,9 @@ struct shell_transport {
 
 struct shell_context {
 	char *cur_prompt;
+
 	enum shell_state state;
+	enum shell_receive_state receive_state;
 
 	struct shell_entry active_cmd;
 
@@ -124,6 +134,8 @@ struct shell_context {
 
 	char temp_buffer[CONFIG_SHELL_CMD_BUFFER_SIZE];
 	size_t temp_buffer_len;
+
+	atomic_t last_nl_char;
 };
 
 struct shell {
@@ -136,10 +148,13 @@ struct shell {
 	struct shell_printf *shell_printf;
 
 	task_id_t shell_task_id;
+	sem_id_t shell_sem_id;
 };
 
 /* Shell interface */
 void shell_show(struct shell *shell, const char *format, ...);
 void shell_color_show(struct shell *shell, enum shell_vt100_color color,
 					  const char *format, ...);
+void shell_hexdump(struct shell *shell, const char *data, size_t len);
+
 #endif

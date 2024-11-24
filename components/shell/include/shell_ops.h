@@ -18,6 +18,7 @@ void shell_op_completion_insert(struct shell *shell, const char * compl,
 								uint32_t compl_len);
 void shell_op_char_insert(struct shell *shell, char data);
 void shell_op_char_delete(struct shell *shell);
+void shell_op_char_backspace(struct shell *shell);
 bool shell_cmd_is_full_line(struct shell *shell);
 bool shell_cursor_is_in_empty_line(struct shell *shell);
 void shell_prompt_and_cmd_print(struct shell *shell);
