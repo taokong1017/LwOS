@@ -7,6 +7,7 @@
 #define TAB_SPACES "  "
 #define SHELL_MSG_TOO_MANY_ARGS "Too many arguments in the command.\n"
 #define max(a, b) ((a) > (b) ? (a) : (b))
+#define min(a, b) ((a) < (b) ? (a) : (b))
 #define in_rage(val, min, max) ((val) >= (min) && (val) <= (max))
 
 void shell_show(struct shell *shell, const char *format, ...) {
@@ -83,6 +84,59 @@ void shell_state_set(struct shell *shell, enum shell_state state) {
 
 enum shell_state shell_state_get(const struct shell *shell) {
 	return shell->shell_context->state;
+}
+
+void shell_line_hexdump(struct shell *shell, int32_t offset,
+						const char *data, uint32_t len) {
+	int32_t index = 0;
+	char ch = 0;
+
+	shell_color_show(shell, SHELL_NORMAL, "%08X: ", offset);
+
+	for (index = 0; index < CONFIG_SHELL_HEXDUMP_BYTES_PER_LINE; index++) {
+		if (index > 0 && !(index % 8)) {
+			shell_color_show(shell, SHELL_NORMAL, " ");
+		}
+
+		if (index < len) {
+			shell_color_show(shell, SHELL_NORMAL, "%02x ", data[index] & 0xFF);
+		} else {
+			shell_color_show(shell, SHELL_NORMAL, "   ");
+		}
+	}
+
+	shell_color_show(shell, SHELL_NORMAL, "|");
+
+	for (index = 0; index < CONFIG_SHELL_HEXDUMP_BYTES_PER_LINE; index++) {
+		if (index > 0 && !(index % 8)) {
+			shell_color_show(shell, SHELL_NORMAL, " ");
+		}
+
+		if (index < len) {
+			ch = data[index];
+
+			shell_color_show(shell, SHELL_NORMAL, "%c",
+							 isprint((int)ch) != 0 ? ch : '.');
+		} else {
+			shell_color_show(shell, SHELL_NORMAL, " ");
+		}
+	}
+
+	shell_color_show(shell, SHELL_NORMAL, "|\n");
+}
+
+void shell_hexdump(struct shell *shell, const char *data, size_t len) {
+	const char *ptr = data;
+	size_t line_len;
+
+	while (len) {
+		line_len = min(len, CONFIG_SHELL_HEXDUMP_BYTES_PER_LINE);
+
+		shell_line_hexdump(shell, ptr - data, ptr, line_len);
+
+		len -= line_len;
+		ptr += line_len;
+	}
 }
 
 void shell_tab_item_print(struct shell *shell, const char *option,
@@ -234,8 +288,8 @@ static void shell_tab_options_print(struct shell *shell,
 	shell_prompt_and_cmd_print(shell);
 }
 
-static size_t shell_str_common(const char *s1, const char *s2, size_t n) {
-	size_t common = 0;
+static int32_t shell_str_common(const char *s1, const char *s2, int32_t n) {
+	int32_t common = 0;
 
 	while ((n > 0) && (*s1 == *s2) && (*s1 != '\0')) {
 		s1++;

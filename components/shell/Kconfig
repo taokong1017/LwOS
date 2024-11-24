@@ -43,6 +43,13 @@ if CONFIG_SHELL
 		help
 			Maximum number of arguments that can build a command.
 
+	config CONFIG_SHELL_HEXDUMP_BYTES_PER_LINE
+		int "Hexdump Bytes Per Line"
+		default 16
+		range 1 64
+		help
+			The number of bytes per line in hexdump.
+
 endif
 
 endmenu
