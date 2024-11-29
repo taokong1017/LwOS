@@ -50,6 +50,18 @@ if CONFIG_SHELL
 		help
 			The number of bytes per line in hexdump.
 
+choice
+	prompt "Shell Uart Synchronous Option"
+	default CONFIG_SHELL_UART_IRQ_TYPE
+	help
+		This Option will choose Synchronous type.
+
+config CONFIG_SHELL_UART_POLL_TYPE
+		bool "Uart Poll Type"
+config CONFIG_SHELL_UART_IRQ_TYPE
+		bool "Uart IRQ Type"
+endchoice
+
 endif
 
 endmenu
