@@ -51,6 +51,6 @@ static int32_t shell_uart_read(struct shell_transport *transport, char *data,
 	return size;
 }
 
-const struct shell_transport_ops *shell_uart_transport_opt_get() {
+const struct shell_transport_ops *shell_uart_transport_ops_get() {
 	return &uart_transport_ops;
 }
