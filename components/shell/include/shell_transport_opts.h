@@ -5,12 +5,13 @@
 
 struct shell_transport;
 struct shell_transport_ops {
-	int (*init)(struct shell_transport *transport);
-	int (*deinit)(struct shell_transport *transport);
-	int (*enable)(struct shell_transport *transport, bool enable);
-	int (*write)(struct shell_transport *transport, const char *data,
-				 uint32_t size);
-	int (*read)(struct shell_transport *transport, char *data, uint32_t size);
+	bool (*init)(struct shell_transport *transport);
+	bool (*deinit)(struct shell_transport *transport);
+	bool (*enable)(struct shell_transport *transport, bool enable);
+	int32_t (*write)(struct shell_transport *transport, const char *data,
+					 uint32_t size);
+	int32_t (*read)(struct shell_transport *transport, char *data,
+					uint32_t size);
 };
 
 #endif
