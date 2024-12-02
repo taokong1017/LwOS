@@ -50,6 +50,20 @@ if CONFIG_SHELL
 		help
 			The number of bytes per line in hexdump.
 
+	config CONFIG_SHELL_TX_RING_BUFFER_SIZE
+		int "Shell Tx Ring Buffer Size"
+		default 128
+		range 128 1024
+		help
+			The size of the shell tx ring buffer.
+
+	config CONFIG_SHELL_RX_RING_BUFFER_SIZE
+		int "Shell Rx Ring Buffer Size"
+		default 128
+		range 128 1024
+		help
+			The size of the shell rx ring buffer.
+
 choice
 	prompt "Shell Uart Synchronous Option"
 	default CONFIG_SHELL_UART_IRQ_TYPE

@@ -18,6 +18,7 @@
 #include <errno.h>
 #include <sem.h>
 #include <arch_atomic.h>
+#include <shell_uart.h>
 
 #define SHELL_NAME_LEN 32
 #define SHELL_TASK_NAME "Shell_Root"
@@ -37,7 +38,8 @@
 		.help = ((_expr) ? (const char *)_help : NULL),                        \
 		.subcmd =                                                              \
 			((const struct shell_cmd_entry *)((_expr) ? _subcmd : NULL)),      \
-		.handler = ((shell_cmd_handler)((_expr) ? _handler : NULL)), .args = { \
+		.handler = ((shell_cmd_handler_t)((_expr) ? _handler : NULL)),         \
+		.args = {                                                              \
 			.mandatory = (_expr) ? _mand : 0,                                  \
 			.optional = (_expr) ? _opt : 0                                     \
 		}                                                                      \
@@ -94,7 +96,7 @@ enum shell_receive_state {
 };
 
 struct shell;
-typedef int (*shell_cmd_handler)(struct shell *shell, int argc, char *argv[]);
+typedef int (*shell_cmd_handler_t)(struct shell *shell, int argc, char *argv[]);
 
 struct shell_args {
 	uint8_t mandatory;
@@ -105,7 +107,7 @@ struct shell_entry {
 	const char *syntax;
 	const char *help;
 	const struct shell_cmd_entry *subcmd;
-	shell_cmd_handler handler;
+	shell_cmd_handler_t handler;
 	struct shell_args args;
 } ALIGNED(8);
 
