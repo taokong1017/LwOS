@@ -43,7 +43,7 @@ struct uart_config {
 typedef void (*uart_irq_callback_user_data_t)(const struct device *dev,
 											  void *user_data);
 
-struct uart_driver_api {
+struct uart_driver_ops {
 	int32_t (*poll_read)(const struct device *dev, char *data);
 	int32_t (*poll_write)(const struct device *dev, char data);
 	errno_t (*error_check)(const struct device *dev);
@@ -65,5 +65,7 @@ struct uart_driver_api {
 							 uart_irq_callback_user_data_t cb, void *user_data);
 	bool (*irq_is_pending)(const struct device *dev);
 };
+
+void uart_poll_out(const struct device *dev, char c);
 
 #endif

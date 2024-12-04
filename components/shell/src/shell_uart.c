@@ -1,4 +1,5 @@
 #include <shell.h>
+#include <uart.h>
 
 #ifdef CONFIG_SHELL_UART_IRQ_TYPE
 static int32_t shell_uart_irq_write(struct shell_transport *transport,
@@ -10,25 +11,34 @@ static int32_t shell_uart_irq_write(struct shell_transport *transport,
 }
 static int32_t shell_uart_irq_read(struct shell_transport *transport,
 								   char *data, uint32_t size) {
-	(void)transport;
-	(void)data;
+	struct shell_uart_irq *shell_uart_irq =
+		(struct shell_uart_irq *)transport->transport_context;
 
-	return size;
+	return ring_buffer_get(&shell_uart_irq->rx_ring_buffer, (uint8_t *)data,
+						   size);
 }
 #else
 static int32_t shell_uart_poll_write(struct shell_transport *transport,
 									 const char *data, uint32_t size) {
-	(void)transport;
-	(void)data;
+	int32_t index = 0;
+	struct shell_uart_poll *shell_uart_poll =
+		(struct shell_uart_poll *)transport->transport_context;
+
+	for (index = 0; index < size; index++) {
+		uart_poll_out(shell_uart_poll->base.dev, data[index]);
+	}
+	shell_uart_poll->base.handler(SHELL_TRANSPORT_TX_RDY,
+								  shell_uart_poll->base.context);
 
 	return size;
 }
 static int32_t shell_uart_poll_read(struct shell_transport *transport,
 									char *data, uint32_t size) {
-	(void)transport;
-	(void)data;
+	struct shell_uart_poll *shell_uart_poll =
+		(struct shell_uart_poll *)transport->transport_context;
 
-	return size;
+	return ring_buffer_get(&shell_uart_poll->rx_ring_buffer, (uint8_t *)data,
+						   size);
 }
 #endif
 
