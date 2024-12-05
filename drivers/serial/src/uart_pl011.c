@@ -31,3 +31,12 @@ int32_t uart_puts(const char *s, int32_t len) {
 
 	return len;
 }
+
+void uart_irq_tx_enable(const struct device *dev) {}
+
+void uart_irq_tx_disable(const struct device *dev) {}
+
+int32_t uart_irq_read(const struct device *dev, uint8_t *rx_data,
+					  const int size) {
+	return 0;
+}

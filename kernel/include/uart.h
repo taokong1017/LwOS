@@ -67,5 +67,12 @@ struct uart_driver_ops {
 };
 
 void uart_poll_out(const struct device *dev, char c);
-
+void uart_irq_tx_enable(const struct device *dev);
+void uart_irq_tx_disable(const struct device *dev);
+bool uart_irq_rx_ready(const struct device *dev);
+bool uart_irq_tx_ready(const struct device *dev);
+int32_t uart_irq_read(const struct device *dev, uint8_t *rx_data,
+					  const int32_t size);
+int32_t uart_irq_write(const struct device *dev, const uint8_t *tx_data,
+					   int32_t size);
 #endif
