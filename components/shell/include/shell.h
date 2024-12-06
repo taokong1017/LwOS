@@ -121,7 +121,7 @@ struct shell_transport {
 };
 
 struct shell_context {
-	char *cur_prompt;
+	const char *cur_prompt;
 
 	enum shell_state state;
 	enum shell_receive_state receive_state;
@@ -141,7 +141,7 @@ struct shell_context {
 };
 
 struct shell {
-	char prompt[SHELL_NAME_LEN];
+	const char prompt[SHELL_NAME_LEN];
 
 	struct shell_transport *shell_transport;
 	struct shell_context *shell_context;
@@ -158,5 +158,26 @@ void shell_show(struct shell *shell, const char *format, ...);
 void shell_color_show(struct shell *shell, enum shell_vt100_color color,
 					  const char *format, ...);
 void shell_hexdump(struct shell *shell, const char *data, size_t len);
+void shell_print(void *context, char *data, uint32_t len);
+
+#define shell_define(shell_name, shell_prompt, shell_transport_ops)            \
+	extern struct shell shell_name;                                            \
+	static struct shell_context shell_name##_context;                          \
+	static struct shell_transport shell_name##_transport = {                   \
+		.transport_ops = shell_transport_ops,                                  \
+		.transport_context = &shell_name##_transport,                          \
+	};                                                                         \
+	static char shell_name##_out_buffer[CONFIG_SHELL_PRINTF_BUFF_SIZE];        \
+	shell_history_define(shell_name, CONFIG_SHELL_HISTORY_BUFFER_SIZE);        \
+	shell_printf_define(shell_name, shell_name##_out_buffer,                   \
+						CONFIG_SHELL_PRINTF_BUFF_SIZE, shell_print,            \
+						&shell_name, true);                                    \
+	struct shell shell_name = {                                                \
+		.prompt = shell_prompt,                                                \
+		.shell_transport = &shell_name##_transport,                            \
+		.shell_context = &shell_name##_context,                                \
+		.shell_history = &shell_name##_history,                                \
+		.shell_printf = &shell_name##_shell_printf,                            \
+	};
 
 #endif

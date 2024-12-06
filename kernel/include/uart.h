@@ -77,7 +77,7 @@ int32_t uart_irq_read(const struct device *dev, uint8_t *rx_data,
 					  const int32_t size);
 int32_t uart_irq_write(const struct device *dev, const uint8_t *tx_data,
 					   const int32_t size);
-bool uart_irq_callback_set(const struct device *dev, uart_irq_callback cb,
+bool uart_irq_callback_set(const struct device *dev, uart_irq_cb cb,
 						   void *data);
 
 #endif

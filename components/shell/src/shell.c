@@ -13,6 +13,23 @@
 #define in_rage(val, min, max) ((val) >= (min) && (val) <= (max))
 #define is_valid_assic_char(c) (in_rage(c, 0, ASCII_MAX_CHAR))
 
+static void shell_transport_notifier(enum shell_transport_event event,
+									 void *context) {
+	struct shell *shell = (struct shell *)context;
+
+	if (!shell) {
+		return;
+	}
+
+	if (event < 0 || event >= SHELL_TRANSPORT_EVENT_NUM) {
+		return;
+	}
+
+	sem_give(shell->shell_sem_id);
+}
+
+void shell_print(void *context, char *data, uint32_t len) {}
+
 void shell_show(struct shell *shell, const char *format, ...) {
 	va_list args;
 

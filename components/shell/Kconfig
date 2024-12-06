@@ -71,6 +71,20 @@ if CONFIG_SHELL
 		help
 			The shell uart timer interval(ms) for uart polling data.
 
+	config CONFIG_SHELL_HISTORY_BUFFER_SIZE
+		int "Shell History Buffer Size"
+		default 128
+		range 64 1024
+		help
+			The shell history buffer size.
+
+	config CONFIG_SHELL_PRINTF_BUFF_SIZE
+		int "Shell Printf Buff Size"
+		default 128
+		range 64 1024
+		help
+			The shell printf buff size.
+
 choice
 	prompt "Shell Uart Synchronous Option"
 	default CONFIG_SHELL_UART_IRQ_TYPE

@@ -4,33 +4,33 @@
 #include <types.h>
 #include <stdarg.h>
 
-typedef void (*shell_write_func)(void *user_context, char *data, size_t length);
+typedef void (*shell_write_func)(void *context, char *data, uint32_t length);
 
 struct shell_printf_control {
 	size_t buffer_count;
-	bool auto_flush;
+	bool flush;
 };
 
 struct shell_printf {
 	char *buffer;
 	size_t buffer_size;
 	shell_write_func write;
-	void *user_context;
+	void *context;
 	struct shell_printf_control *control;
 };
 
-#define shell_buffer_define(_name, _buffer, _size, _write, _user_context,      \
-							_auto_flush)                                       \
-	static struct shell_printf_control _name##_shell_printf_control = {        \
-		.buffer_count = 0U,                                                    \
-		.auto_flush = _auto_flush,                                             \
+#define shell_printf_define(name, printf_buffer, printf_buffer_size,           \
+							write_func, user_context, auto_flush)              \
+	static struct shell_printf_control name##_shell_printf_control = {         \
+		.buffer_count = 0,                                                     \
+		.flush = auto_flush,                                                   \
 	};                                                                         \
-	static struct shell_printf _name##_shell_printf = {                        \
-		.buffer = _buffer,                                                     \
-		.buffer_size = _size,                                                  \
-		.write = _write,                                                       \
-		.user_context = _user_context,                                         \
-		.control = &_name##_shell_printf_control,                              \
+	static struct shell_printf name##_shell_printf = {                         \
+		.buffer = printf_buffer,                                               \
+		.buffer_size = printf_buffer_size,                                     \
+		.write = write_func,                                                   \
+		.context = user_context,                                               \
+		.control = &name##_shell_printf_control,                               \
 	};
 
 /* Shell printf interface */

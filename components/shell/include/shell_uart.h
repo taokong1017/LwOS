@@ -30,6 +30,4 @@ struct shell_uart_irq {
 	atomic_t tx_busy;
 };
 
-const struct shell_transport_ops *shell_uart_transport_ops_get();
-
 #endif

@@ -13,7 +13,7 @@ int32_t shell_printf(struct shell_printf *shell_printf, const char *format,
 					args);
 	shell_printf->control->buffer_count = ret;
 
-	if (shell_printf->control->auto_flush) {
+	if (shell_printf->control->flush) {
 		shell_printf_flush(shell_printf);
 	}
 
@@ -25,7 +25,7 @@ void shell_printf_flush(struct shell_printf *shell_printf) {
 		return;
 	}
 
-	shell_printf->write(shell_printf->user_context, shell_printf->buffer,
+	shell_printf->write(shell_printf->context, shell_printf->buffer,
 						shell_printf->control->buffer_count);
 	shell_printf->control->buffer_count = 0;
 

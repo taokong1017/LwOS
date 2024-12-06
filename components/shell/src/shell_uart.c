@@ -7,6 +7,7 @@
 #define IRQ_TX_NO_BUSY 0
 #define POLL_TIMER_NAME "shell_uart_timer"
 #define SHELL_UART_TAG "SHELL_UART"
+#define SHELL_PROMPT "[LW shell] > "
 
 #ifdef CONFIG_SHELL_UART_IRQ_TYPE
 static void uart_irq_rx_handle(const struct device *dev,
@@ -232,7 +233,7 @@ static int32_t shell_uart_read(struct shell_transport *transport, char *data,
 #endif
 }
 
-const struct shell_transport_ops uart_transport_ops = {
+struct shell_transport_ops uart_transport_ops = {
 	.init = shell_uart_init,
 	.deinit = shell_uart_deinit,
 	.enable = shell_uart_enable,
@@ -240,6 +241,4 @@ const struct shell_transport_ops uart_transport_ops = {
 	.write = shell_uart_write,
 };
 
-const struct shell_transport_ops *shell_uart_transport_ops_get() {
-	return &uart_transport_ops;
-}
+shell_define(shell_uart, SHELL_PROMPT, &uart_transport_ops);

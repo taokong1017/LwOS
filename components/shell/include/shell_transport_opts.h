@@ -7,6 +7,7 @@
 enum shell_transport_event {
 	SHELL_TRANSPORT_RX_RDY,
 	SHELL_TRANSPORT_TX_RDY,
+	SHELL_TRANSPORT_EVENT_NUM,
 };
 
 typedef void (*shell_transport_handler)(enum shell_transport_event event,

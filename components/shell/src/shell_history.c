@@ -66,7 +66,7 @@ static void shell_history_oldest_item_remove(struct shell_history *history) {
 	h_item = list_first_entry(&history->list, struct shell_history_item, inode);
 	total_len = offsetof(struct shell_history_item, data) + h_item->len +
 				h_item->padding;
-	ring_buffer_get(&history->ring_buf, NULL, total_len);
+	ring_buffer_get(history->ring_buffer, NULL, total_len);
 	list_del_init(history->list.next);
 }
 
@@ -83,7 +83,7 @@ void shell_history_add(struct shell_history *history, const char *cmd_line,
 	total_len += padding;
 	shell_history_mode_exit(history);
 
-	if ((total_len > ring_buffer_capacity_get(&history->ring_buf)) ||
+	if ((total_len > ring_buffer_capacity_get(history->ring_buffer)) ||
 		(len == 0)) {
 		return;
 	}
@@ -100,18 +100,18 @@ void shell_history_add(struct shell_history *history, const char *cmd_line,
 
 	do {
 		/* Reset the history ring buffer */
-		if (ring_buffer_is_empty(&history->ring_buf)) {
-			ring_buffer_reset(&history->ring_buf);
+		if (ring_buffer_is_empty(history->ring_buffer)) {
+			ring_buffer_reset(history->ring_buffer);
 		}
 
 		/*
 		 * Attempt to access the free ring buffer space for history command item
 		 */
-		claim_len = ring_buffer_put_claim(&history->ring_buf,
+		claim_len = ring_buffer_put_claim(history->ring_buffer,
 										  (uint8_t **)&h_item, total_len);
 		if (claim_len < total_len) {
 			claim_len2 = ring_buffer_put_claim(
-				&history->ring_buf, (uint8_t **)&h_prev_item, total_len);
+				history->ring_buffer, (uint8_t **)&h_prev_item, total_len);
 			if (claim_len2 == total_len) {
 				last_item->padding += claim_len;
 				total_len += claim_len;
@@ -122,12 +122,12 @@ void shell_history_add(struct shell_history *history, const char *cmd_line,
 		/* Add command item to the history list */
 		if (claim_len == total_len) {
 			shell_history_item_add(history, h_item, cmd_line, len, padding);
-			ring_buffer_put_finish(&history->ring_buf, claim_len);
+			ring_buffer_put_finish(history->ring_buffer, claim_len);
 			break;
 		}
 
 		/* Need to remove the odlest command from the history list */
-		ring_buffer_put_finish(&history->ring_buf, 0);
+		ring_buffer_put_finish(history->ring_buffer, 0);
 		shell_history_oldest_item_remove(history);
 	} while (true);
 
