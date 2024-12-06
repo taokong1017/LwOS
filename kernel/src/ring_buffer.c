@@ -4,7 +4,7 @@
 
 #define min(a, b) ((a) < (b) ? (a) : (b))
 
-void ring_buf_reset(struct ring_buffer *buf) {
+void ring_buffer_reset(struct ring_buffer *buf) {
 	buf->put_head = 0;
 	buf->put_tail = 0;
 	buf->put_base = 0;
@@ -13,10 +13,10 @@ void ring_buf_reset(struct ring_buffer *buf) {
 	buf->get_base = 0;
 }
 
-void ring_buf_init(struct ring_buffer *buf, uint32_t size, uint8_t *data) {
+void ring_buffer_init(struct ring_buffer *buf, uint32_t size, uint8_t *data) {
 	buf->size = size;
 	buf->buffer = data;
-	ring_buf_reset(buf);
+	ring_buffer_reset(buf);
 }
 
 bool ring_buffer_is_empty(struct ring_buffer *buf) {

@@ -20,7 +20,7 @@ struct ring_buffer {
 	struct ring_bufer name = {.buffer = ring_buffer_data_##name, .size = bytes}
 #define ring_buffer_define_pow2(name, pow) ring_buffer_define(name, BIT(pow))
 void ring_buffer_init(struct ring_buffer *buf, uint32_t size, uint8_t *data);
-void ring_buf_reset(struct ring_buffer *buf);
+void ring_buffer_reset(struct ring_buffer *buf);
 
 /* obtain a ring buffer status */
 bool ring_buffer_is_empty(struct ring_buffer *buf);

@@ -40,8 +40,7 @@ struct uart_config {
 	uint8_t flow_ctrl; /* Flow control setting */
 };
 
-typedef void (*uart_irq_callback_user_data_t)(const struct device *dev,
-											  void *user_data);
+typedef void (*uart_irq_callback_t)(const struct device *dev, void *data);
 
 struct uart_driver_ops {
 	int32_t (*poll_read)(const struct device *dev, char *data);
@@ -61,18 +60,24 @@ struct uart_driver_ops {
 	bool (*irq_rx_ready)(const struct device *dev);
 	bool (*irq_err_enable)(const struct device *dev);
 	bool (*irq_err_disable)(const struct device *dev);
-	bool (*irq_callback_set)(const struct device *dev,
-							 uart_irq_callback_user_data_t cb, void *user_data);
+	bool (*irq_callback_set)(const struct device *dev, uart_irq_callback_t cb,
+							 void *data);
 	bool (*irq_is_pending)(const struct device *dev);
 };
 
-void uart_poll_out(const struct device *dev, char c);
-void uart_irq_tx_enable(const struct device *dev);
-void uart_irq_tx_disable(const struct device *dev);
+bool uart_poll_in(const struct device *dev, char *c);
+bool uart_poll_out(const struct device *dev, char c);
+bool uart_irq_tx_enable(const struct device *dev);
+bool uart_irq_tx_disable(const struct device *dev);
+bool uart_irq_rx_enable(const struct device *dev);
+bool uart_irq_rx_disable(const struct device *dev);
 bool uart_irq_rx_ready(const struct device *dev);
 bool uart_irq_tx_ready(const struct device *dev);
 int32_t uart_irq_read(const struct device *dev, uint8_t *rx_data,
 					  const int32_t size);
 int32_t uart_irq_write(const struct device *dev, const uint8_t *tx_data,
-					   int32_t size);
+					   const int32_t size);
+bool uart_irq_callback_set(const struct device *dev, uart_irq_callback_t cb,
+						   void *data);
+
 #endif

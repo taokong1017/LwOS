@@ -101,7 +101,7 @@ void shell_history_add(struct shell_history *history, const char *cmd_line,
 	do {
 		/* Reset the history ring buffer */
 		if (ring_buffer_is_empty(&history->ring_buf)) {
-			ring_buf_reset(&history->ring_buf);
+			ring_buffer_reset(&history->ring_buf);
 		}
 
 		/*
@@ -134,8 +134,8 @@ void shell_history_add(struct shell_history *history, const char *cmd_line,
 	return;
 }
 
-bool shell_history_get(struct shell_history *history, char *buffer,
-					   size_t *len, enum shell_history_direction direction) {
+bool shell_history_get(struct shell_history *history, char *buffer, size_t *len,
+					   enum shell_history_direction direction) {
 	struct shell_history_item *h_item = NULL;
 	struct list_head *logical_next = NULL;
 

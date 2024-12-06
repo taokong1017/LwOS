@@ -5,8 +5,9 @@
 #include <general.h>
 #include <menuconfig.h>
 #include <task.h>
-#include <shell_history.h>
 #include <shell_transport_opts.h>
+#include <shell_history.h>
+#include <shell_uart.h>
 #include <shell_printf.h>
 #include <shell_vt100.h>
 #include <shell_types.h>
@@ -18,7 +19,6 @@
 #include <errno.h>
 #include <sem.h>
 #include <arch_atomic.h>
-#include <shell_uart.h>
 
 #define SHELL_NAME_LEN 32
 #define SHELL_TASK_NAME "Shell_Root"

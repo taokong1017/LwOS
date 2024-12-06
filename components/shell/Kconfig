@@ -64,6 +64,13 @@ if CONFIG_SHELL
 		help
 			The size of the shell rx ring buffer.
 
+	config CONFIG_SHELL_UART_TIMER_INTERVAL
+		int "Shell Uart Timer Interval"
+		default 10
+		range 1 1000
+		help
+			The shell uart timer interval(ms) for uart polling data.
+
 choice
 	prompt "Shell Uart Synchronous Option"
 	default CONFIG_SHELL_UART_IRQ_TYPE
