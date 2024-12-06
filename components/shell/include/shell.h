@@ -158,7 +158,7 @@ void shell_show(struct shell *shell, const char *format, ...);
 void shell_color_show(struct shell *shell, enum shell_vt100_color color,
 					  const char *format, ...);
 void shell_hexdump(struct shell *shell, const char *data, size_t len);
-void shell_print(void *context, char *data, uint32_t len);
+void shell_output(void *context, char *data, uint32_t len);
 
 #define shell_define(shell_name, shell_prompt, shell_transport_ops)            \
 	extern struct shell shell_name;                                            \
@@ -170,7 +170,7 @@ void shell_print(void *context, char *data, uint32_t len);
 	static char shell_name##_out_buffer[CONFIG_SHELL_PRINTF_BUFF_SIZE];        \
 	shell_history_define(shell_name, CONFIG_SHELL_HISTORY_BUFFER_SIZE);        \
 	shell_printf_define(shell_name, shell_name##_out_buffer,                   \
-						CONFIG_SHELL_PRINTF_BUFF_SIZE, shell_print,            \
+						CONFIG_SHELL_PRINTF_BUFF_SIZE, shell_output,           \
 						&shell_name, true);                                    \
 	struct shell shell_name = {                                                \
 		.prompt = shell_prompt,                                                \

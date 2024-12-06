@@ -28,7 +28,22 @@ static void shell_transport_notifier(enum shell_transport_event event,
 	sem_give(shell->shell_sem_id);
 }
 
-void shell_print(void *context, char *data, uint32_t len) {}
+void shell_output(void *context, char *data, uint32_t len) {
+	struct shell *shell = (struct shell *)context;
+	struct shell_transport *shell_transport = shell->shell_transport;
+	int32_t offset = 0;
+	int32_t write_len = 0;
+
+	while (len) {
+		write_len = shell_transport->transport_ops->write(
+			shell_transport->transport_context, (const char *)&data[offset],
+			len);
+		offset += write_len;
+		len -= write_len;
+	}
+
+	return;
+}
 
 void shell_show(struct shell *shell, const char *format, ...) {
 	va_list args;
