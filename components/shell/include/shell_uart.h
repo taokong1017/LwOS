@@ -9,7 +9,7 @@
 
 struct shell_uart_base {
 	const struct device *dev;
-	shell_transport_handler_t handler;
+	shell_transport_handler handler;
 	void *context;
 	bool block_tx;
 };

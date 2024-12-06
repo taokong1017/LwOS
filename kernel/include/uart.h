@@ -40,7 +40,7 @@ struct uart_config {
 	uint8_t flow_ctrl; /* Flow control setting */
 };
 
-typedef void (*uart_irq_callback_t)(const struct device *dev, void *data);
+typedef void (*uart_irq_cb)(const struct device *dev, void *data);
 
 struct uart_driver_ops {
 	int32_t (*poll_read)(const struct device *dev, char *data);
@@ -60,7 +60,7 @@ struct uart_driver_ops {
 	bool (*irq_rx_ready)(const struct device *dev);
 	bool (*irq_err_enable)(const struct device *dev);
 	bool (*irq_err_disable)(const struct device *dev);
-	bool (*irq_callback_set)(const struct device *dev, uart_irq_callback_t cb,
+	bool (*irq_callback_set)(const struct device *dev, uart_irq_cb cb,
 							 void *data);
 	bool (*irq_is_pending)(const struct device *dev);
 };
@@ -77,7 +77,7 @@ int32_t uart_irq_read(const struct device *dev, uint8_t *rx_data,
 					  const int32_t size);
 int32_t uart_irq_write(const struct device *dev, const uint8_t *tx_data,
 					   const int32_t size);
-bool uart_irq_callback_set(const struct device *dev, uart_irq_callback_t cb,
+bool uart_irq_callback_set(const struct device *dev, uart_irq_callback cb,
 						   void *data);
 
 #endif

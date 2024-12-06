@@ -59,7 +59,7 @@ int32_t uart_irq_write(const struct device *dev, const uint8_t *tx_data,
 	return 0;
 }
 
-bool uart_irq_callback_set(const struct device *dev, uart_irq_callback_t cb,
+bool uart_irq_callback_set(const struct device *dev, uart_irq_cb cb,
 						   void *data) {
 	return true;
 }

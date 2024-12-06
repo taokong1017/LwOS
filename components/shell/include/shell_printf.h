@@ -4,7 +4,7 @@
 #include <types.h>
 #include <stdarg.h>
 
-typedef void (*shell_write_t)(void *user_context, char *data, size_t length);
+typedef void (*shell_write_func)(void *user_context, char *data, size_t length);
 
 struct shell_printf_control {
 	size_t buffer_count;
@@ -14,7 +14,7 @@ struct shell_printf_control {
 struct shell_printf {
 	char *buffer;
 	size_t buffer_size;
-	const shell_write_t write;
+	shell_write_func write;
 	void *user_context;
 	struct shell_printf_control *control;
 };
