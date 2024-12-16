@@ -4,8 +4,13 @@
 #include <ctype.h>
 #include <limits.h>
 #include <arch_atomic.h>
+#include <log.h>
+#include <task.h>
 
 #define TAB_SPACES "  "
+#define SHELL_TAG "SHELL"
+#define SHELL_TASK_NAME "Shell_Root"
+#define SHELL_TASK_SIZE 8192
 #define SHELL_MSG_TOO_MANY_ARGS "Too many arguments in the command.\n"
 #define ASCII_MAX_CHAR 127
 #define max(a, b) ((a) > (b) ? (a) : (b))
@@ -802,4 +807,41 @@ void shell_entry(struct shell *shell) {
 			break;
 		}
 	}
+}
+
+errno_t shell_init(struct shell *shell, void *transport_config) {
+	if (!shell) {
+		log_err(SHELL_TAG, "shell is empty!\n");
+		return ERRNO_SHELL_EMPTY_PTR;
+	}
+
+	memset(shell->shell_context, 0x0, sizeof(struct shell_context));
+	shell_history_init(shell->shell_history);
+
+	shell->shell_context->cur_prompt = shell->prompt;
+	shell->shell_context->state = SHELL_STATE_UNINITIALIZED;
+	shell->shell_context->receive_state = SHELL_RECEIVE_DEFAULT;
+
+	shell->shell_context->vt100_context.col.col = SHELL_VT100_COLOR_WHITE;
+	shell->shell_context->vt100_context.col.bgcol = SHELL_VT100_COLOR_BLACK;
+	shell->shell_context->vt100_context.cons.terminal_width =
+		CONFIG_SHELL_TERMINAL_WIDTH_SIZE;
+	shell->shell_context->vt100_context.cons.terminal_heiht =
+		CONFIG_SHELL_TERMINAL_HEIGHT_SIZE;
+	shell->shell_context->vt100_context.cons.name_len =
+		strlen(shell->shell_context->cur_prompt);
+
+	shell->shell_transport->transport_ops->init(
+		shell->shell_transport, transport_config, shell_transport_notifier,
+		shell);
+
+	shell_state_set(shell, SHELL_STATE_INITIALIZED);
+	task_create(&shell->shell_task_id, SHELL_TASK_NAME,
+				(task_entry_func)shell_entry, shell, NULL, NULL, NULL,
+				SHELL_TASK_SIZE, TASK_DEFAULT_FLAG);
+	task_cpu_affi_set(shell->shell_task_id, TASK_CPU_AFFI(0));
+	task_priority_set(shell->shell_task_id, TASK_PRIORITY_HIGHEST);
+	task_start(shell->shell_task_id);
+
+	return OK;
 }

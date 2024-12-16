@@ -174,12 +174,12 @@ static int32_t shell_uart_poll_read(struct shell_transport *transport,
 #endif
 
 static bool shell_uart_init(struct shell_transport *transport,
-							struct device *device,
-							shell_transport_handler handler, void *context) {
+							const void *config, shell_transport_handler handler,
+							void *context) {
 	struct shell_uart_base *shell_uart_base =
 		(struct shell_uart_base *)transport->transport_context;
 
-	shell_uart_base->dev = device;
+	shell_uart_base->dev = (const struct device *)config;
 	shell_uart_base->handler = handler;
 	shell_uart_base->context = context;
 

@@ -21,7 +21,6 @@
 #include <arch_atomic.h>
 
 #define SHELL_NAME_LEN 32
-#define SHELL_TASK_NAME "Shell_Root"
 #define shell_root_cmd_section ".shell.root.cmd"
 #define shell_sub_cmd_section ".shell.sub.cmd"
 #define declare_align(type, align) type __attribute__((aligned(align)))
@@ -159,13 +158,15 @@ void shell_color_show(struct shell *shell, enum shell_vt100_color color,
 					  const char *format, ...);
 void shell_hexdump(struct shell *shell, const char *data, size_t len);
 void shell_output(void *context, char *data, uint32_t len);
+errno_t shell_init(struct shell *shell, void *transport_config);
 
 #define shell_define(shell_name, shell_prompt, shell_transport_ops)            \
 	extern struct shell shell_name;                                            \
 	static struct shell_context shell_name##_context;                          \
+	static shell_transport_context_t shell_name##_transport_context;           \
 	static struct shell_transport shell_name##_transport = {                   \
 		.transport_ops = shell_transport_ops,                                  \
-		.transport_context = &shell_name##_transport,                          \
+		.transport_context = &shell_name##_transport_context,                  \
 	};                                                                         \
 	static char shell_name##_out_buffer[CONFIG_SHELL_PRINTF_BUFF_SIZE];        \
 	shell_history_define(shell_name, CONFIG_SHELL_HISTORY_BUFFER_SIZE);        \

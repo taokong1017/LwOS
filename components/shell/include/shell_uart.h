@@ -30,4 +30,10 @@ struct shell_uart_irq {
 	atomic_t tx_busy;
 };
 
+#ifdef CONFIG_SHELL_UART_IRQ_TYPE
+typedef struct shell_uart_irq shell_transport_context_t;
+#else
+typedef struct shell_uart_poll shell_transport_context_t;
+#endif
+
 #endif

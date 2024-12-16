@@ -15,7 +15,7 @@ typedef void (*shell_transport_handler)(enum shell_transport_event event,
 
 struct shell_transport;
 struct shell_transport_ops {
-	bool (*init)(struct shell_transport *transport, struct device *device,
+	bool (*init)(struct shell_transport *transport, const void *config,
 				 shell_transport_handler handler, void *context);
 	bool (*deinit)(struct shell_transport *transport);
 	bool (*enable)(struct shell_transport *transport, bool blocking);
