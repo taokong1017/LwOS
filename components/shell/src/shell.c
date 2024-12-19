@@ -41,8 +41,7 @@ void shell_output(void *context, char *data, uint32_t len) {
 
 	while (len) {
 		write_len = shell_transport->transport_ops->write(
-			shell_transport->transport_context, (const char *)&data[offset],
-			len);
+			shell_transport, (const char *)&data[offset], len);
 		offset += write_len;
 		len -= write_len;
 	}

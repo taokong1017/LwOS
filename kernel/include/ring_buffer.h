@@ -4,14 +4,14 @@
 #include <types.h>
 
 struct ring_buffer {
-	uint8_t *buffer;
-	uint32_t size;
 	int32_t put_head;
 	int32_t put_tail;
 	int32_t put_base;
 	int32_t get_head;
 	int32_t get_tail;
 	int32_t get_base;
+	uint32_t size;
+	uint8_t *buffer;
 };
 
 /* define and initialize a ring buffer */
