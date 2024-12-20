@@ -65,7 +65,7 @@ errno_t sem_take(sem_id_t id, uint64_t timeout) {
 	if (sem->cur_count > 0) {
 		sem->cur_count--;
 		sched_spin_unlock(key);
-		log_info(SEM_TAG, "the sem %s is taken without waiting\n", sem->name);
+		log_debug(SEM_TAG, "the sem %s is taken without waiting\n", sem->name);
 		return ret;
 	}
 
@@ -96,10 +96,10 @@ errno_t sem_give(sem_id_t id) {
 	if (list_empty(&sem->wait_queue.wait_list)) {
 		if (sem->cur_count < sem->max_count) {
 			sem->cur_count++;
-			log_info(SEM_TAG, "the sem %s is given\n", sem->name);
+			log_debug(SEM_TAG, "the sem %s is given\n", sem->name);
 		} else {
 			sched_spin_unlock(key);
-			log_err(SEM_TAG, "the sem %s is full\n", sem->name);
+			log_debug(SEM_TAG, "the sem %s is full\n", sem->name);
 			return ERRNO_SEM_COUNT_FULL;
 		}
 	} else {

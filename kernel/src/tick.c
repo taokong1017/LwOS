@@ -14,7 +14,6 @@
 #define TICK_SPIN_LOCKER "TICK_SPIN_LOCKER"
 SPIN_LOCK_DEFINE(tick_spinlocker, TICK_SPIN_LOCKER);
 uint64_t tick_counts[CONFIG_CPUS_MAX_NUM] = {0};
-SPIN_LOCK_DECLARE(sched_spinlocker);
 
 void tick_announce() {
 	uint32_t cpu_id = arch_cpu_id_get();
@@ -25,8 +24,8 @@ void tick_announce() {
 	spin_lock_restore(&tick_spinlocker, key);
 
 	log_debug(TICK_TAG, "cpu%u tick: %llu\n", cpu_id, tick_counts[cpu_id]);
-	/* Fails to lock irq for qemue-system-aarch64 */
-	if (!spin_lock_is_locked(&sched_spinlocker)) {
+
+	if (!sched_spin_is_locked()) {
 		timeout_queue_handle(tick_counts[cpu_id]);
 	}
 }

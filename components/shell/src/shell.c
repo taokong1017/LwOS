@@ -11,6 +11,8 @@
 #define SHELL_TAG "SHELL"
 #define SHELL_TASK_NAME "Shell_Root"
 #define SHELL_TASK_SIZE 8192
+#define SHELL_SEM_NAME "Shell_Sem"
+#define SHELL_SEM_MAX_COUNT 1
 #define SHELL_MSG_TOO_MANY_ARGS "Too many arguments in the command.\n"
 #define ASCII_MAX_CHAR 127
 #define max(a, b) ((a) > (b) ? (a) : (b))
@@ -816,6 +818,7 @@ errno_t shell_init(struct shell *shell, void *transport_config) {
 
 	memset(shell->shell_context, 0x0, sizeof(struct shell_context));
 	shell_history_init(shell->shell_history);
+	sem_create(SHELL_SEM_NAME, 0, SHELL_SEM_MAX_COUNT, &shell->shell_sem_id);
 
 	shell->shell_context->cur_prompt = shell->prompt;
 	shell->shell_context->state = SHELL_STATE_UNINITIALIZED;
@@ -838,9 +841,11 @@ errno_t shell_init(struct shell *shell, void *transport_config) {
 	task_create(&shell->shell_task_id, SHELL_TASK_NAME,
 				(task_entry_func)shell_entry, shell, NULL, NULL, NULL,
 				SHELL_TASK_SIZE, TASK_DEFAULT_FLAG);
+	task_mem_domain_add(shell->shell_task_id, kernel_mem_domain_get());
 	task_cpu_affi_set(shell->shell_task_id, TASK_CPU_AFFI(0));
 	task_priority_set(shell->shell_task_id, TASK_PRIORITY_HIGHEST);
 	task_start(shell->shell_task_id);
+	shell_state_set(shell, SHELL_STATE_ACTIVE);
 
 	return OK;
 }

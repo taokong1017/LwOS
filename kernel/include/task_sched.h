@@ -6,6 +6,7 @@
 
 uint32_t sched_spin_lock();
 void sched_spin_unlock(uint32_t key);
+bool sched_spin_is_locked();
 void sched_ready_queue_remove(uint32_t cpu_id, struct task *task);
 void sched_ready_queue_add(uint32_t cpu_id, struct task *task);
 void sched_ready_queue_dump(uint32_t cpu_id);

@@ -49,5 +49,6 @@ struct mmu_pgtable kernel_mem_domain_page_table_get();
 phys_addr_t page_table_page_alloc(size_t size);
 ttbr_t mem_domain_save();
 void mem_domain_restore(ttbr_t ttbr);
+struct mem_domain *kernel_mem_domain_get();
 
 #endif

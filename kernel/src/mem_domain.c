@@ -291,3 +291,7 @@ ttbr_t mem_domain_save() {
 }
 
 void mem_domain_restore(ttbr_t ttbr) { write_ttbr0_el1(ttbr); }
+
+struct mem_domain *kernel_mem_domain_get() {
+	return &kernel_mem_domain;
+}

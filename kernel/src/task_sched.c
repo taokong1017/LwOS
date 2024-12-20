@@ -135,6 +135,8 @@ void sched_spin_unlock(uint32_t key) {
 	spin_lock_restore(&sched_spinlocker, key);
 }
 
+bool sched_spin_is_locked() { return spin_lock_is_locked(&sched_spinlocker); }
+
 void sched_spin_lock_dump() {
 #ifdef CONFIG_SPIN_LOCK_TRACE
 	spin_lock_dump(&sched_spinlocker);
