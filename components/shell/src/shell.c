@@ -837,7 +837,7 @@ errno_t shell_init(struct shell *shell, void *transport_config) {
 		shell->shell_transport, transport_config, shell_transport_notifier,
 		shell);
 
-	shell_state_set(shell, SHELL_STATE_INITIALIZED);
+	shell->shell_context->state = SHELL_STATE_INITIALIZED;
 	task_create(&shell->shell_task_id, SHELL_TASK_NAME,
 				(task_entry_func)shell_entry, shell, NULL, NULL, NULL,
 				SHELL_TASK_SIZE, TASK_DEFAULT_FLAG);

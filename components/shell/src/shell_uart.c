@@ -7,7 +7,7 @@
 #define IRQ_TX_NO_BUSY 0
 #define POLL_TIMER_NAME "shell_uart_timer"
 #define SHELL_UART_TAG "SHELL_UART"
-#define SHELL_PROMPT "[LW shell] > \n"
+#define SHELL_PROMPT "[LW shell] > "
 
 #ifdef CONFIG_SHELL_UART_IRQ_TYPE
 static void uart_irq_rx_handle(const struct device *dev,
