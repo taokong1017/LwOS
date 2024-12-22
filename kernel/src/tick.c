@@ -17,11 +17,10 @@ uint64_t tick_counts[CONFIG_CPUS_MAX_NUM] = {0};
 
 void tick_announce() {
 	uint32_t cpu_id = arch_cpu_id_get();
-	uint32_t key = 0;
 
-	spin_lock_save(&tick_spinlocker, &key);
+	spin_lock(&tick_spinlocker);
 	tick_counts[cpu_id]++;
-	spin_lock_restore(&tick_spinlocker, key);
+	spin_unlock(&tick_spinlocker);
 
 	log_debug(TICK_TAG, "cpu%u tick: %llu\n", cpu_id, tick_counts[cpu_id]);
 
@@ -32,11 +31,10 @@ void tick_announce() {
 
 uint64_t current_ticks_get() {
 	uint64_t tick = 0;
-	uint32_t key = 0;
 
-	spin_lock_save(&tick_spinlocker, &key);
+	spin_lock(&tick_spinlocker);
 	tick = tick_counts[arch_cpu_id_get()];
-	spin_lock_restore(&tick_spinlocker, key);
+	spin_unlock(&tick_spinlocker);
 
 	return tick;
 }

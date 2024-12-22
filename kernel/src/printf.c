@@ -8,9 +8,6 @@
 #include <menuconfig.h>
 #include <spin_lock.h>
 
-#define PRINT_LOCKER "PRINT_LOCKER"
-SPIN_LOCK_DEFINE(print_locker, PRINT_LOCKER);
-
 #define SIGN 1	   /* unsigned/signed, must be 1 */
 #define LEFT 2	   /* left justified */
 #define PLUS 4	   /* show plus */
@@ -711,14 +708,11 @@ out:
 int printf(const char *fmt, ...) {
 	va_list args;
 	int ret;
-	uint32_t key = 0;
 
-	spin_lock_save(&print_locker, &key);
 	va_start(args, fmt);
 	ret = vsnprintf(buf, BUF_SIZE - 1, fmt, args);
 	va_end(args);
 	uart_puts(buf, ret);
-	spin_lock_restore(&print_locker, key);
 
 	return ret;
 }

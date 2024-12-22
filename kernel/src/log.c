@@ -4,7 +4,6 @@
 #include <spin_lock.h>
 
 #define BUFFER_SIZE 256
-SPIN_LOCK_DECLARE(print_locker)
 extern int32_t uart_puts(const char *str, int32_t len);
 static const char *level_strings[] = {"FATAL", "ERROR", "INFO", "DEBUG"};
 static output_func log_output_func = uart_puts;
@@ -37,7 +36,6 @@ static int32_t tag_output(const char *fmt, ...) {
 int32_t log_output(int32_t level, const char *tag, const char *format, ...) {
 	va_list args;
 	int32_t ret = 0;
-	uint32_t key = 0;
 	char buffer[BUFFER_SIZE] = {0};
 
 	if (LOG_LEVEL_IS_INVALID(level) || !tag || !format) {
@@ -48,7 +46,6 @@ int32_t log_output(int32_t level, const char *tag, const char *format, ...) {
 		return -1;
 	}
 
-	spin_lock_save(&print_locker, &key);
 	tag_output("[%s]<%s>: ", level_strings[level], tag);
 
 	va_start(args, format);
@@ -58,7 +55,6 @@ int32_t log_output(int32_t level, const char *tag, const char *format, ...) {
 	if (log_output_func) {
 		log_output_func(buffer, ret);
 	}
-	spin_lock_restore(&print_locker, key);
 
 	return ret;
 }
