@@ -91,14 +91,18 @@ errno_t sem_give(sem_id_t id) {
 		return ERRNO_SEM_ID_INVALID;
 	}
 
-	key = sched_spin_lock();
+	if (!sched_spin_is_locked()) {
+		key = sched_spin_lock();
+	}
 
 	if (list_empty(&sem->wait_queue.wait_list)) {
 		if (sem->cur_count < sem->max_count) {
 			sem->cur_count++;
 			log_debug(SEM_TAG, "the sem %s is given\n", sem->name);
 		} else {
-			sched_spin_unlock(key);
+			if (!sched_spin_is_locked()) {
+				sched_spin_unlock(key);
+			}
 			log_debug(SEM_TAG, "the sem %s is full\n", sem->name);
 			return ERRNO_SEM_COUNT_FULL;
 		}
@@ -107,7 +111,9 @@ errno_t sem_give(sem_id_t id) {
 		log_debug(SEM_TAG, "the sem %s wakeup an waiting task\n", sem->name);
 	}
 
-	sched_spin_unlock(key);
+	if (!sched_spin_is_locked()) {
+		sched_spin_unlock(key);
+	}
 
 	return OK;
 }

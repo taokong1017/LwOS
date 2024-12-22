@@ -6,6 +6,7 @@
 #include <arch_atomic.h>
 #include <log.h>
 #include <task.h>
+#include <tick.h>
 
 #define TAB_SPACES "  "
 #define SHELL_TAG "SHELL"
@@ -793,6 +794,7 @@ void shell_entry(struct shell *shell) {
 	while (true) {
 		ret = sem_take(shell->shell_sem_id, SEM_WAIT_FOREVER);
 		if (ret != OK) {
+			task_delay(ms2tick(CONFIG_SHELL_UART_TIMER_INTERVAL));
 			continue;
 		}
 

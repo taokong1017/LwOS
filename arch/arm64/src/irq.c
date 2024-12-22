@@ -27,7 +27,7 @@ uint32_t arch_irq_save() {
 	uint32_t key = 0;
 
 	__asm__ __volatile__("mrs %0, daif \n"
-						 "msr daifSet, %1"
+						 "msr daifset, %1"
 						 : "=r"(key)
 						 : "i"(DAIFSET_IRQ_BIT | DAIFSET_FIQ_BIT)
 						 : "memory");
