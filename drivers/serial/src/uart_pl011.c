@@ -1,19 +1,32 @@
 #include <uart_pl011.h>
 #include <device.h>
 #include <uart.h>
+#include <general.h>
 
 void uart_early_init() {
-	UARTREG(UART_REG_BASE, UART_CR) = (1 << 8) | (1 << 0);
+	UART_UINT32(UART_REG_BASE, UART_CR) = (1 << 8) | (1 << 0);
 }
 
-bool uart_poll_in(const struct device *dev, char *c) { return true; }
+bool uart_poll_in(const struct device *dev, char *c) {
+	(void)dev;
 
-bool uart_poll_out(const struct device *dev, char c) {
-	/* Spin while fifo is full */
-	while (UARTREG(UART_REG_BASE, UART_FR) & UART_FR_TXFF) {
+	if (UART_UINT32(UART_REG_BASE, UART_FR) & UART_FR_RXFE) {
+		return false;
 	}
 
-	UARTREG(UART_REG_BASE, UART_DR) = c;
+	*c = UART_UINT8(UART_REG_BASE, UART_DR);
+
+	return true;
+}
+
+bool uart_poll_out(const struct device *dev, char c) {
+	(void)dev;
+
+	while (UART_UINT32(UART_REG_BASE, UART_FR) & UART_FR_TXFF) {
+		;
+	}
+
+	UART_UINT32(UART_REG_BASE, UART_DR) = c;
 
 	return true;
 }
