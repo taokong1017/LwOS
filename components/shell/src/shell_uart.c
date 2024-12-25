@@ -157,8 +157,6 @@ static int32_t shell_uart_poll_write(struct shell_transport *transport,
 	for (index = 0; index < size; index++) {
 		uart_poll_out(shell_uart_poll->base.dev, data[index]);
 	}
-	shell_uart_poll->base.handler(SHELL_TRANSPORT_TX_RDY,
-								  shell_uart_poll->base.context);
 
 	return size;
 }
