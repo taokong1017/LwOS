@@ -31,7 +31,7 @@ static int cmd_history(struct shell *shell, int argc, char *argv[]) {
 		if (shell->shell_context->temp_buffer_len == 0) {
 			break;
 		}
-		shell_show(shell, "[%3d] %s", index++,
+		shell_show(shell, "[%3d] %s\n", index++,
 				   shell->shell_context->temp_buffer);
 	}
 

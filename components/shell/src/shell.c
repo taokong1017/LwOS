@@ -429,6 +429,7 @@ void shell_history_handle(struct shell *shell, bool up) {
 
 void shell_tab_handle(struct shell *shell) {
 	char *argv[CONFIG_SHELL_ARGC_MAX + 1] = {NULL};
+	char **argvp = (char **)argv;
 	const struct shell_entry *cmd = NULL;
 	bool tab_possible = false;
 	int32_t arg_index = 0;
@@ -437,9 +438,8 @@ void shell_tab_handle(struct shell *shell) {
 	uint32_t count = 0;
 	uint32_t longest = 0;
 
-	tab_possible =
-		shell_tab_prepare(shell, &cmd, (char ***)&argv, &argc, &arg_index);
-	if (!tab_possible) {
+	tab_possible = shell_tab_prepare(shell, &cmd, &argvp, &argc, &arg_index);
+	if (!tab_possible || !argv[arg_index]) {
 		return;
 	}
 

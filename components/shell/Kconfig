@@ -80,7 +80,7 @@ if CONFIG_SHELL
 
 	config CONFIG_SHELL_PRINTF_BUFF_SIZE
 		int "Shell Printf Buff Size"
-		default 128
+		default 512
 		range 64 1024
 		help
 			The shell printf buff size.
