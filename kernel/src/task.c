@@ -624,7 +624,7 @@ errno_t task_wakeup_locked(struct wait_queue *wq) {
 		task->status = TASK_STATUS_READY;
 		sched_ready_queue_add(task->cpu_id, task);
 		task->is_timeout = false;
-		if (task->cpu_id == cur_cpuid) {
+		if ((task->cpu_id == cur_cpuid) && (!is_in_irq())) {
 			task_sched_locked();
 		} else {
 			smp_sched_notify();
