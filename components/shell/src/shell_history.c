@@ -76,7 +76,6 @@ void shell_history_add(struct shell_history *history, const char *cmd_line,
 	uint32_t padding = cal_padding_bytes(total_len);
 	struct shell_history_item *last_item = NULL;
 	struct shell_history_item *h_item = NULL;
-	struct shell_history_item *h_prev_item = NULL;
 	uint32_t claim_len = 0;
 	uint32_t claim_len2 = 0;
 
@@ -110,8 +109,8 @@ void shell_history_add(struct shell_history *history, const char *cmd_line,
 		claim_len = ring_buffer_put_claim(history->ring_buffer,
 										  (uint8_t **)&h_item, total_len);
 		if (claim_len < total_len) {
-			claim_len2 = ring_buffer_put_claim(
-				history->ring_buffer, (uint8_t **)&h_prev_item, total_len);
+			claim_len2 = ring_buffer_put_claim(history->ring_buffer,
+											   (uint8_t **)&h_item, total_len);
 			if (claim_len2 == total_len) {
 				last_item->padding += claim_len;
 				total_len += claim_len;
