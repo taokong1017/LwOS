@@ -1,6 +1,8 @@
 #include <shell_printf.h>
 #include <stdio.h>
 
+#define min(a, b) ((a) < (b) ? (a) : (b))
+
 int32_t shell_printf(struct shell_printf *shell_printf, const char *format,
 					 va_list args) {
 	int32_t ret = 0;
@@ -11,8 +13,7 @@ int32_t shell_printf(struct shell_printf *shell_printf, const char *format,
 
 	ret = vsnprintf(shell_printf->buffer, shell_printf->buffer_size, format,
 					args);
-	shell_printf->buffer[shell_printf->buffer_size - 1] = 0;
-	shell_printf->control->buffer_count = ret;
+	shell_printf->control->buffer_count = min(ret, shell_printf->buffer_size);
 
 	if (shell_printf->control->flush) {
 		shell_printf_flush(shell_printf);
