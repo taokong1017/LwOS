@@ -11,6 +11,7 @@ int32_t shell_printf(struct shell_printf *shell_printf, const char *format,
 
 	ret = vsnprintf(shell_printf->buffer, shell_printf->buffer_size, format,
 					args);
+	shell_printf->buffer[shell_printf->buffer_size - 1] = 0;
 	shell_printf->control->buffer_count = ret;
 
 	if (shell_printf->control->flush) {
