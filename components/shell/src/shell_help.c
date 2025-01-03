@@ -87,6 +87,8 @@ static void shell_formatted_text_print(struct shell *shell, const char *str,
 		shell_cursor_next_line_move(shell);
 		shell_op_cursor_horiz_move(shell, terminal_offset);
 	}
+
+	shell_cursor_next_line_move(shell);
 }
 
 void shell_help_cmd_print(struct shell *shell,
@@ -164,7 +166,7 @@ void shell_help_subcmd_print(struct shell *shell,
 }
 
 bool shell_help_cmd_is_request(const char *str) {
-	if (!strcmp(str, "-h") || !strcmp(str, "--help")) {
+	if (!strcmp(str, "-h") || !strcmp(str, "--help") || !strcmp(str, "?")) {
 		return true;
 	}
 
