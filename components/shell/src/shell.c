@@ -508,37 +508,30 @@ void shell_ctrl_metakeys_handle(struct shell *shell, char data) {
 static errno_t shell_cmd_do_execute(struct shell *shell, int32_t argc,
 									char **argv,
 									const struct shell_entry *help_entry) {
-	int32_t ret = 0;
+	bool in_range = true;
 	uint8_t mandatory = 0;
 	uint8_t optional = 0;
 
 	if (shell->shell_context->active_cmd.handler == NULL) {
-		if (help_entry != NULL) {
-			if (help_entry->help == NULL) {
-				return ERRNO_SHELL_NO_EXEC;
-			}
-			if (help_entry->help != shell->shell_context->active_cmd.help) {
-				shell->shell_context->active_cmd = *help_entry;
-			}
-			shell_internal_help_print(shell);
-			return ERRNO_SHELL_HELP_PRINT;
-		} else {
-			return ERRNO_SHELL_NO_EXEC;
-		}
+		shell_color_show(shell, SHELL_ERROR, "invalid command\n");
+		return ERRNO_SHELL_NO_EXEC;
 	}
 
 	if (shell->shell_context->active_cmd.args.mandatory) {
 		mandatory = shell->shell_context->active_cmd.args.mandatory;
 		optional = shell->shell_context->active_cmd.args.optional;
-		ret = in_rage(argc, mandatory, (mandatory + optional));
+		in_range = in_rage(argc, mandatory, (mandatory + optional));
 	}
 
-	if (!ret) {
-		ret = shell->shell_context->active_cmd.handler(shell, argc,
-													   (char **)argv);
+	if (in_range) {
+		return shell->shell_context->active_cmd.handler(shell, argc,
+														(char **)argv);
+	} else {
+		shell_color_show(shell, SHELL_ERROR, "%s: wrong parameter count\n",
+						 shell->shell_context->active_cmd.syntax);
+		shell_internal_help_print(shell);
+		return ERRNO_SHELL_PARAMETER_COUNT;
 	}
-
-	return ret;
 }
 
 static void active_cmd_prepare(struct shell_entry *entry,
