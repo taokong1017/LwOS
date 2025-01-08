@@ -136,31 +136,22 @@ void shell_history_add(struct shell_history *history, const char *cmd_line,
 bool shell_history_get(struct shell_history *history, char *buffer, size_t *len,
 					   enum shell_history_direction direction) {
 	struct shell_history_item *h_item = NULL;
-	struct list_head *logical_next = NULL;
+	struct list_head *next = NULL;
+	bool active = shell_history_is_active(history);
 
 	if (list_empty(&history->list) || invalid_dirction(direction)) {
 		return false;
 	}
 
-	if (direction == SHELL_HISTORY_DOWN) {
-		if (history->current == NULL) {
-			*len = 0;
-			return false;
-		}
-		logical_next = history->current->next;
-		h_item = list_entry(logical_next, struct shell_history_item, inode);
+	if (direction == SHELL_HISTORY_UP) {
+		next = active ? history->current->next : history->list.next;
 	} else {
-		if (history->current == NULL) {
-			logical_next = history->list.prev;
-			h_item = list_entry(logical_next, struct shell_history_item, inode);
-		} else {
-			logical_next = history->current->prev;
-			h_item = list_entry(logical_next, struct shell_history_item, inode);
-		}
+		next = active ? history->current->prev : history->list.prev;
 	}
 
-	if (logical_next != &history->list) {
-		history->current = &h_item->inode;
+	if (next != &history->list) {
+		history->current = next;
+		h_item = list_entry(next, struct shell_history_item, inode);
 		memcpy(buffer, h_item->data, h_item->len);
 		*len = h_item->len;
 		buffer[*len] = '\0';

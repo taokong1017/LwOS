@@ -393,38 +393,17 @@ static void shell_partial_autocomplete(struct shell *shell,
 
 void shell_history_handle(struct shell *shell, bool up) {
 	size_t cmd_len = 0;
-	bool history_mode = false;
 
-	if (!shell_history_is_active(shell->shell_history)) {
-		if (up) {
-			cmd_len = strlen(shell->shell_context->cmd_buffer);
-			if (cmd_len) {
-				strncpy(shell->shell_context->temp_buffer,
-						shell->shell_context->cmd_buffer,
-						CONFIG_SHELL_CMD_BUFFER_SIZE);
-			} else {
-				shell->shell_context->temp_buffer[0] = '\0';
-			}
-		} else {
-			return;
-		}
+	if (shell_history_get(shell->shell_history,
+						  shell->shell_context->cmd_buffer, &cmd_len,
+						  up ? SHELL_HISTORY_UP : SHELL_HISTORY_DOWN)) {
+		shell_op_cursor_home_move(shell);
+		shell_show(shell, SHELL_VT100_CLEAREOS);
+		shell_cmd_print(shell);
+		shell->shell_context->cmd_buffer_position = cmd_len;
+		shell->shell_context->cmd_buffer_length = cmd_len;
+		shell_cursor_next_line_move(shell);
 	}
-
-	history_mode = shell_history_get(shell->shell_history,
-									 shell->shell_context->cmd_buffer, &cmd_len,
-									 SHELL_HISTORY_UP);
-	if (!history_mode) {
-		strcpy(shell->shell_context->cmd_buffer,
-			   shell->shell_context->temp_buffer);
-		cmd_len = strlen(shell->shell_context->cmd_buffer);
-	}
-
-	shell_op_cursor_home_move(shell);
-	shell_show(shell, SHELL_VT100_CLEAREOS);
-	shell_cmd_print(shell);
-	shell->shell_context->cmd_buffer_position = cmd_len;
-	shell->shell_context->cmd_buffer_length = cmd_len;
-	shell_cursor_next_line_move(shell);
 }
 
 void shell_tab_handle(struct shell *shell) {
@@ -641,7 +620,7 @@ errno_t shell_cmd_interal_execute(struct shell *shell) {
 		shell_wildcard_finalize(shell);
 	}
 
-	return shell_cmd_do_execute(shell, argc - cmd_with_handler_level,
+	return shell_cmd_do_execute(shell, cmd_level - cmd_with_handler_level,
 								&argv[cmd_with_handler_level], &help_entry);
 }
 
@@ -706,11 +685,11 @@ static void shell_state_process(struct shell *shell) {
 		case SHELL_RECEIVE_DEFAULT:
 			if (shell_new_line_process(shell, data)) {
 				if (!shell->shell_context->cmd_buffer_length) {
-					shell_history_mode_exit(shell->shell_history);
 					shell_cursor_next_line_move(shell);
 				} else {
 					shell_cmd_interal_execute(shell);
 				}
+				shell_history_mode_exit(shell->shell_history);
 				shell_state_set(shell, SHELL_STATE_ACTIVE);
 				continue;
 			}

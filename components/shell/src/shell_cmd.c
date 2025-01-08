@@ -23,7 +23,7 @@ static int cmd_history(struct shell *shell, int argc, char *argv[]) {
 	while (true) {
 		his_ret = shell_history_get(
 			shell->shell_history, shell->shell_context->temp_buffer,
-			&shell->shell_context->temp_buffer_len, SHELL_HISTORY_UP);
+			&shell->shell_context->temp_buffer_len, SHELL_HISTORY_DOWN);
 		if (!his_ret) {
 			break;
 		}
