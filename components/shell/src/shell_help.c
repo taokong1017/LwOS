@@ -166,7 +166,7 @@ void shell_help_subcmd_print(struct shell *shell,
 }
 
 bool shell_help_cmd_is_request(const char *str) {
-	if (!strcmp(str, "-h") || !strcmp(str, "--help") || !strcmp(str, "?")) {
+	if (!strcmp(str, "-h") || !strcmp(str, "--help")) {
 		return true;
 	}
 

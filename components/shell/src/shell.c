@@ -468,16 +468,9 @@ void shell_ctrl_metakeys_handle(struct shell *shell, char data) {
 	case SHELL_VT100_ASCII_CTRL_K: /* CTRL + K */
 		shell_op_cursor_from_delete(shell);
 		break;
-	case SHELL_VT100_ASCII_CTRL_L: /* CTRL + L */
-		shell_show(shell, SHELL_VT100_CURSORHOME);
-		shell_show(shell, SHELL_VT100_CLEARSCREEN);
-		shell_prompt_and_cmd_print(shell);
-		break;
-
 	case SHELL_VT100_ASCII_CTRL_N: /* CTRL + N */
 		shell_history_handle(shell, false);
 		break;
-
 	case SHELL_VT100_ASCII_CTRL_P: /* CTRL + P */
 		shell_history_handle(shell, true);
 		break;
@@ -622,26 +615,6 @@ errno_t shell_cmd_interal_execute(struct shell *shell) {
 
 	return shell_cmd_do_execute(shell, cmd_level - cmd_with_handler_level,
 								&argv[cmd_with_handler_level], &help_entry);
-}
-
-errno_t shell_cmd_execute(struct shell *shell, const char *cmd) {
-	uint32_t cmd_len = strlen(cmd);
-
-	if (!cmd || !shell) {
-		return ERRNO_SHELL_EMPTY_PTR;
-	}
-
-	if (cmd_len == 0) {
-		return ERRNO_SHELL_EMPTY_CMD;
-	}
-
-	strcpy(shell->shell_context->cmd_buffer, cmd);
-	shell->shell_context->cmd_buffer_length = cmd_len;
-	shell->shell_context->cmd_buffer_position = cmd_len;
-	shell_cmd_interal_execute(shell);
-	shell_cmd_buffer_clear(shell);
-
-	return OK;
 }
 
 static void shell_receive_state_change(struct shell *shell,
