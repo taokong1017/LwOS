@@ -85,13 +85,14 @@ errno_t sem_take(sem_id_t id, uint64_t timeout) {
 errno_t sem_give(sem_id_t id) {
 	struct sem *sem = id2sem(id);
 	uint32_t key = 0;
+	bool locked = sched_spin_is_locked();
 
 	if (!sem || id != sem->id) {
 		log_err(SEM_TAG, "the sem id %ld is invalid\n", id);
 		return ERRNO_SEM_ID_INVALID;
 	}
 
-	if (!sched_spin_is_locked()) {
+	if (!locked) {
 		key = sched_spin_lock();
 	}
 
@@ -100,7 +101,7 @@ errno_t sem_give(sem_id_t id) {
 			sem->cur_count++;
 			log_debug(SEM_TAG, "the sem %s is given\n", sem->name);
 		} else {
-			if (!sched_spin_is_locked()) {
+			if (!locked) {
 				sched_spin_unlock(key);
 			}
 			log_debug(SEM_TAG, "the sem %s is full\n", sem->name);
@@ -111,7 +112,7 @@ errno_t sem_give(sem_id_t id) {
 		log_debug(SEM_TAG, "the sem %s wakeup an waiting task\n", sem->name);
 	}
 
-	if (!sched_spin_is_locked()) {
+	if (!locked) {
 		sched_spin_unlock(key);
 	}
 
