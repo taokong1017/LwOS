@@ -335,11 +335,6 @@ shell_get_last_command(const struct shell_entry *entry, int32_t argc,
 	*match_arg = SHELL_CMD_ROOT_LEVEL;
 
 	while (*match_arg < argc) {
-		if (shell_has_wildcard(argv[*match_arg])) {
-			(*match_arg)++;
-			continue;
-		}
-
 		prev_entry = entry;
 		entry = shell_cmd_find(entry, argv[*match_arg]);
 		if (entry) {

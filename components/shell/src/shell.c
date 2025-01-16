@@ -112,7 +112,7 @@ void shell_internal_help_print(struct shell *shell) {
 							"Subcommands:\n");
 }
 
-void shell_wrong_cmd_print(struct shell *shell) {
+static void shell_wrong_cmd_print(struct shell *shell) {
 	shell_color_show(shell, SHELL_ERROR, "%s: wrong parameter count\n",
 					 shell->shell_context->active_cmd.syntax);
 	shell_internal_help_print(shell);
@@ -478,30 +478,25 @@ void shell_ctrl_metakeys_handle(struct shell *shell, char data) {
 }
 
 static errno_t shell_cmd_do_execute(struct shell *shell, int32_t argc,
-									char **argv,
-									const struct shell_entry *help_entry) {
+									char **argv) {
 	bool in_range = true;
 	uint8_t mandatory = 0;
 	uint8_t optional = 0;
 
 	if (shell->shell_context->active_cmd.handler == NULL) {
-		shell_color_show(shell, SHELL_ERROR, "invalid command\n");
+		shell_color_show(shell, SHELL_ERROR, "%s: not found\n", argv[0]);
 		return ERRNO_SHELL_NO_EXEC;
 	}
 
-	if (shell->shell_context->active_cmd.args.mandatory) {
-		mandatory = shell->shell_context->active_cmd.args.mandatory;
-		optional = shell->shell_context->active_cmd.args.optional;
-		in_range = in_rage(argc, mandatory, (mandatory + optional));
-	}
+	mandatory = shell->shell_context->active_cmd.args.mandatory;
+	optional = shell->shell_context->active_cmd.args.optional;
+	in_range = in_rage(argc, mandatory, (mandatory + optional));
 
 	if (in_range) {
 		return shell->shell_context->active_cmd.handler(shell, argc,
 														(char **)argv);
 	} else {
-		shell_color_show(shell, SHELL_ERROR, "%s: wrong parameter count\n",
-						 shell->shell_context->active_cmd.syntax);
-		shell_internal_help_print(shell);
+		shell_wrong_cmd_print(shell);
 		return ERRNO_SHELL_PARAMETER_COUNT;
 	}
 }
@@ -509,13 +504,10 @@ static errno_t shell_cmd_do_execute(struct shell *shell, int32_t argc,
 static void active_cmd_prepare(struct shell_entry *entry,
 							   struct shell_entry *active_cmd,
 							   struct shell_entry *help_entry, uint32_t *level,
-							   uint32_t *handler_level, uint32_t *args_left) {
+							   uint32_t *handler_level) {
 	if (entry->handler) {
 		*active_cmd = *entry;
 		*handler_level = *level;
-		if (entry->subcmd == NULL) {
-			*args_left = entry->args.mandatory - 1;
-		}
 	}
 
 	if (entry->help) {
@@ -527,8 +519,6 @@ errno_t shell_cmd_interal_execute(struct shell *shell) {
 	struct shell_entry *entry = NULL;
 	struct shell_entry help_entry = {.help = NULL};
 	struct shell_entry *parent = NULL;
-	enum shell_wildcard_status status;
-	bool wildcard_found = false;
 	bool has_last_handler = false;
 	char *argv[CONFIG_SHELL_ARGC_MAX + 1] = {0};
 	char **argvp = &argv[0];
@@ -536,7 +526,6 @@ errno_t shell_cmd_interal_execute(struct shell *shell) {
 	char quote = 0;
 	uint32_t cmd_level = 0;
 	uint32_t cmd_with_handler_level = 0;
-	uint32_t args_left = U32_MAX;
 	int32_t argc = 0;
 
 	shell_op_cursor_end_move(shell);
@@ -550,10 +539,7 @@ errno_t shell_cmd_interal_execute(struct shell *shell) {
 	shell_history_add(shell->shell_history, shell->shell_context->cmd_buffer,
 					  shell->shell_context->cmd_buffer_length);
 
-	shell_wildcard_prepare(shell);
-
-	while ((argc != 1) && (cmd_level < CONFIG_SHELL_ARGC_MAX) &&
-		   args_left > 0) {
+	while ((argc != 1) && (cmd_level < CONFIG_SHELL_ARGC_MAX)) {
 		quote = shell_make_argv(&argc, argvp, cmd_buf, 2);
 		cmd_buf = (char *)argvp[1];
 
@@ -564,22 +550,11 @@ errno_t shell_cmd_interal_execute(struct shell *shell) {
 			return -ERRNO_SHELL_NO_EXEC;
 		}
 
-		if (cmd_level > 0) {
-			if (shell_help_cmd_is_request(argvp[0])) {
-				if (help_entry.help) {
-					shell->shell_context->active_cmd = help_entry;
-					shell_internal_help_print(shell);
-					return ERRNO_SHELL_HELP_PRINT;
-				}
-			}
-			status = shell_wildcard_process(shell, entry, argvp[0]);
-			if (status == SHELL_WILDCARD_NO_MATCH_FOUND) {
-				break;
-			}
-			if (status != SHELL_WILDCARD_NOT_FOUND) {
-				++cmd_level;
-				wildcard_found = true;
-				continue;
+		if ((cmd_level > 0) && shell_help_cmd_is_request(argvp[0])) {
+			if (help_entry.help) {
+				shell->shell_context->active_cmd = help_entry;
+				shell_internal_help_print(shell);
+				return ERRNO_SHELL_HELP_PRINT;
 			}
 		}
 
@@ -588,20 +563,17 @@ errno_t shell_cmd_interal_execute(struct shell *shell) {
 		}
 
 		argvp++;
-		args_left--;
 
 		if (entry) {
 			active_cmd_prepare(entry, &shell->shell_context->active_cmd,
-							   &help_entry, &cmd_level, &cmd_with_handler_level,
-							   &args_left);
+							   &help_entry, &cmd_level,
+							   &cmd_with_handler_level);
 			parent = entry;
 		} else {
 			has_last_handler = true;
 		}
 
-		if (args_left || (argc == 2)) {
-			cmd_level++;
-		}
+		cmd_level++;
 	}
 
 	if ((cmd_level >= CONFIG_SHELL_ARGC_MAX) && (argc == 2)) {
@@ -609,12 +581,8 @@ errno_t shell_cmd_interal_execute(struct shell *shell) {
 		return ERRNO_SHELL_NO_EXEC;
 	}
 
-	if (wildcard_found) {
-		shell_wildcard_finalize(shell);
-	}
-
 	return shell_cmd_do_execute(shell, cmd_level - cmd_with_handler_level,
-								&argv[cmd_with_handler_level], &help_entry);
+								&argv[cmd_with_handler_level]);
 }
 
 static void shell_receive_state_change(struct shell *shell,

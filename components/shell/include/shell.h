@@ -12,7 +12,6 @@
 #include <shell_vt100.h>
 #include <shell_types.h>
 #include <shell_help.h>
-#include <shell_wildcard.h>
 #include <shell_vt100.h>
 #include <shell_util.h>
 #include <shell_ops.h>
@@ -55,7 +54,7 @@
 	};
 
 #define shell_cmd_register(syntax, subcmd, help, handler)                      \
-	shell_cmd_register_with_args(syntax, subcmd, help, handler, 0, 0)
+	shell_cmd_register_with_args(syntax, subcmd, help, handler, 1, 0)
 
 #define shell_subcmd_set_create(name, ...)                                     \
 	static const struct shell_entry shell_##name[] = {__VA_ARGS__};            \
