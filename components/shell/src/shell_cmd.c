@@ -1,7 +1,8 @@
 #include <shell.h>
 
-#define SHELL_CLEAR_HELP "Clear screen."
-#define SHELL_HISTORY_HELP "Command history."
+#define SHELL_CLEAR_CMD_HELP "Clear screen."
+#define SHELL_HISTORY_CMD_HELP "Command history."
+#define SHELL_HELP_CMD_HELP "Prints the help message."
 
 static int cmd_clear(struct shell *shell, int argc, char *argv[]) {
 	(void)argc;
@@ -41,5 +42,22 @@ static int cmd_history(struct shell *shell, int argc, char *argv[]) {
 	return 0;
 }
 
-shell_cmd_register(clear, NULL, SHELL_CLEAR_HELP, cmd_clear);
-shell_cmd_register(history, NULL, SHELL_HISTORY_HELP, cmd_history);
+static int cmd_help(struct shell *shell, int argc, char *argv[]) {
+	shell_show(shell, "Use the <Tab> button to prompt or auto-complete"
+					  " all commands or its subcommands.\n");
+
+	shell_show(shell, "Try to call commands with <-h> or <--help> parameter"
+					  " for more information.\n");
+
+	shell_show(shell, "Shell supports following meta-keys:\n"
+					  "  Ctrl + (a key from: abcdefknp)\n"
+					  "  Alt  + (a key from: bf).\n");
+
+	shell_help_subcmd_print(shell, NULL, "\nAvailable commands:\n");
+
+	return 0;
+}
+
+shell_cmd_register(clear, NULL, SHELL_CLEAR_CMD_HELP, cmd_clear);
+shell_cmd_register(history, NULL, SHELL_HISTORY_CMD_HELP, cmd_history);
+shell_cmd_register(help, NULL, SHELL_HELP_CMD_HELP, cmd_help);

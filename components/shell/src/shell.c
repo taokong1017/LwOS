@@ -314,6 +314,7 @@ static void shell_tab_options_print(struct shell *shell,
 	uint32_t str_len = strlen(str);
 	uint32_t index = first;
 
+	shell_tab_item_print(shell, NULL, longest);
 	while (count) {
 		match = shell_cmd_get(cmd, index);
 		index++;
