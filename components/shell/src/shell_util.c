@@ -30,7 +30,7 @@ const struct shell_entry *shell_root_cmd_find(const char *syntax) {
 
 	for (index = 0; index < cmd_count; ++index) {
 		cmd_entry = shell_root_cmd_get(index);
-		if ((strlen(syntax) == strlen(cmd_entry->entry->syntax)) &&
+		if ((shell_strlen(syntax) == shell_strlen(cmd_entry->entry->syntax)) &&
 			(strcmp(syntax, cmd_entry->entry->syntax) == 0)) {
 			return cmd_entry->entry;
 		}
@@ -50,7 +50,7 @@ static bool shell_is_section_subcmd(const struct shell_cmd_entry *cmd_entry) {
 const struct shell_entry *shell_cmd_get(const struct shell_entry *parent,
 										uint32_t index) {
 	const struct shell_entry *entry = NULL;
-	const struct shell_cmd_entry *entry_list = NULL;
+	const struct shell_entry *entry_list = NULL;
 
 	if (parent == NULL) {
 		return (index < shell_root_cmd_count())
@@ -59,9 +59,9 @@ const struct shell_entry *shell_cmd_get(const struct shell_entry *parent,
 	}
 
 	if (shell_is_section_subcmd(parent->subcmd)) {
-		entry_list = (const struct shell_cmd_entry *)parent->subcmd;
-		if (entry_list[index].entry->syntax != NULL) {
-			entry = entry_list[index].entry;
+		entry_list = parent->subcmd->entry;
+		if (entry_list[index].syntax != NULL) {
+			entry = &entry_list[index];
 		}
 	}
 
@@ -74,7 +74,7 @@ const struct shell_entry *shell_cmd_find(const struct shell_entry *parent,
 	size_t index = 0;
 
 	while ((entry = shell_cmd_get(parent, index++)) != NULL) {
-		if ((strlen(cmd_str) == strlen(entry->syntax)) &&
+		if ((shell_strlen(cmd_str) == shell_strlen(entry->syntax)) &&
 			(strcmp(cmd_str, entry->syntax) == 0)) {
 			return entry;
 		}
@@ -116,7 +116,7 @@ void shell_cmd_space_trim(struct shell *shell) {
 }
 
 void shell_spaces_trim(char *str) {
-	int32_t len = strlen(str);
+	int32_t len = shell_strlen(str);
 	int32_t shift = 0;
 	int32_t i = 0;
 	int32_t j = 0;
@@ -147,7 +147,7 @@ void shell_spaces_trim(char *str) {
 
 void shell_pattern_remove(char *buff, size_t *buff_len, const char *pattern) {
 	char *pattern_addr = strstr(buff, pattern);
-	uint32_t pattern_len = strlen(pattern);
+	uint32_t pattern_len = shell_strlen(pattern);
 	uint32_t shift = 0;
 
 	if (!pattern_addr) {
@@ -161,7 +161,7 @@ void shell_pattern_remove(char *buff, size_t *buff_len, const char *pattern) {
 		}
 	}
 
-	shift = strlen(pattern_addr) - pattern_len + 1; /* +1 for EOS */
+	shift = shell_strlen(pattern_addr) - pattern_len + 1; /* +1 for EOS */
 	*buff_len -= pattern_len;
 
 	memmove(pattern_addr, pattern_addr + pattern_len, shift);
@@ -215,13 +215,13 @@ static char shell_internal_make_argv(char **ppcmd, uint8_t c) {
 		if (!quote) {
 			switch (c) {
 			case '\\':
-				memmove(cmd, cmd + 1, strlen(cmd));
+				memmove(cmd, cmd + 1, shell_strlen(cmd));
 				cmd += 1;
 				continue;
 
 			case '\'':
 			case '\"':
-				memmove(cmd, cmd + 1, strlen(cmd));
+				memmove(cmd, cmd + 1, shell_strlen(cmd));
 				quote = c;
 				continue;
 			default:
@@ -230,7 +230,7 @@ static char shell_internal_make_argv(char **ppcmd, uint8_t c) {
 		}
 
 		if (quote == c) {
-			memmove(cmd, cmd + 1, strlen(cmd));
+			memmove(cmd, cmd + 1, shell_strlen(cmd));
 			quote = 0;
 			continue;
 		}
@@ -239,7 +239,7 @@ static char shell_internal_make_argv(char **ppcmd, uint8_t c) {
 			char t = *(cmd + 1);
 
 			if (t == quote) {
-				memmove(cmd, cmd + 1, strlen(cmd));
+				memmove(cmd, cmd + 1, shell_strlen(cmd));
 				cmd += 1;
 				continue;
 			}
@@ -259,7 +259,7 @@ static char shell_internal_make_argv(char **ppcmd, uint8_t c) {
 				}
 
 				if (i > 2) {
-					memmove(cmd, cmd + (i - 1), strlen(cmd) - (i - 2));
+					memmove(cmd, cmd + (i - 1), shell_strlen(cmd) - (i - 2));
 					*cmd++ = v;
 					continue;
 				}
@@ -284,7 +284,7 @@ static char shell_internal_make_argv(char **ppcmd, uint8_t c) {
 				}
 
 				if (i > 2) {
-					memmove(cmd, cmd + (i - 1), strlen(cmd) - (i - 2));
+					memmove(cmd, cmd + (i - 1), shell_strlen(cmd) - (i - 2));
 					*cmd++ = v;
 					continue;
 				}
@@ -347,3 +347,5 @@ shell_get_last_command(const struct shell_entry *entry, int32_t argc,
 
 	return entry;
 }
+
+size_t shell_strlen(const char *s) { return (s == NULL) ? 0 : strlen(s); }

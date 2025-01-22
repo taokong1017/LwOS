@@ -33,14 +33,14 @@ void shell_op_cursor_vert_move(struct shell *shell, int32_t delta) {
 
 bool shell_cmd_is_full_line(struct shell *shell) {
 	return ((shell->shell_context->cmd_buffer_length +
-			 strlen(shell->shell_context->cur_prompt)) %
+			 shell_strlen(shell->shell_context->cur_prompt)) %
 				shell->shell_context->vt100_context.cons.terminal_width ==
 			0U);
 }
 
 bool shell_cursor_is_in_empty_line(struct shell *shell) {
 	return ((shell->shell_context->cmd_buffer_position +
-			 strlen(shell->shell_context->cur_prompt)) %
+			 shell_strlen(shell->shell_context->cur_prompt)) %
 				shell->shell_context->vt100_context.cons.terminal_width ==
 			0U);
 }
@@ -52,7 +52,7 @@ static void shell_prompt_print(struct shell *shell) {
 void shell_cmd_print(struct shell *shell) {
 	int beg_offset = 0;
 	int end_offset = 0;
-	int cmd_width = strlen(shell->shell_context->cmd_buffer);
+	int cmd_width = shell_strlen(shell->shell_context->cmd_buffer);
 	int adjust = shell->shell_context->vt100_context.cons.name_len;
 	char ch = 0;
 

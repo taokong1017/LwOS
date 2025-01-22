@@ -26,7 +26,7 @@ static void shell_formatted_text_print(struct shell *shell, const char *str,
 
 	while (true) {
 		index = 0;
-		length = strlen(str) - offset;
+		length = shell_strlen(str) - offset;
 		if (length <= shell->shell_context->vt100_context.cons.terminal_width -
 						  terminal_offset) {
 			for (index = 0; index < length; index++) {
@@ -96,7 +96,7 @@ void shell_help_cmd_print(struct shell *shell,
 	static const char cmd_sep[] = " - "; /* commands separator */
 	uint16_t field_width = 0;
 
-	field_width = strlen(entry->syntax) + strlen(cmd_sep);
+	field_width = shell_strlen(entry->syntax) + shell_strlen(cmd_sep);
 
 	shell_show(shell, "%s%s", entry->syntax, cmd_sep);
 
@@ -106,7 +106,7 @@ void shell_help_cmd_print(struct shell *shell,
 static void help_item_print(struct shell *shell, const char *item_name,
 							uint32_t item_name_width, const char *item_help) {
 	static const char tabulator[] = "  ";
-	uint32_t offset = 2 * strlen(tabulator) + item_name_width + 1;
+	uint32_t offset = 2 * shell_strlen(tabulator) + item_name_width + 1;
 	uint32_t space_num = 0;
 	uint32_t index = 0;
 	const char space = ' ';
@@ -117,7 +117,7 @@ static void help_item_print(struct shell *shell, const char *item_name,
 
 	shell_color_show(shell, SHELL_NORMAL, "%s%s", tabulator, item_name);
 
-	space_num = item_name_width - strlen(item_name);
+	space_num = item_name_width - shell_strlen(item_name);
 	if (item_help) {
 		for (index = 0; index < space_num; index++) {
 			shell_show(shell, "%c", space);
@@ -145,7 +145,7 @@ void shell_help_subcmd_print(struct shell *shell,
 
 	/* Search for the longest subcommand to print */
 	while ((entry = shell_cmd_get(parent, index++)) != NULL) {
-		max_len = max(max_len, strlen(entry->syntax));
+		max_len = max(max_len, shell_strlen(entry->syntax));
 	}
 
 	if (max_len == 0U) {

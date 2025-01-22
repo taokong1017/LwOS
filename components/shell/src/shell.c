@@ -193,12 +193,12 @@ void shell_tab_item_print(struct shell *shell, const char *option,
 		return;
 	}
 
-	longest_option += strlen(tab);
+	longest_option += shell_strlen(tab);
 
 	columns = ((shell->shell_context->vt100_context.cons.terminal_width -
-				strlen(tab)) /
+				shell_strlen(tab)) /
 			   longest_option);
-	diff = longest_option - strlen(option);
+	diff = longest_option - shell_strlen(option);
 
 	if (shell->shell_context->vt100_context.printed_cmd++ % columns == 0U) {
 		shell_color_show(shell, SHELL_OPTION, "\n%s%s", tab, option);
@@ -261,7 +261,7 @@ static void shell_completion_candidates_find(
 	struct shell *shell, const struct shell_entry *cmd, const char *incompl_cmd,
 	uint32_t *first_index, uint32_t *count, uint32_t *longest) {
 	const struct shell_entry *candidate = NULL;
-	uint32_t incompl_cmd_len = strlen(incompl_cmd);
+	uint32_t incompl_cmd_len = shell_strlen(incompl_cmd);
 	uint32_t index = 0;
 
 	*longest = 0;
@@ -272,7 +272,7 @@ static void shell_completion_candidates_find(
 		is_candidate = shell_is_completion_candidate(
 			candidate->syntax, incompl_cmd, incompl_cmd_len);
 		if (is_candidate) {
-			*longest = max(strlen(candidate->syntax), *longest);
+			*longest = max(shell_strlen(candidate->syntax), *longest);
 			if (*count == 0) {
 				*first_index = index;
 			}
@@ -287,10 +287,10 @@ static void autocomplete(struct shell *shell, const struct shell_entry *cmd,
 						 const char *arg, uint32_t subcmd_index) {
 	const struct shell_entry *match = NULL;
 	uint32_t cmd_len = 0;
-	uint32_t arg_len = strlen(arg);
+	uint32_t arg_len = shell_strlen(arg);
 
 	match = shell_cmd_get(cmd, subcmd_index);
-	cmd_len = strlen(match->syntax);
+	cmd_len = shell_strlen(match->syntax);
 
 	if (cmd_len != arg_len) {
 		shell_op_completion_insert(shell, match->syntax + arg_len,
@@ -311,7 +311,7 @@ static void shell_tab_options_print(struct shell *shell,
 									const char *str, uint32_t first,
 									uint32_t count, uint32_t longest) {
 	const struct shell_entry *match;
-	uint32_t str_len = strlen(str);
+	uint32_t str_len = shell_strlen(str);
 	uint32_t index = first;
 
 	shell_tab_item_print(shell, NULL, longest);
@@ -382,7 +382,7 @@ static void shell_partial_autocomplete(struct shell *shell,
 									   const char *arg, uint32_t first,
 									   uint32_t count) {
 	const char *completion = NULL;
-	uint32_t arg_len = strlen(arg);
+	uint32_t arg_len = shell_strlen(arg);
 	uint16_t common =
 		common_beginning_find(shell, cmd, &completion, first, count, arg_len);
 
@@ -419,7 +419,7 @@ void shell_tab_handle(struct shell *shell) {
 	uint32_t longest = 0;
 
 	tab_possible = shell_tab_prepare(shell, &cmd, &argvp, &argc, &arg_index);
-	if (!tab_possible || !argv[arg_index]) {
+	if (!tab_possible) {
 		return;
 	}
 
@@ -747,7 +747,7 @@ errno_t shell_init(struct shell *shell, void *transport_config) {
 	shell->shell_context->vt100_context.cons.terminal_heiht =
 		CONFIG_SHELL_TERMINAL_HEIGHT_SIZE;
 	shell->shell_context->vt100_context.cons.name_len =
-		strlen(shell->shell_context->cur_prompt);
+		shell_strlen(shell->shell_context->cur_prompt);
 
 	shell->shell_transport->transport_ops->init(
 		shell->shell_transport, transport_config, shell_transport_notifier,
