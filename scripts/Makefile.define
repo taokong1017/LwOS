@@ -14,6 +14,7 @@ endif
 CFLAGS += -g -Wall -Wunused-function -Wunused-variable -Wno-frame-address -fno-builtin -nostdinc -nostdlib -pipe \
 
 INCLUDES := -I$(srctree)/sample/include \
+	-I$(srctree)/lib/libc/include \
 	-I$(srctree)/kernel/include \
 	-I$(srctree) \
 	-I$(srctree)/components/rpmsg/include \

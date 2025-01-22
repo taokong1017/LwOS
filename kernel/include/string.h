@@ -22,16 +22,6 @@ char *strcpy(char *dest, const char *src);
 void *memmove(void *dest, const void *src, size_t count);
 
 /**
- * @brief Copies a specified number of bytes from a source memory area to a
- * destination memory area
- * @param dest: Pointer to the destination memory area
- * @param src: Pointer to the source memory area
- * @param count: The number of bytes to copy
- * @return A pointer to the destination memory area
- */
-void *memcpy(void *dest, const void *src, size_t count);
-
-/**
  * @brief Copies a specified number of characters from a source string to a
  * destination string
  * @param dest: Pointer to the destination string
@@ -67,16 +57,6 @@ char *strncpy(char *dest, const char *src, size_t count);
  * @return A pointer to the destination memory area
  */
 void *memmove(void *dest, const void *src, size_t count);
-
-/**
- * @brief Copies a specified number of bytes from a source memory area to a
- * destination memory area
- * @param dest: Pointer to the destination memory area
- * @param src: Pointer to the source memory area
- * @param count: The number of bytes to copy
- * @return A pointer to the destination memory area
- */
-void *memcpy(void *dest, const void *src, size_t count);
 
 /**
  * @brief Appends a specified number of characters from a source string to a
