@@ -3,4 +3,6 @@ obj-y := \
 	memmove.o \
 	memset.o \
 	memcmp.o \
-	memchr.o
+	memchr.o \
+	strcpy.o \
+	stpcpy.o
