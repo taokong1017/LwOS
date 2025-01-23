@@ -1,4 +1,5 @@
 obj-y := \
-	memcpy.o \
+	memcpy.o  \
 	memmove.o \
-	memset.o
+	memset.o  \
+	memcmp.o
