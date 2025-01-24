@@ -9,7 +9,7 @@
 #include <smp.h>
 #include <shell.h>
 
-#define HEAP_SIZE (0x10000000)
+#define HEAP_SIZE (0x10000)
 extern void logo_show();
 extern struct shell shell_uart;
 ALIGNED(16) char heap[HEAP_SIZE] = {0};
