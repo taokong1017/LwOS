@@ -126,7 +126,7 @@ metal_io_virt_to_phys(struct metal_io_region *io, void *virt) {
  * @return      On success, number of bytes read. On failure, negative value
  */
 int metal_io_block_read(struct metal_io_region *io, unsigned long offset,
-						void *restrict dst, int len);
+						void *dst, int len);
 
 /**
  * @brief	Write a block into an I/O region.
@@ -137,7 +137,7 @@ int metal_io_block_read(struct metal_io_region *io, unsigned long offset,
  * @return      On success, number of bytes written. On failure, negative value
  */
 int metal_io_block_write(struct metal_io_region *io, unsigned long offset,
-						 const void *restrict src, int len);
+						 const void *src, int len);
 
 /**
  * @brief	fill a block of an I/O region.

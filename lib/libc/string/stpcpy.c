@@ -7,7 +7,7 @@
 #define HIGHS (ONES * (UCHAR_MAX/2+1))
 #define HASZERO(x) (((x)-ONES) & ~(x) & HIGHS)
 
-char *stpcpy(char *restrict d, const char *restrict s)
+char *stpcpy(char *d, const char *s)
 {
 	typedef size_t __attribute__((__may_alias__)) word;
 	word *wd;

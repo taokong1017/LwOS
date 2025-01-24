@@ -18,7 +18,7 @@ void metal_io_init(struct metal_io_region *io, void *virt,
 }
 
 int metal_io_block_read(struct metal_io_region *io, unsigned long offset,
-						void *restrict dst, int len) {
+						void *dst, int len) {
 	unsigned char *ptr = metal_io_virt(io, offset);
 	unsigned char *dest = dst;
 	int retlen;
@@ -56,7 +56,7 @@ int metal_io_block_read(struct metal_io_region *io, unsigned long offset,
 }
 
 int metal_io_block_write(struct metal_io_region *io, unsigned long offset,
-						 const void *restrict src, int len) {
+						 const void *src, int len) {
 	unsigned char *ptr = metal_io_virt(io, offset);
 	const unsigned char *source = src;
 	int retlen;
