@@ -6,5 +6,6 @@ obj-y := \
 	memchr.o \
 	strcpy.o \
 	strncpy.o \
+	strcat.o \
 	stpcpy.o \
 	stpncpy.o
