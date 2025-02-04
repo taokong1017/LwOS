@@ -11,5 +11,6 @@ obj-y := \
 	strcmp.o \
 	strncmp.o \
 	strcoll.o \
+	strxfrm.o \
 	stpcpy.o \
 	stpncpy.o
