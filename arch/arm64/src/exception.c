@@ -3,6 +3,9 @@
 #include <operate_regs.h>
 #include <stdio.h>
 #include <stack_trace.h>
+#include <task.h>
+#include <task_sched.h>
+#include <cpu.h>
 
 #define EXC_TAG "EXCECTION"
 
@@ -102,15 +105,15 @@ static void print_pstate(struct arch_regs *regs) {
 
 static void show_regs(struct arch_regs *regs) {
 	int i = CPU_GPR_COUNT;
-	uint64_t lr = regs->lr;
-	uint64_t sp = regs->sp;
 
+	printf("[REGISTERS] info:\n");
 	print_pstate(regs);
 	printf("pc : 0x%016llx\n", regs->pc);
-	printf("lr : 0x%016llx\n", lr);
-	printf("sp : 0x%016llx\n", sp);
+	printf("lr : 0x%016llx\n", regs->lr);
+	printf("sp : 0x%016llx\n", regs->sp);
 	printf("esr: 0x%016llx\n", read_esr_el1());
 	printf("far: 0x%016llx\n", read_far_el1());
+	printf("cpu: 0x%016llx\n", arch_cpu_id_get());
 
 	while (i >= 0) {
 		printf("x%-2d: 0x%016llx", i, regs->gprs[i]);
@@ -123,11 +126,39 @@ static void show_regs(struct arch_regs *regs) {
 	}
 }
 
+static void show_current_task() {
+	struct task *cur_task = current_task_get();
+
+	if (!cur_task) {
+		return;
+	}
+
+	printf("[CURRENT TASK] info:\n");
+	printf("name     : %s\n", cur_task->name);
+	printf("priority : %016d\n", cur_task->priority);
+	printf("flag     : %016d\n", cur_task->flag);
+	printf("stack    : [0x%016llx, 0x%016llx]\n",
+		   cur_task->stack_ptr - cur_task->stack_size, cur_task->stack_ptr);
+	printf("cpu_id   : %016u\n", cur_task->cpu_id);
+	printf("lock_cnt : %016u\n", cur_task->lock_cnt);
+}
+
+static void show_interrupt() {
+	struct stack_info irq_stack = irq_stack_info(arch_cpu_id_get());
+
+	printf("[INTERRUPT] info:\n");
+	printf("stack    : [0x%016llx, 0x%016llx]\n", irq_stack.low,
+		   irq_stack.high);
+	printf("irq_cnt  : %016u\n", current_percpu_get()->irq_nested_cnt);
+}
+
 static void panic_unhandled(struct arch_regs *regs, const char *vector,
 							unsigned long esr) {
 	printf("Unhandled %s exception, ESR 0x%016lx -- %s\n", vector, esr,
 		   esr_get_class_string(esr));
 	show_regs(regs);
+	show_current_task();
+	show_interrupt();
 	arch_stack_default_walk(EXC_TAG, NULL, regs);
 	forever();
 }
@@ -139,7 +170,6 @@ static void panic_unhandled(struct arch_regs *regs, const char *vector,
 	}
 
 unhandled_handler_define(el1t, 64, sync);
-unhandled_handler_define(el1t, 64, irq);
 unhandled_handler_define(el1t, 64, firq);
 unhandled_handler_define(el1t, 64, serror);
 
@@ -148,11 +178,5 @@ unhandled_handler_define(el1h, 64, firq);
 unhandled_handler_define(el1h, 64, serror);
 
 unhandled_handler_define(el0t, 64, sync);
-unhandled_handler_define(el0t, 64, irq);
 unhandled_handler_define(el0t, 64, firq);
 unhandled_handler_define(el0t, 64, serror);
-
-unhandled_handler_define(el0t, 32, sync);
-unhandled_handler_define(el0t, 32, irq);
-unhandled_handler_define(el0t, 32, firq);
-unhandled_handler_define(el0t, 32, serror);

@@ -286,11 +286,15 @@ ttbr_t mem_domain_save() {
 	ttbr_t ttbr0_new = kernel_mem_domain_page_table_get().ttbr0;
 
 	write_ttbr0_el1(ttbr0_new);
+	isb();
 
 	return ttbr0_old;
 }
 
-void mem_domain_restore(ttbr_t ttbr) { write_ttbr0_el1(ttbr); }
+void mem_domain_restore(ttbr_t ttbr) {
+	write_ttbr0_el1(ttbr);
+	isb();
+}
 
 struct mem_domain *kernel_mem_domain_get() {
 	return &kernel_mem_domain;

@@ -62,8 +62,7 @@ el2_entry:
 	msr cptr_el2, x0
 
 	/* set spsr_el2 register*/
-	mov x0, SPSR_DAIF_MASK
-	orr x0, x0, SPSR_MODE_EL1T
+	mov x0, (SPSR_DAIF_MASK | SPSR_MODE_EL1H)
 	msr spsr_el2, x0
 
 	/* clear cnt register for EL2 */
@@ -130,7 +129,6 @@ bss_loop_done:
 	.extern __kernel_stack_start
 	ldr x0, =__kernel_stack_start
 	ldr x1, =arch_boot_params
-	mov x2, xzr
 	dsb osh
 	ldr w2, [x1, #BOOT_PARAMS_OF_CPU_ID_OFFSET]
 	add x2, x2, #1
