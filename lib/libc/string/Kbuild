@@ -16,6 +16,7 @@ obj-y := \
 	strrchr.o \
 	strcspn.o \
 	strspn.o \
+	strpbrk.o \
 	stpcpy.o \
 	stpncpy.o \
 	strchrnul.o \
