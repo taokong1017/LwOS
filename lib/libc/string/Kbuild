@@ -19,6 +19,7 @@ obj-y := \
 	strpbrk.o \
 	strstr.o \
 	strlen.o \
+	strtok_r.o \
 	stpcpy.o \
 	stpncpy.o \
 	strchrnul.o \
