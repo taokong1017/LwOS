@@ -13,6 +13,8 @@ obj-y := \
 	strcoll.o \
 	strxfrm.o \
 	strchr.o \
+	strrchr.o \
 	stpcpy.o \
 	stpncpy.o \
-	strchrnul.o
+	strchrnul.o \
+	memrchr.o
