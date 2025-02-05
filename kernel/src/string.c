@@ -1,13 +1,5 @@
 #include <string.h>
 
-size_t strlen(const char *s) {
-	const char *sc;
-
-	for (sc = s; *sc != '\0'; ++sc)
-		/* nothing */;
-	return sc - s;
-}
-
 size_t strnlen(const char *s, size_t count) {
 	const char *sc;
 
