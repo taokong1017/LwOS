@@ -12,5 +12,7 @@ obj-y := \
 	strncmp.o \
 	strcoll.o \
 	strxfrm.o \
+	strchr.o \
 	stpcpy.o \
-	stpncpy.o
+	stpncpy.o \
+	strchrnul.o
