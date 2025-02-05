@@ -22,5 +22,6 @@ obj-y := \
 	strtok_r.o \
 	stpcpy.o \
 	stpncpy.o \
+	strnlen.o \
 	strchrnul.o \
 	memrchr.o
