@@ -62,7 +62,7 @@ el2_entry:
 	msr cptr_el2, x0
 
 	/* set spsr_el2 register*/
-	mov x0, (SPSR_DAIF_MASK | SPSR_MODE_EL1H)
+	mov x0, (SPSR_DAIF_MASK | SPSR_MODE_EL1T)
 	msr spsr_el2, x0
 
 	/* clear cnt register for EL2 */
@@ -98,7 +98,7 @@ secondary_core:
 	mov x1, CONFIG_KERNEL_STACK_SIZE
 	mul x3, x1, x2
 	add x3, x0, x3
-	msr SPSel, #1
+	msr spsel, #0
 	mov sp, x3
 	b arch_secondary_cpu_init
 
@@ -135,7 +135,7 @@ bss_loop_done:
 	mov x1, CONFIG_KERNEL_STACK_SIZE
 	mul x3, x1, x2
 	add x3, x0, x3
-	msr SPSel, #1
+	msr spsel, #0
 	mov sp, x3
 
 	/* set up kernel memory map */

@@ -2,6 +2,7 @@
 #include <offsets.h>
 #include <task_offsets.h>
 #include <menuconfig.h>
+#include <general.h>
 
 /*
  * void arch_task_context_switch(arch_task_context_t *new, arch_task_context_t *old)
@@ -60,7 +61,7 @@ arch_task_context_switch:
 	cmp x1, #0
 	mov x1, #0x1
 	csel x1, x1, xzr, eq
-	msr SPSel, x1
+	msr spsel, x1
 
 	/* restore cpu registers */
 	ldp x30, x2,  [x0, #ARCH_TASK_CONTEXT_X30_SP_OFFSET]
@@ -104,7 +105,7 @@ arch_main_task_switch:
 	cmp x1, #0
 	mov x1, #0x1
 	csel x1, x1, xzr, eq
-	msr SPSel, x1
+	msr spsel, x1
 	mov sp, x3
 	blr x2
 	ret
@@ -116,6 +117,7 @@ arch_main_task_switch:
 .type arch_exc_exit, function
 .section .text, "ax"
 arch_exc_exit:
+	msr daifset, (DAIFSET_IRQ_BIT | DAIFSET_FIQ_BIT)
 	ldp x0, x1, [sp, #ESF_CONTEXT_OF_SPSR_ELR_OFFSET]
 	msr spsr_el1, x0
 	msr elr_el1, x1

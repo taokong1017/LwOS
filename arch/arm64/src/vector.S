@@ -91,7 +91,7 @@ nested_exit_\label:
 /* Push registers on stack */
 .macro PUSH_GENERAL_REGS el
 	.if	\el == el0
-	msr SPSel, #0
+	msr spsel, #0
 	.else
 	msr spsel, #1
 	.endif

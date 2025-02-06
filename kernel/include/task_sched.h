@@ -19,6 +19,6 @@ void main_task_create(uint32_t cpu_id);
 void system_task_create(uint32_t cpu_id);
 void task_sched_start();
 void sched_spin_lock_dump();
-errno_t task_sched_unlock();
+void task_sched_unlock();
 
 #endif

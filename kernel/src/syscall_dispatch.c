@@ -198,9 +198,12 @@ static uintptr_t syscall_task_sched_unlock(uintptr_t arg1, uintptr_t arg2,
 	(void)arg5;
 	(void)arg6;
 
+	uint32_t key = arch_irq_save();
 	arch_irq_unlock_with_regs(regs);
+	task_sched_unlock();
+	arch_irq_restore(key);
 
-	return task_sched_unlock();
+	return OK;
 }
 
 static uintptr_t syscall_msgq_create(uintptr_t arg1, uintptr_t arg2,
