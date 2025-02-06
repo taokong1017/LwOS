@@ -25,5 +25,6 @@ obj-y := \
 	strnlen.o \
 	strdup.o \
 	strndup.o \
+	memmem.o \
 	strchrnul.o \
 	memrchr.o
