@@ -13,11 +13,11 @@ __start:
 	lsr x0, x0, MODE_EL_SHIFT
 	and x0, x0, MODE_EL_MASK
 	cmp x0, MODE_EL3
-	beq el3_entry
+	b.eq el3_entry
 	cmp x0, MODE_EL2
-	beq el2_entry
+	b.eq el2_entry
 	cmp x0, MODE_EL1
-	beq el1_entry
+	b.eq el1_entry
 
 el3_entry:
 	/* set cptr_el3 register */
@@ -80,7 +80,7 @@ el1_entry:
 	ldr x1, [x0, #BOOT_PARAMS_OF_MP_ID_OFFSET]
 	cmn x1, #1
 	str x1, [x0, #BOOT_PARAMS_OF_MP_ID_OFFSET]
-	beq primary_core
+	b.eq primary_core
 
 secondary_core:
 	/* disable fp trap */

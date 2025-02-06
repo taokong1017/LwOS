@@ -18,7 +18,7 @@ sync_func:
 	mrs x1, esr_el1
 	lsr x2, x1, #26
 	cmp x2, #0x15 /* 0x15 = svc */
-	bne inv
+	b.ne inv
 
 #ifdef CONFIG_USER_SPACE
 	and x1, x1, #0xff
@@ -56,7 +56,7 @@ loop:
 	tbnz x4, #0, no_permit
 
 	cmp x0, x1
-	blo loop
+	b.lo loop
 
 	msr daif, x3
 	mov x0, #0

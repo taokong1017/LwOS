@@ -7,7 +7,7 @@ bool atomic_cas(atomic_t *target, atomic_t old_value, atomic_t new_value) {
 	__asm__ volatile("prfm pstl1strm, %2\n"
 					 "1: ldxr %w0, %2\n"
 					 "cmp %w0, %w3\n"
-					 "bne 2f\n"
+					 "b.ne 2f\n"
 					 "stxr %w1, %w4, %2\n"
 					 "cbnz %w1, 1b\n"
 					 "2:\n"

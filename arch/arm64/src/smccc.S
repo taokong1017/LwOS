@@ -1,6 +1,6 @@
 #include <offsets.h>
 
-.macro SMCCC, instr
+.macro smccc, instr
 	stp x29, x30, [sp, #-16]!
 	mov x29, sp
 	\instr #0
@@ -18,11 +18,11 @@
 .type arch_smccc_smc, function
 .section .text, "ax"
 arch_smccc_smc:
-	SMCCC smc
+	smccc smc
 
 .text
 .globl arch_smccc_hvc
 .type arch_smccc_hvc, function
 .section .text, "ax"
 arch_smccc_hvc:
-	SMCCC hvc
+	smccc hvc

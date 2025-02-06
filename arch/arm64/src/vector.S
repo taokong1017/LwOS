@@ -45,12 +45,12 @@
 	b  \label
 .endm
 
-.macro CALL_EXCEPTION_CFUNC cfunc
+.macro call_exception_func func
 	mov x0, sp
-	bl  \cfunc
+	bl  \func
 .endm
 
-.macro CALL_IRQ_CFUNC cfunc label
+.macro call_irq_func func label
 	mrs x0, tpidrro_el0
 	ldr w1, [x0, #PER_CPU_OF_IRQ_NESTED_CNT_OFFSET]
 	add w2, w1, #1
@@ -63,7 +63,7 @@
 	str x1, [sp, #-16]!
 
 ready_sp_\label:
-	bl \cfunc
+	bl \func
 
 	mrs x0, tpidrro_el0
 	ldr w1, [x0, #PER_CPU_OF_IRQ_NESTED_CNT_OFFSET]
@@ -83,13 +83,13 @@ ready_sp_\label:
 nested_exit_\label:
 .endm
 
-.macro EXCEPTION_HANDLER irqname
+.macro exception_handler irqname
 .align 7
 \irqname:
 .endm
 
 /* Push registers on stack */
-.macro PUSH_GENERAL_REGS el
+.macro push_general_regs el
 	.if	\el == el0
 	msr spsel, #0
 	.else
@@ -119,7 +119,7 @@ nested_exit_\label:
 .endm
 
 /* Pop registers from stack */
-.macro POP_GENERAL_REGS
+.macro pop_general_regs
 	ldp x22, x23, [sp, #ARM_ARCH_REGS_PC]
 	msr elr_el1,  x22
 	msr spsr_el1, x23
@@ -143,76 +143,76 @@ nested_exit_\label:
 	eret
 .endm
 
-EXCEPTION_HANDLER el1t_sync_handler
-	PUSH_GENERAL_REGS el1
-	CALL_EXCEPTION_CFUNC el1t_64_sync_handler
-	POP_GENERAL_REGS
+exception_handler el1t_sync_handler
+	push_general_regs el1
+	call_exception_func el1t_64_sync_handler
+	pop_general_regs
 
-EXCEPTION_HANDLER el1t_irq_handler
-	PUSH_GENERAL_REGS el1
-	CALL_IRQ_CFUNC isr_func el1t
-	POP_GENERAL_REGS
+exception_handler el1t_irq_handler
+	push_general_regs el1
+	call_irq_func isr_func el1t
+	pop_general_regs
 
-EXCEPTION_HANDLER el1t_firq_handler
-	PUSH_GENERAL_REGS el1
-	CALL_EXCEPTION_CFUNC el1t_64_firq_handler
-	POP_GENERAL_REGS
+exception_handler el1t_firq_handler
+	push_general_regs el1
+	call_exception_func el1t_64_firq_handler
+	pop_general_regs
 
-EXCEPTION_HANDLER el1t_serror_handler
-	PUSH_GENERAL_REGS el1
-	CALL_EXCEPTION_CFUNC el1t_64_serror_handler
-	POP_GENERAL_REGS
+exception_handler el1t_serror_handler
+	push_general_regs el1
+	call_exception_func el1t_64_serror_handler
+	pop_general_regs
 
-EXCEPTION_HANDLER el1h_sync_handler
-	PUSH_GENERAL_REGS el1
-	CALL_EXCEPTION_CFUNC el1h_64_sync_handler
-	POP_GENERAL_REGS
+exception_handler el1h_sync_handler
+	push_general_regs el1
+	call_exception_func el1h_64_sync_handler
+	pop_general_regs
 
-EXCEPTION_HANDLER el1h_irq_handler
-	PUSH_GENERAL_REGS el1
-	CALL_IRQ_CFUNC isr_func el1h
-	POP_GENERAL_REGS
+exception_handler el1h_irq_handler
+	push_general_regs el1
+	call_irq_func isr_func el1h
+	pop_general_regs
 
-EXCEPTION_HANDLER el1h_firq_handler
-	PUSH_GENERAL_REGS el1
-	CALL_EXCEPTION_CFUNC el1h_64_firq_handler
-	POP_GENERAL_REGS
+exception_handler el1h_firq_handler
+	push_general_regs el1
+	call_exception_func el1h_64_firq_handler
+	pop_general_regs
 
-EXCEPTION_HANDLER el1h_serror_handler
-	PUSH_GENERAL_REGS el1
-	CALL_EXCEPTION_CFUNC el1h_64_serror_handler
-	POP_GENERAL_REGS
+exception_handler el1h_serror_handler
+	push_general_regs el1
+	call_exception_func el1h_64_serror_handler
+	pop_general_regs
 
-EXCEPTION_HANDLER aarch64_el0_sync_handler
-	PUSH_GENERAL_REGS el0
-	CALL_EXCEPTION_CFUNC sync_func
-	POP_GENERAL_REGS
+exception_handler aarch64_el0_sync_handler
+	push_general_regs el0
+	call_exception_func sync_func
+	pop_general_regs
 
-EXCEPTION_HANDLER aarch64_el0_irq_handler
-	PUSH_GENERAL_REGS el0
-	CALL_IRQ_CFUNC isr_func aarch64_el0
-	POP_GENERAL_REGS
+exception_handler aarch64_el0_irq_handler
+	push_general_regs el0
+	call_irq_func isr_func aarch64_el0
+	pop_general_regs
 
-EXCEPTION_HANDLER aarch64_el0_firq_handler
-	PUSH_GENERAL_REGS el0
-	CALL_EXCEPTION_CFUNC el0t_64_firq_handler
-	POP_GENERAL_REGS
+exception_handler aarch64_el0_firq_handler
+	push_general_regs el0
+	call_exception_func el0t_64_firq_handler
+	pop_general_regs
 
-EXCEPTION_HANDLER aarch64_el0_serror_handler
-	PUSH_GENERAL_REGS el0
-	CALL_EXCEPTION_CFUNC el0t_64_serror_handler
-	POP_GENERAL_REGS
+exception_handler aarch64_el0_serror_handler
+	push_general_regs el0
+	call_exception_func el0t_64_serror_handler
+	pop_general_regs
 
-EXCEPTION_HANDLER aarch32_el0_sync_handler
+exception_handler aarch32_el0_sync_handler
 	b .
 
-EXCEPTION_HANDLER aarch32_el0_irq_handler
+exception_handler aarch32_el0_irq_handler
 	b .
 
-EXCEPTION_HANDLER aarch32_el0_firq_handler
+exception_handler aarch32_el0_firq_handler
 	b .
 
-EXCEPTION_HANDLER aarch32_el0_serror_handler
+exception_handler aarch32_el0_serror_handler
 	b .
 
 .globl _vector_table
