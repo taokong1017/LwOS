@@ -107,7 +107,7 @@ clean:
 
 help:
 	@echo "make config:		make CROSS_COMPILE=~/aarch64-none-elf/bin/aarch64-none-elf- menuconfig"
-	@echo "make defconfig:		make CROSS_COMPILE=~/aarch64-none-elf/bin/aarch64-none-elf- CONFIG=aarch64_defconfig defconfig"
+	@echo "make defconfig:		make CROSS_COMPILE=~/aarch64-none-elf/bin/aarch64-none-elf- CONFIG=arm64_qemu_defconfig defconfig"
 	@echo "make all:		make CROSS_COMPILE=~/aarch64-none-elf/bin/aarch64-none-elf- -j"
 	@echo "make clean:		make CROSS_COMPILE=~/aarch64-none-elf/bin/aarch64-none-elf- clean"
 	@echo "make run:		make CROSS_COMPILE=~/aarch64-none-elf/bin/aarch64-none-elf- run"
