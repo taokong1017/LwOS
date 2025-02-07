@@ -144,16 +144,24 @@ nested_exit_\label:
 .endm
 
 exception_handler el1t_sync_handler
-	b .
+	push_general_regs el1
+	call_exception_func el1t_64_sync_handler
+	pop_general_regs
 
 exception_handler el1t_irq_handler
-	b .
+	push_general_regs el1
+	call_irq_func isr_func el1t
+	pop_general_regs
 
 exception_handler el1t_firq_handler
-	b .
+	push_general_regs el1
+	call_exception_func el1t_64_firq_handler
+	pop_general_regs
 
 exception_handler el1t_serror_handler
-	b .
+	push_general_regs el1
+	call_exception_func el1t_64_serror_handler
+	pop_general_regs
 
 exception_handler el1h_sync_handler
 	push_general_regs el1
