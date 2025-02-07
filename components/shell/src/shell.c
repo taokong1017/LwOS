@@ -21,6 +21,8 @@
 #define in_rage(val, min, max) ((val) >= (min) && (val) <= (max))
 #define is_valid_assic_char(c) (in_rage(c, 0, ASCII_MAX_CHAR))
 
+extern void logo_show();
+
 static void shell_transport_notifier(enum shell_transport_event event,
 									 void *context) {
 	struct shell *shell = (struct shell *)context;
@@ -732,6 +734,7 @@ errno_t shell_init(struct shell *shell, void *transport_config) {
 		return ERRNO_SHELL_EMPTY_PTR;
 	}
 
+	logo_show();
 	memset(shell->shell_context, 0x0, sizeof(struct shell_context));
 	shell_history_init(shell->shell_history);
 	sem_create(SHELL_SEM_NAME, 0, SHELL_SEM_MAX_COUNT, &shell->shell_sem_id);
