@@ -9,7 +9,6 @@ CONFIG     :=
 
 CROSS_COMPILE :=
 LOGO       := kernel/src/logo.c
-CPU_NUM    := 2
 
 ifeq ($(V),1)
 	export quiet =
@@ -20,7 +19,7 @@ else
 endif
 export srctree = $(BASE_DIR)
 
-QEMU_RUN = qemu-system-aarch64 -machine virt,gic-version=2 -smp $(CPU_NUM) -m 1024M -cpu cortex-a53 -nographic -kernel
+QEMU_RUN = qemu-system-aarch64 -machine virt,gic-version=2 -smp $(CONFIG_CPUS_MAX_NUM) -m 1024M -cpu cortex-a53 -nographic -kernel
 
 define ALL_OBJS
 	$(shell find $(1) -name "*.o")
