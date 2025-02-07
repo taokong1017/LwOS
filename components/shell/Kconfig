@@ -9,6 +9,12 @@ config CONFIG_SHELL
 
 if CONFIG_SHELL
 
+	config CONFIG_SHELL_LOGO_SHOW
+		bool "Shell Logo show"
+		default n
+		help
+			The shell logo will be shown when the shell is starting
+
 	config CONFIG_SHELL_CMD_BUFFER_SIZE
 		int "Shell Command Buffer Size"
 		default 128

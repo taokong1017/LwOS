@@ -19,7 +19,7 @@ def convert_ascii_art(ascii_art_input, output_file):
 
 	full_ascii_art = ''.join(processed_lines)
 	full_ascii_art = '#include <stdio.h>\n\nconst char *logo =\n' + full_ascii_art
-	full_ascii_art += "\n\n void logo_show() { printf(\"%s\", logo); }\n"
+	full_ascii_art += "\n\nvoid logo_show() { printf(\"%s\", logo); }\n"
 
 	with open(output_file, 'w') as f:
 		f.write(full_ascii_art)

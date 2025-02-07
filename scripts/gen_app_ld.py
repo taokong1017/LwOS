@@ -97,7 +97,7 @@ def main():
 
 	if args.directory is None:
 		return
-	
+
 	parse_obj_files(partitions)
 	generate_linker(args.output, partitions)
 

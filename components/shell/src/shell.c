@@ -734,7 +734,9 @@ errno_t shell_init(struct shell *shell, void *transport_config) {
 		return ERRNO_SHELL_EMPTY_PTR;
 	}
 
+#ifdef CONFIG_SHELL_LOGO_SHOW
 	logo_show();
+#endif
 	memset(shell->shell_context, 0x0, sizeof(struct shell_context));
 	shell_history_init(shell->shell_history);
 	sem_create(SHELL_SEM_NAME, 0, SHELL_SEM_MAX_COUNT, &shell->shell_sem_id);
