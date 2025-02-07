@@ -24,7 +24,7 @@ void arch_task_init(task_id_t task_id) {
 #else
 	{
 #endif
-		esf->spsr = SPSR_MODE_EL1T | DAIF_FIQ_BIT | DAIF_IRQ_BIT;
+		esf->spsr = SPSR_MODE_EL1H | DAIF_FIQ_BIT | DAIF_IRQ_BIT;
 		esf->elr = (uint64_t)task_kernel_entry_point;
 	}
 
