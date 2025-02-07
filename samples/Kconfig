@@ -1,5 +1,11 @@
-menu "Samples"
+menu "Applications"
 
+if CONFIG_USER_SPACE
+source "samples/user/Kconfig"
+endif
+
+if !CONFIG_USER_SPACE
 source "samples/kernel/Kconfig"
+endif
 
 endmenu

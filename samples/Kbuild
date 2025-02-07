@@ -1,1 +1,1 @@
-subdir-y += kernel
+subdir-y += kernel user

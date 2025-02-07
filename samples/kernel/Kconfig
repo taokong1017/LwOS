@@ -1,80 +1,36 @@
-menu "Kernel APP"
+menu "Kernel Applications"
+
+choice
+	bool "Select Kernel Application"
+	default CONFIG_TASK_001
 
 config CONFIG_TASK_001
 	bool "Kernel TASK 001"
-	depends on !CONFIG_USER_SPACE
-	default n
 
 config CONFIG_TASK_002
 	bool "Kernel TASK 002"
-	depends on !CONFIG_USER_SPACE
-	default n
 
 config CONFIG_TASK_003
 	bool "Kernel TASK 003"
-	depends on !CONFIG_USER_SPACE
-	default n
 
 config CONFIG_TASK_004
 	bool "Kernel TASK 004"
-	depends on !CONFIG_USER_SPACE
-	default n
 
 config CONFIG_TASK_005
 	bool "Kernel TASK 005"
-	depends on !CONFIG_USER_SPACE
-	default n
-
-config CONFIG_USER_TASK_001
-	bool "User TASK 001"
-	depends on CONFIG_USER_SPACE
-	default n
-
-config CONFIG_USER_TASK_002
-	bool "User TASK 002"
-	depends on CONFIG_USER_SPACE
-	default n
-
-config CONFIG_USER_TASK_003
-	bool "User TASK 003"
-	depends on CONFIG_USER_SPACE
-	default n
-	help
-		These are test tasks for two user spaces.
 
 config CONFIG_TIMER_001
 	bool "Kernel Timer 001"
-	depends on !CONFIG_USER_SPACE
-	default n
 
 config CONFIG_MSGQ_001
 	bool "Kernel MSGQ 001"
-	depends on !CONFIG_USER_SPACE
-	default n
-
-config CONFIG_USER_MSGQ_001
-	bool "User MSGQ 001"
-	depends on CONFIG_USER_SPACE
-	default n
 
 config CONFIG_MUTEX_001
 	bool "Kernel MUTEX 001"
-	depends on !CONFIG_USER_SPACE
-	default n
-
-config CONFIG_USER_MUTEX_001
-	bool "User MUTEX 001"
-	depends on CONFIG_USER_SPACE
-	default n
 
 config CONFIG_SEM_001
 	bool "Kernel SEM 001"
-	depends on !CONFIG_USER_SPACE
-	default n
 
-config CONFIG_USER_SEM_001
-	bool "User SEM 001"
-	depends on CONFIG_USER_SPACE
-	default n
+endchoice
 
 endmenu

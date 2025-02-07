@@ -1,0 +1,29 @@
+menu "User Applications"
+
+choice
+	bool "Select User Application"
+	default CONFIG_USER_TASK_001
+
+config CONFIG_USER_TASK_001
+	bool "User TASK 001"
+
+config CONFIG_USER_TASK_002
+	bool "User TASK 002"
+
+config CONFIG_USER_TASK_003
+	bool "User TASK 003"
+	help
+		These are test tasks for two user spaces.
+
+config CONFIG_USER_MSGQ_001
+	bool "User MSGQ 001"
+
+config CONFIG_USER_MUTEX_001
+	bool "User MUTEX 001"
+
+config CONFIG_USER_SEM_001
+	bool "User SEM 001"
+
+endchoice
+
+endmenu
