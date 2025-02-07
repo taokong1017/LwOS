@@ -169,10 +169,6 @@ static void panic_unhandled(struct arch_regs *regs, const char *vector,
 		panic_unhandled(regs, desc, read_esr_el1());                           \
 	}
 
-unhandled_handler_define(el1t, 64, sync);
-unhandled_handler_define(el1t, 64, firq);
-unhandled_handler_define(el1t, 64, serror);
-
 unhandled_handler_define(el1h, 64, sync);
 unhandled_handler_define(el1h, 64, firq);
 unhandled_handler_define(el1h, 64, serror);
