@@ -1,5 +1,5 @@
-#ifndef __APP_MEM_DOMAIN_H__
-#define __APP_MEM_DOMAIN_H__
+#ifndef __USER_MEM_DOMAIN_H__
+#define __USER_MEM_DOMAIN_H__
 
 #include <types.h>
 #include <mem_domain.h>
@@ -14,6 +14,7 @@
 	extern char __user_data_start[];                                           \
 	extern char __user_data_end[];                                             \
 	static const struct mem_range user_data_region = {                         \
+		.name = "user_data",                                                   \
 		.start = (void *)&__user_data_start[0],                                \
 		.end = (void *)&__user_data_end[0],                                    \
 		.attrs = MT_P_RW_U_RW,                                                 \
@@ -21,6 +22,7 @@
 	extern char __user_bss_start[];                                            \
 	extern char __user_bss_end[];                                              \
 	static const struct mem_range user_bss_region = {                          \
+		.name = "user_bss",                                                    \
 		.start = (void *)&__user_bss_start[0],                                 \
 		.end = (void *)&__user_bss_end[0],                                     \
 		.attrs = MT_P_RW_U_RW,                                                 \
@@ -35,6 +37,7 @@
 							  (struct mem_range *)&user_data_region, 1);       \
 		mem_domain_ranges_add(&user_mem_domain,                                \
 							  (struct mem_range *)&user_bss_region, 1);        \
+		mem_domain_set_up(&user_mem_domain);                                   \
 	} while (0)
 
 #endif

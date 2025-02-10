@@ -15,15 +15,15 @@ section_template = """
 .{name} ALIGN({align_size}):
 {{
 	. = ALIGN({align_size});
-	__{name}_data_start = .;	/* define a global symbol at app data start */
-	*(.{name}_data)				/* app data sections */
+	__{name}_data_start = .;	/* define a global symbol at user data start */
+	*(.{name}_data)				/* user data sections */
 	. = ALIGN(0x1000);
-	__{name}_data_end = .;		/* define a global symbol at app data end */
+	__{name}_data_end = .;		/* define a global symbol at user data end */
 
-	__{name}_bss_start = .;		/* define a global symbol at app bss start */
-	*(.{name}_bss)				/* app bss sections */
+	__{name}_bss_start = .;		/* define a global symbol at user bss start */
+	*(.{name}_bss)				/* user bss sections */
 	. = ALIGN(0x1000);
-	__{name}_bss_end = .;		/* define a global symbol at app bss end */
+	__{name}_bss_end = .;		/* define a global symbol at user bss end */
 }}
 """
 
