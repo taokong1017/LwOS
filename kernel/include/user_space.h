@@ -5,7 +5,7 @@
 #include <types.h>
 #include <errno.h>
 #include <mem_domain.h>
-#include <app_mem_domain.h>
+#include <user_mem_domain.h>
 #include <task.h>
 #include <msgq.h>
 #include <sem.h>
