@@ -85,25 +85,20 @@ errno_t sem_take(sem_id_t id, uint64_t timeout) {
 errno_t sem_give(sem_id_t id) {
 	struct sem *sem = id2sem(id);
 	uint32_t key = 0;
-	bool locked = sched_spin_is_locked();
 
 	if (!sem || id != sem->id) {
 		log_err(SEM_TAG, "the sem id %ld is invalid\n", id);
 		return ERRNO_SEM_ID_INVALID;
 	}
 
-	if (!locked) {
-		key = sched_spin_lock();
-	}
+	key = sched_spin_lock();
 
 	if (list_empty(&sem->wait_queue.wait_list)) {
 		if (sem->cur_count < sem->max_count) {
 			sem->cur_count++;
 			log_debug(SEM_TAG, "the sem %s is given\n", sem->name);
 		} else {
-			if (!locked) {
-				sched_spin_unlock(key);
-			}
+			sched_spin_unlock(key);
 			log_debug(SEM_TAG, "the sem %s is full\n", sem->name);
 			return ERRNO_SEM_COUNT_FULL;
 		}
@@ -112,8 +107,30 @@ errno_t sem_give(sem_id_t id) {
 		log_debug(SEM_TAG, "the sem %s wakeup an waiting task\n", sem->name);
 	}
 
-	if (!locked) {
-		sched_spin_unlock(key);
+	sched_spin_unlock(key);
+
+	return OK;
+}
+
+errno_t sem_irq_give(sem_id_t id) {
+	struct sem *sem = id2sem(id);
+
+	if (!sem || id != sem->id) {
+		log_err(SEM_TAG, "the sem id %ld is invalid\n", id);
+		return ERRNO_SEM_ID_INVALID;
+	}
+
+	if (list_empty(&sem->wait_queue.wait_list)) {
+		if (sem->cur_count < sem->max_count) {
+			sem->cur_count++;
+			log_debug(SEM_TAG, "the sem %s is given\n", sem->name);
+		} else {
+			log_debug(SEM_TAG, "the sem %s is full\n", sem->name);
+			return ERRNO_SEM_COUNT_FULL;
+		}
+	} else {
+		task_wakeup_locked(&sem->wait_queue);
+		log_debug(SEM_TAG, "the sem %s wakeup an waiting task\n", sem->name);
 	}
 
 	return OK;

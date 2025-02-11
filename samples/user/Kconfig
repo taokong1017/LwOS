@@ -10,11 +10,6 @@ config CONFIG_USER_TASK_001
 config CONFIG_USER_TASK_002
 	bool "User TASK 002"
 
-config CONFIG_USER_TASK_003
-	bool "User TASK 003"
-	help
-		These are test tasks for two user spaces.
-
 config CONFIG_USER_MSGQ_001
 	bool "User MSGQ 001"
 

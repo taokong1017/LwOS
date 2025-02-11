@@ -10,7 +10,7 @@ import elftools.common.exceptions
 
 SZ = 'size'
 SRC = 'sources'
-section_regex = re.compile(r'.([A-Za-z0-9_]*)_(data|bss)')
+section_regex = re.compile(r'.([A-Za-z0-9_]*)_(data|bss|rodata)')
 section_template = """
 .{name} ALIGN({align_size}):
 {{
@@ -24,6 +24,11 @@ section_template = """
 	*(.{name}_bss)				/* user bss sections */
 	. = ALIGN(0x1000);
 	__{name}_bss_end = .;		/* define a global symbol at user bss end */
+
+	__{name}_rodata_start = .;		/* define a global symbol at user rodata start */
+	*(.{name}_rodata)				/* user rodata sections */
+	. = ALIGN(0x1000);
+	__{name}_rodata_end = .;		/* define a global symbol at user rodata end */
 }}
 """
 

@@ -3,26 +3,25 @@
 #include <tick.h>
 
 #define TASK_STACK_SIZE 0x2000
-static struct mem_domain app_mem_domain;
-APP_PARTITION_DEFINE(app1);
+user_mem_domain_define();
 
 #define ROOT_TASK_NAME "Root_Task"
-APP_DATA(app1) task_id_t root_task_id = -1;
-APP_DATA(app1) struct task root_task = {0};
-APP_BSS(app1) char root_stack[TASK_STACK_SIZE] = {0};
+user_data_section task_id_t root_task_id = -1;
+user_data_section struct task root_task = {0};
+user_bss_section char root_stack[TASK_STACK_SIZE] = {0};
 
 #define TASK_A_NAME "Task_A"
-APP_DATA(app1) task_id_t task_a_id = -1;
-APP_DATA(app1) struct task task_a = {0};
-APP_BSS(app1) char task_a_stack[TASK_STACK_SIZE] = {0};
+user_data_section task_id_t task_a_id = -1;
+user_data_section struct task task_a = {0};
+user_bss_section char task_a_stack[TASK_STACK_SIZE] = {0};
 
 #define TASK_B_NAME "Task_B"
-APP_DATA(app1) task_id_t task_b_id = -1;
-APP_DATA(app1) struct task task_b = {0};
-APP_BSS(app1) char task_b_stack[TASK_STACK_SIZE] = {0};
+user_data_section task_id_t task_b_id = -1;
+user_data_section struct task task_b = {0};
+user_bss_section char task_b_stack[TASK_STACK_SIZE] = {0};
 
 #define USER_MUTEX_NAME "User_Mutex"
-APP_DATA(app1) mutex_id_t user_mutex_id = -1;
+user_data_section mutex_id_t user_mutex_id = -1;
 
 static void my_delay(int32_t i) {
 	while (i--)
@@ -86,14 +85,13 @@ static void user_task_entry(void *arg0, void *arg1, void *arg2, void *arg3) {
 }
 
 int main() {
-	app_mem_domain_init(&app_mem_domain, "app1", app1);
-	mem_domain_set_up(&app_mem_domain);
+	user_mem_domain_init();
 
 	/* 创建用户态根任务 */
 	task_create_with_stack(&root_task_id, ROOT_TASK_NAME, user_task_entry, NULL,
 						   NULL, NULL, NULL, &root_task, &root_stack,
 						   TASK_STACK_SIZE, TASK_FLAG_USER);
-	task_mem_domain_add(root_task_id, &app_mem_domain);
+	task_mem_domain_add(root_task_id, &user_mem_domain);
 	task_priority_set(root_task_id, TASK_PRIORITY_HIGHEST);
 	task_start(root_task_id);
 

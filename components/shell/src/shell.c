@@ -35,7 +35,7 @@ static void shell_transport_notifier(enum shell_transport_event event,
 		return;
 	}
 
-	sem_give(shell->shell_sem_id);
+	sem_irq_give(shell->shell_sem_id);
 }
 
 void shell_output(void *context, char *data, uint32_t len) {

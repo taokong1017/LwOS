@@ -27,16 +27,32 @@
 		.end = (void *)&__user_bss_end[0],                                     \
 		.attrs = MT_P_RW_U_RW,                                                 \
 	};                                                                         \
+	extern char __user_rodata_start[];                                         \
+	extern char __user_rodata_end[];                                           \
+	static const struct mem_range user_rodata_region = {                       \
+		.name = "user_rodata",                                                 \
+		.start = (void *)&__user_rodata_start[0],                              \
+		.end = (void *)&__user_rodata_end[0],                                  \
+		.attrs = MT_P_RO_U_RO,                                                 \
+	};                                                                         \
 	struct mem_domain user_mem_domain;
 
 #define user_mem_domain_init()                                                 \
 	do {                                                                       \
 		mem_domain_init(&user_mem_domain, "user_domain");                      \
 		mem_domain_kernel_ranges_copy(&user_mem_domain);                       \
-		mem_domain_ranges_add(&user_mem_domain,                                \
-							  (struct mem_range *)&user_data_region, 1);       \
-		mem_domain_ranges_add(&user_mem_domain,                                \
-							  (struct mem_range *)&user_bss_region, 1);        \
+		if (user_data_region.start < user_data_region.end) {                   \
+			mem_domain_ranges_add(&user_mem_domain,                            \
+								  (struct mem_range *)&user_data_region, 1);   \
+		}                                                                      \
+		if (user_bss_region.start < user_bss_region.end) {                     \
+			mem_domain_ranges_add(&user_mem_domain,                            \
+								  (struct mem_range *)&user_bss_region, 1);    \
+		}                                                                      \
+		if (user_rodata_region.start < user_rodata_region.end) {               \
+			mem_domain_ranges_add(&user_mem_domain,                            \
+								  (struct mem_range *)&user_rodata_region, 1); \
+		}                                                                      \
 		mem_domain_set_up(&user_mem_domain);                                   \
 	} while (0)
 
