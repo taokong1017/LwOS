@@ -1,4 +1,4 @@
-obj-y := \
+obj-$(CONFIG_LIBC_STRING) := \
 	memcpy.o \
 	memmove.o \
 	memset.o \

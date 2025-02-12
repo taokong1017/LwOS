@@ -1,2 +1,2 @@
-obj-y := \
+obj-$(CONFIG_LIBC_STD) := \
 	abs.o

@@ -1,0 +1,19 @@
+menu "C Standard Library"
+
+choice
+	prompt "Library String Option"
+	default CONFIG_LIBC_STRING
+	help
+		The C Standard Library provides a complete string interface.
+
+config CONFIG_LIBC_STRING
+	bool "Enable Library String"
+endchoice
+
+config CONFIG_LIBC_STD
+	bool "Enable Library STD"
+	default y
+	help
+		The C Standard Library provides standard interface.
+
+endmenu

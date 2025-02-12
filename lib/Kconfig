@@ -1,0 +1,5 @@
+menu "Libs"
+
+source "lib/libc/Kconfig"
+
+endmenu
