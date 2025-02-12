@@ -44,6 +44,7 @@ char *strchrnul(const char *, int);
 char *strcasestr(const char *, const char *);
 void *memrchr(const void *, int, size_t);
 void *mempcpy(void *, const void *, size_t);
+int strncasecmp (const char *, const char *, size_t);
 
 #ifdef __cplusplus
 }

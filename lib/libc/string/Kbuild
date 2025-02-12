@@ -30,5 +30,10 @@ obj-y := \
 	strsep.o \
 	strlcat.o \
 	strlcpy.o \
+	explicit_bzero.o \
+	strverscmp.o \
 	strchrnul.o \
-	memrchr.o
+	strcasestr.o \
+	strncasecmp.o \
+	memrchr.o \
+	mempcpy.o
