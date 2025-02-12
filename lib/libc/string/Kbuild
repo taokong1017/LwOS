@@ -36,4 +36,9 @@ obj-y := \
 	strcasestr.o \
 	strncasecmp.o \
 	memrchr.o \
-	mempcpy.o
+	mempcpy.o \
+	bcmp.o \
+	bcopy.o \
+	bzero.o \
+	index.o \
+	rindex.o
