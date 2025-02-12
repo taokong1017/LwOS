@@ -44,16 +44,16 @@ char *strchrnul(const char *, int);
 char *strcasestr(const char *, const char *);
 void *memrchr(const void *, int, size_t);
 void *mempcpy(void *, const void *, size_t);
-int strcasecmp (const char *, const char *);
-int strncasecmp (const char *, const char *, size_t);
-int ffs (int);
-int ffsl (long);
-int ffsll (long long);
-int bcmp (const void *, const void *, size_t);
-void bcopy (const void *, void *, size_t);
-void bzero (void *, size_t);
-char *index (const char *, int);
-char *rindex (const char *, int);
+int strcasecmp(const char *, const char *);
+int strncasecmp(const char *, const char *, size_t);
+int ffs(int);
+int ffsl(long);
+int ffsll(long long);
+int bcmp(const void *, const void *, size_t);
+void bcopy(const void *, void *, size_t);
+void bzero(void *, size_t);
+char *index(const char *, int);
+char *rindex(const char *, int);
 
 #ifdef __cplusplus
 }

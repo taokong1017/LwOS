@@ -1,2 +1,4 @@
 subdir-y += \
-	string
+	string \
+	stdlib \
+	malloc

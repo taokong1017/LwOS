@@ -17,6 +17,7 @@ typedef long ssize_t;
 typedef unsigned long uintptr_t;
 typedef long intptr_t;
 typedef signed long ptrdiff_t;
+typedef unsigned wchar_t;
 
 #define true 1
 #define false 0
