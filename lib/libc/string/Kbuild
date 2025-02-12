@@ -34,9 +34,13 @@ obj-y := \
 	strverscmp.o \
 	strchrnul.o \
 	strcasestr.o \
-	strncasecmp.o \
 	memrchr.o \
 	mempcpy.o \
+	strcasecmp.o \
+	strncasecmp.o \
+	ffs.o \
+	ffsl.o \
+	ffsll.o \
 	bcmp.o \
 	bcopy.o \
 	bzero.o \
