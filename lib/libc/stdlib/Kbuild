@@ -2,6 +2,9 @@ obj-$(CONFIG_LIBC_STD) := \
 	atoi.o \
 	atol.o \
 	atoll.o \
+	strtol.o \
+	strtoul.o \
+	strtoll.o \
 	rand.o \
 	bsearch.o \
 	qsort.o \
