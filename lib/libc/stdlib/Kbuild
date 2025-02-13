@@ -1,2 +1,13 @@
 obj-$(CONFIG_LIBC_STD) := \
-	abs.o
+	atoi.o \
+	atol.o \
+	atoll.o \
+	rand.o \
+	bsearch.o \
+	qsort.o \
+	abs.o \
+	labs.o \
+	llabs.o \
+	div.o \
+	ldiv.o \
+	lldiv.o
