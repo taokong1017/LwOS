@@ -51,6 +51,17 @@ SECTIONS
 		__data_end = .;		/* define a global symbol at data end */
 	}
 
+	.shared_data ALIGN(0x1000):
+	{
+		__shared_data_start = .;	/* define a global symbol at shared data start */
+
+		*(.shared_data)			/* .shared_data sections */
+		*(.shared_data*)			/* .shared_data* sections */
+
+		. = ALIGN(0x1000);
+		__shared_data_end = .;		/* define a global symbol at data end */
+	}
+
 	.shell ALIGN(0x1000):
 	{
 		__shell_cmd_start = .;	/* define shell command start */

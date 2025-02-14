@@ -8,6 +8,7 @@
 #define ALIGNED(x) __attribute__((aligned(x)))
 #define PACKED __attribute__((__packed__))
 #define BIT(nr) (1UL << nr)
+#define BIT_MASK(n) (BIT((n)) - 1UL)
 #define GENMASK(h, l) (((~0UL) - (1UL << (l)) + 1) & (~0UL >> (32UL - 1 - (h))))
 #define GENMASK64(h, l)                                                        \
 	(((~0ULL) - (1ULL << (l)) + 1) & (~0ULL >> (64UL - 1 - (h))))

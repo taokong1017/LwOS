@@ -9,6 +9,7 @@
 #define user_section(segment) __attribute__((section(#segment)))
 #define user_data_section user_section(.user_data)
 #define user_bss_section user_section(.user_bss)
+#define shared_data_section user_section(.shared_data)
 
 #define user_mem_domain_define()                                               \
 	extern char __user_data_start[];                                           \

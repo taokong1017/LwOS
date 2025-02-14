@@ -17,7 +17,8 @@ obj-y := \
 	timer.o \
 	mem_domain.o \
 	ring_buffer.o \
-	fnmatch.o 
+	fnmatch.o \
+	heap.o
 
 obj-$(CONFIG_SMP) += \
 	smp.o

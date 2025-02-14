@@ -1,6 +1,7 @@
 #include <stdlib.h>
+#include <user_mem_domain.h>
 
-static uint64_t seed;
+shared_data_section uint64_t seed = 0;
 
 void srand(unsigned s)
 {
