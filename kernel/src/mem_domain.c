@@ -22,6 +22,8 @@ extern char __bss_start[];
 extern char __bss_end[];
 extern char __kernel_stack_start[];
 extern char __kernel_stack_end[];
+extern char __kernel_heap_start[];
+extern char __kernel_heap_end[];
 extern char __interrupt_stack_start[];
 extern char __interrupt_stack_end[];
 extern char __page_table_pool_start[];
@@ -75,6 +77,12 @@ static struct mem_range kernel_mem_ranges[] = {
 		.name = "Kernel_Stack",
 		.start = (void *)__kernel_stack_start,
 		.end = (void *)__kernel_stack_end,
+		.attrs = MT_P_RW_U_NA,
+	},
+	{
+		.name = "Kernel_Heap",
+		.start = (void *)__kernel_heap_start,
+		.end = (void *)__kernel_heap_end,
 		.attrs = MT_P_RW_U_NA,
 	},
 	{

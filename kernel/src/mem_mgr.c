@@ -34,6 +34,9 @@
 #define ROUNDDOWN_SIZE(_r) ((_r) & ~MEM_ALIGN)
 #define ROUNDUP(_x, _v) ((((~(_x)) + 1) & ((_v)-1)) + (_x))
 
+extern char __kernel_heap_start[];
+extern char __kernel_heap_end[];
+
 struct free_ptr {
 	struct bhdr *prev;
 	struct bhdr *next;
@@ -269,7 +272,7 @@ static void free_ex(void *ptr, void *mem_pool) {
 	tmp_b->prev_hdr = b;
 }
 
-errno_t kmem_init(void *mem, uint32_t size) {
+static errno_t kmem_init(void *mem, uint32_t size) {
 	struct tlsf *tlsf;
 	struct bhdr *b, *ib;
 
@@ -309,6 +312,11 @@ errno_t kmem_init(void *mem, uint32_t size) {
 	tlsf->max_size = tlsf->used_size;
 
 	return OK;
+}
+
+void kheap_init() {
+	kmem_init((void *)__kernel_heap_start,
+			  __kernel_heap_end - __kernel_heap_start);
 }
 
 static void *malloc_ex(uint32_t size, void *mem_pool) {

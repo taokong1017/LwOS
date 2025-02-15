@@ -1,16 +1,16 @@
 menu "Kernel"
 
 config CONFIG_SMP
-	bool "Enable Kernel SMP"
+	bool "Enable SMP"
 	default y
 	help
-		this option enables kernel smp to use multiple CPUs.
+		this option enables smp to use multiple CPUs.
 
-config CONFIG_USER_SPACE
-	bool "Enable User Space"
+config CONFIG_SPIN_LOCK_TRACE
+	bool "Enable Spin Lock Trace"
 	default n
 	help
-		this option enables to use user space running applications.
+		This option enables to trace the spin lock. It is useful when debugging dead spin lock.
 
 config CONFIG_PAGE_TABLE_MAX_NUM
 	int "Page Table Maximum Number"
@@ -31,14 +31,21 @@ config CONFIG_TICKS_PER_SECOND
 	default 1000
 	range 1 10000
 	help
-	  This represents the tick value per second.
+		This represents the tick value per second.
 
 config CONFIG_KERNEL_STACK_SIZE
 	int "Kernel Stack Size"
 	default 8192
 	range 4096 8192
 	help
-	  This represents the kernel stack size for primary core initialization.
+		This represents the kernel stack size for primary core initialization.
+
+config CONFIG_INTERRUPT_STACK_SIZE
+	int "Interrupt Stack Size"
+	default 8192
+	range 4096 8192
+	help
+		This represents the interrupt stack size for every cpu.
 
 menu "Message Queue"
 
@@ -58,21 +65,30 @@ config CONFIG_MSGQ_MAX_SIZE
 
 endmenu
 
-menu "Interrupt"
-
-config CONFIG_INTERRUPT_STACK_SIZE
-	int "Interrupt Stack Size"
-	default 8192
-	range 4096 8192
+config CONFIG_KERNEL_HEAP_SIZE
+	int "Kernel Heap Size"
+	default 1048576
+	range 1048576 8388608
 	help
-	  This represents the interrupt stack size for every cpu.
+		This represents the size of the kernel heap, which is used for dynamic memory
+		allocation within the kernel.
 
-endmenu
-
-config CONFIG_SPIN_LOCK_TRACE
-	bool "Enable Spin Lock Trace"
+config CONFIG_USER_SPACE
+	bool "Enable User Space"
 	default n
 	help
-		This option enables to trace the spin lock. It's useful when debugging dead spin lock.
+		This option enables to use user space running applications.
+
+if CONFIG_USER_SPACE
+
+config CONFIG_USER_HEAP_SIZE
+	int "User Heap Size"
+	default 1048576
+	range 1048576 8388608
+	help
+		This represents the size of the user heap, which is used for dynamic memory
+		allocation within the user.
+
+endif
 
 endmenu

@@ -9,12 +9,10 @@
 #include <smp.h>
 #include <shell.h>
 
-#define HEAP_SIZE (0x200000)
 extern struct shell shell_uart;
-ALIGNED(16) char heap[HEAP_SIZE] = {0};
 
 void kernel_start() {
-	kmem_init((void *)heap, HEAP_SIZE);
+	kheap_init();
 	psci_init("hvc");
 	arm_gic_init(true);
 	arch_timer_init(true);

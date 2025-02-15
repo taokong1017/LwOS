@@ -90,6 +90,12 @@ SECTIONS
 	__kernel_stack_end = .;
 
 	. = ALIGN(0x1000);
+	__kernel_heap_start = .;
+	. += (CONFIG_KERNEL_HEAP_SIZE);
+	. = ALIGN(0x1000);
+	__kernel_heap_end = .;
+
+	. = ALIGN(0x1000);
 	__interrupt_stack_start = .;
 	. += (CONFIG_INTERRUPT_STACK_SIZE * CONFIG_CPUS_MAX_NUM);
 	. = ALIGN(0x1000);

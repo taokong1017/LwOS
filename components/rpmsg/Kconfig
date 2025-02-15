@@ -16,6 +16,7 @@ config CONFIG_RPMSG_KERNEL_USE
 
 config CONFIG_RPMSG_USER_USE
 	bool "Enable RPMSG User Use"
+	depends on CONFIG_USER_SPACE
 
 endchoice
 
