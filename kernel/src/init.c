@@ -14,7 +14,7 @@ extern struct shell shell_uart;
 ALIGNED(16) char heap[HEAP_SIZE] = {0};
 
 void kernel_start() {
-	mem_init((void *)heap, HEAP_SIZE);
+	kmem_init((void *)heap, HEAP_SIZE);
 	psci_init("hvc");
 	arm_gic_init(true);
 	arch_timer_init(true);

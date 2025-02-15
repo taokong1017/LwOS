@@ -44,7 +44,7 @@ errno_t mutex_create(const char *name, mutex_id_t *id) {
 		return ERRNO_MUTEX_PTR_NULL;
 	}
 
-	mutex = (struct mutex *)mem_malloc(sizeof(struct mutex));
+	mutex = (struct mutex *)kmalloc(sizeof(struct mutex));
 	if (!mutex) {
 		log_fatal(MUTEX_TAG, "allocate the mutex %s failed without memory\n",
 				  name);
@@ -80,7 +80,7 @@ errno_t mutex_destroy(mutex_id_t id) {
 
 	mutex->id = MUTEX_INVALID_ID;
 	log_debug(MUTEX_TAG, "the mutex %s is destroyed\n", mutex->name);
-	mem_free(mutex);
+	kfree(mutex);
 
 	sched_spin_unlock(key);
 

@@ -70,7 +70,7 @@ errno_t timer_create(const char *name, enum timer_type type, uint64_t ticks,
 		return ret;
 	}
 
-	timer = mem_malloc(sizeof(struct timer));
+	timer = kmalloc(sizeof(struct timer));
 	if (!timer) {
 		log_err(TIMER_TAG, "malloc failed\n");
 		return ERRNO_TIMER_NO_MEMORY;
@@ -161,7 +161,7 @@ errno_t timer_destroy(timer_id_t id) {
 
 	timer->id = TIMER_INVALID_ID;
 	log_debug(TIMER_TAG, "timer %s is destroyed\n", timer->name);
-	mem_free(timer);
+	kfree(timer);
 
 	return OK;
 }

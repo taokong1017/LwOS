@@ -136,7 +136,7 @@ errno_t task_create(task_id_t *task_id, const char *name, task_entry_func entry,
 		return err;
 	}
 
-	stack_limit = mem_malloc(stack_size);
+	stack_limit = kmalloc(stack_size);
 	stack_ptr = (void *)((uintptr_t)stack_limit + stack_size);
 	if (!stack_limit) {
 		log_fatal(TASK_TAG, "allocate stack of task %s failed without memory\n",
@@ -144,9 +144,9 @@ errno_t task_create(task_id_t *task_id, const char *name, task_entry_func entry,
 		return ERRNO_TASK_NO_MEMORY;
 	}
 
-	task = (struct task *)mem_malloc(sizeof(struct task));
+	task = (struct task *)kmalloc(sizeof(struct task));
 	if (!task) {
-		mem_free(stack_limit);
+		kfree(stack_limit);
 		log_fatal(TASK_TAG, "allocate task %s failed without memory\n", name);
 		return ERRNO_TASK_NO_MEMORY;
 	}

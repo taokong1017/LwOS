@@ -4,4 +4,19 @@ config CONFIG_RPMSG
 	bool "Kernel RPMSG"
 	default n
 
+choice
+	prompt "RPMSG Use State"
+	default CONFIG_RPMSG_KERNEL_USE
+	depends on CONFIG_RPMSG
+	help
+		The rpmsg component provides a choice to use in kernel state or user state.
+
+config CONFIG_RPMSG_KERNEL_USE
+	bool "Enable RPMSG Kenerl Use"
+
+config CONFIG_RPMSG_USER_USE
+	bool "Enable RPMSG User Use"
+
+endchoice
+
 endmenu

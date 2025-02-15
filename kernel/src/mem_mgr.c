@@ -33,7 +33,6 @@
 #define ROUNDUP_SIZE(_r) (((_r) + MEM_ALIGN) & ~MEM_ALIGN)
 #define ROUNDDOWN_SIZE(_r) ((_r) & ~MEM_ALIGN)
 #define ROUNDUP(_x, _v) ((((~(_x)) + 1) & ((_v)-1)) + (_x))
-extern errno_t mutex_init(struct mutex *mutex, const char *name);
 
 struct free_ptr {
 	struct bhdr *prev;
@@ -57,7 +56,6 @@ struct area_info {
 
 struct tlsf {
 	uint32_t signature;
-	struct mutex mutex;
 
 	uint64_t used_size;
 	uint64_t max_size;
@@ -271,7 +269,7 @@ static void free_ex(void *ptr, void *mem_pool) {
 	tmp_b->prev_hdr = b;
 }
 
-errno_t mem_init(void *mem, uint32_t size) {
+errno_t kmem_init(void *mem, uint32_t size) {
 	struct tlsf *tlsf;
 	struct bhdr *b, *ib;
 
@@ -300,7 +298,6 @@ errno_t mem_init(void *mem, uint32_t size) {
 	mp = mem;
 	memset(mem, 0, sizeof(struct tlsf));
 	tlsf->signature = SIGNATURE;
-	mutex_init(&tlsf->mutex, "mem_pool");
 
 	ib = process_area(GET_NEXT_BLOCK(mem, ROUNDUP_SIZE(sizeof(struct tlsf))),
 					  ROUNDDOWN_SIZE(size - sizeof(struct tlsf)));
@@ -350,9 +347,9 @@ static void *malloc_ex(uint32_t size, void *mem_pool) {
 	return (void *)b->ptr.buffer;
 }
 
-void *mem_malloc(uint32_t size) { return malloc_ex(size, mp); }
+void *kmalloc(uint32_t size) { return malloc_ex(size, mp); }
 
-void mem_free(void *ptr) { free_ex(ptr, mp); }
+void kfree(void *ptr) { free_ex(ptr, mp); }
 
 static void *realloc_ex(void *ptr, uint32_t new_size, void *mem_pool) {
 	struct tlsf *tlsf = (struct tlsf *)mem_pool;
@@ -436,9 +433,7 @@ static void *realloc_ex(void *ptr, uint32_t new_size, void *mem_pool) {
 	return ptr_aux;
 }
 
-void *mem_realloc(void *ptr, uint32_t size) {
-	return realloc_ex(ptr, size, mp);
-}
+void *krealloc(void *ptr, uint32_t size) { return realloc_ex(ptr, size, mp); }
 
 static void *calloc_ex(size_t nelem, size_t elem_size, void *mem_pool) {
 	void *ptr = NULL;
@@ -456,6 +451,6 @@ static void *calloc_ex(size_t nelem, size_t elem_size, void *mem_pool) {
 	return ptr;
 }
 
-void *mem_calloc(uint32_t nelem, uint32_t elem_size) {
+void *kcalloc(uint32_t nelem, uint32_t elem_size) {
 	return calloc_ex(nelem, elem_size, mp);
 }

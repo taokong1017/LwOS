@@ -66,15 +66,15 @@ errno_t msgq_create(const char *name, uint32_t max_msgs, uint32_t max_msg_size,
 		return ERRNO_MSGQ_PTR_NULL;
 	}
 
-	msgq = (struct msgq *)mem_malloc(sizeof(struct msgq));
+	msgq = (struct msgq *)kmalloc(sizeof(struct msgq));
 	if (!msgq) {
 		log_err(MSGQ_TAG, "malloc memory failed for creating msgq\n");
 		return ERRNO_MSGQ_NO_MEMORY;
 	}
 
-	buffer = (char *)mem_malloc(max_msgs * msgq_buffer_size(max_msg_size));
+	buffer = (char *)kmalloc(max_msgs * msgq_buffer_size(max_msg_size));
 	if (!msgq) {
-		mem_free(msgq);
+		kfree(msgq);
 		log_err(MSGQ_TAG, "malloc memory failed for creating buffer\n");
 		return ERRNO_MSGQ_NO_MEMORY;
 	}
@@ -118,8 +118,8 @@ errno_t msgq_destroy(msgq_id_t id) {
 	list_del_init(&msgq->rec_queue.wait_list);
 	list_del_init(&msgq->send_queue.wait_list);
 
-	mem_free(msgq->msg_buffer);
-	mem_free(msgq);
+	kfree(msgq->msg_buffer);
+	kfree(msgq);
 	log_debug(MSGQ_TAG, "the msgq is destroyed, id is 0x%lx\n", id);
 
 	return OK;
