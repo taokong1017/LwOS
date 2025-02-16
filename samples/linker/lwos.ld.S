@@ -78,34 +78,40 @@ SECTIONS
 		__shell_cmd_end = .;	/* define shell command end */
 	}
 
-	. = ALIGN(0x1000);
-	__page_table_pool_start = .;
-	. += 0x400000;
-	__page_table_pool_end = .;
+	.page_table_pool ALIGN(0x1000):
+	{
+		__page_table_pool_start = .;
+		. += 0x200000;
+		__page_table_pool_end = .;
+	}
 
-	. = ALIGN(0x1000);
-	__kernel_stack_start = .;
-	. += (CONFIG_KERNEL_STACK_SIZE * CONFIG_CPUS_MAX_NUM);
-	. = ALIGN(0x1000);
-	__kernel_stack_end = .;
+	.kernel_stack ALIGN(0x1000):
+	{
+		__kernel_stack_start = .;
+		. += (CONFIG_KERNEL_STACK_SIZE * CONFIG_CPUS_MAX_NUM);
+		. = ALIGN(0x1000);
+		__kernel_stack_end = .;
+	}
 
-	. = ALIGN(0x1000);
-	__kernel_heap_start = .;
-	. += (CONFIG_KERNEL_HEAP_SIZE);
-	. = ALIGN(0x1000);
-	__kernel_heap_end = .;
+	.kernel_heap ALIGN(0x1000):
+	{
+		__kernel_heap_start = .;
+		. += (CONFIG_KERNEL_HEAP_SIZE);
+		. = ALIGN(0x1000);
+		__kernel_heap_end = .;
+	}
 
-	. = ALIGN(0x1000);
-	__interrupt_stack_start = .;
-	. += (CONFIG_INTERRUPT_STACK_SIZE * CONFIG_CPUS_MAX_NUM);
-	. = ALIGN(0x1000);
-	__interrupt_stack_end = .;
+	.interrupt_stack ALIGN(0x1000):
+	{
+		__interrupt_stack_start = .;
+		. += (CONFIG_INTERRUPT_STACK_SIZE * CONFIG_CPUS_MAX_NUM);
+		. = ALIGN(0x1000);
+		__interrupt_stack_end = .;
+	}
 
 #ifdef CONFIG_USER_SPACE
-	. = ALIGN(0x1000);
 	__application_data_start = .;
 	#include <samples/linker/app.ld>
-	. = ALIGN(0x1000);
 	__application_data_end = .;
 #endif
 }

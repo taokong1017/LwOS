@@ -5,7 +5,9 @@
 
 #define HEAP_ALIGN_SIZE 16
 
-shared_data_section struct user_heap malloc_heap;
+extern char __user_heap_start[];
+extern char __user_heap_end[];
+shared_data_section struct user_heap malloc_heap = {0};
 
 void *malloc(size_t size) {
 	return user_heap_aligned_alloc(&malloc_heap, HEAP_ALIGN_SIZE, size);
@@ -45,3 +47,8 @@ void *realloc(void *ptr, size_t requested_size) {
 }
 
 void free(void *ptr) { user_heap_free(&malloc_heap, ptr); }
+
+void uheap_init() {
+	user_heap_init(&malloc_heap, __user_heap_start,
+				   __user_heap_end - __user_heap_start);
+}

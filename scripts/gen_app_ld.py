@@ -12,19 +12,32 @@ SZ = 'size'
 SRC = 'sources'
 section_regex = re.compile(r'.([A-Za-z0-9_]*)_(data|bss|rodata)')
 section_template = """
-.{name} ALIGN({align_size}):
+.{name}_heap ALIGN({align_size}):
 {{
-	. = ALIGN({align_size});
+	__user_heap_start = .;
+	. += (CONFIG_USER_HEAP_SIZE);
+	. = ALIGN(0x1000);
+	__user_heap_end = .;
+}}
+
+.{name}_data ALIGN({align_size}):
+{{
 	__{name}_data_start = .;	/* define a global symbol at user data start */
 	*(.{name}_data)				/* user data sections */
 	. = ALIGN(0x1000);
 	__{name}_data_end = .;		/* define a global symbol at user data end */
+}}
 
+.{name}_bss ALIGN({align_size}):
+{{
 	__{name}_bss_start = .;		/* define a global symbol at user bss start */
 	*(.{name}_bss)				/* user bss sections */
 	. = ALIGN(0x1000);
 	__{name}_bss_end = .;		/* define a global symbol at user bss end */
+}}
 
+.{name}_rodata ALIGN({align_size}):
+{{
 	__{name}_rodata_start = .;		/* define a global symbol at user rodata start */
 	*(.{name}_rodata)				/* user rodata sections */
 	. = ALIGN(0x1000);

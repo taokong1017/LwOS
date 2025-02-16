@@ -49,7 +49,7 @@ endef
 
 all: obj
 	$(Q)python3 scripts/gen_app_ld.py -s 0x1000 -d $(BASE_DIR)/samples -o $(APP_LD)
-	$(Q)$(CPP) $(cpp_flags) -D__ASSEMBLY__  $(LINKER).S |grep -v "^#" > $(LINKER)
+	$(Q)$(CPP) $(cpp_flags) -D__ASSEMBLY__ $(LINKER).S |grep -v "^#" > $(LINKER)
 	$(Q)$(RM) .$@.d
 	$(Q)$(LD) $(LDFLAGS) -T $(LINKER) -e __start -o $(TARGET) -Map=$(PROJECT).map \
 		$(strip $(filter-out %/offsets.o, $(call ALL_OBJS, $(srctree))))
