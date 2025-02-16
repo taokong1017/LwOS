@@ -19,6 +19,13 @@ config CONFIG_USER_MUTEX_001
 config CONFIG_USER_SEM_001
 	bool "User SEM 001"
 
+config CONFIG_USER_LIBC_STRING
+	bool "User LIBC String"
+
+config CONFIG_USER_LIBC_STD
+	bool "User LIBC STD"
+	depends on CONFIG_LIBC_STD
+
 endchoice
 
 endmenu
