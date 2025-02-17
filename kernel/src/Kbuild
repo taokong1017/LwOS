@@ -27,3 +27,5 @@ obj-$(CONFIG_USER_SPACE) += \
 	syscall_dispatch.o \
 	user_space.o
 
+obj-$(CONFIG_SHELL) += \
+	mem_domain_shell.o

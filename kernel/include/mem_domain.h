@@ -29,6 +29,7 @@ struct mem_range {
 };
 
 struct mem_partition {
+	char *name;
 	virt_addr_t vaddr;
 	phys_addr_t paddr;
 	size_t size;

@@ -168,6 +168,7 @@ static errno_t mem_domain_range_add(struct mem_domain *domain,
 	}
 
 	i = domain->partition_num;
+	domain->partitions[i].name = range.name;
 	domain->partitions[i].vaddr = (virt_addr_t)range.start;
 	domain->partitions[i].paddr = (phys_addr_t)range.start;
 	domain->partitions[i].size = range.end - range.start;
