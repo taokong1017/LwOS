@@ -100,7 +100,7 @@ static struct mem_range kernel_mem_ranges[] = {
 		.attrs = MT_P_RW_U_NA,
 	},
 	{
-		.name = "UART",
+		.name = "Uart",
 		.start = (void *)UART_REG_BASE,
 		.end = (void *)UART_REG_BASE + UART_REG_SIZE,
 		.attrs = MT_P_RW_U_NA,

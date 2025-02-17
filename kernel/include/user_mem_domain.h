@@ -15,7 +15,7 @@
 	extern char __user_heap_start[];                                           \
 	extern char __user_heap_end[];                                             \
 	static const struct mem_range user_heap_region = {                         \
-		.name = "user_heap",                                                   \
+		.name = "User_Heap",                                                   \
 		.start = (void *)&__user_heap_start[0],                                \
 		.end = (void *)&__user_heap_end[0],                                    \
 		.attrs = MT_P_RW_U_RW,                                                 \
@@ -23,7 +23,7 @@
 	extern char __user_data_start[];                                           \
 	extern char __user_data_end[];                                             \
 	static const struct mem_range user_data_region = {                         \
-		.name = "user_data",                                                   \
+		.name = "User_Data",                                                   \
 		.start = (void *)&__user_data_start[0],                                \
 		.end = (void *)&__user_data_end[0],                                    \
 		.attrs = MT_P_RW_U_RW,                                                 \
@@ -31,7 +31,7 @@
 	extern char __user_bss_start[];                                            \
 	extern char __user_bss_end[];                                              \
 	static const struct mem_range user_bss_region = {                          \
-		.name = "user_bss",                                                    \
+		.name = "User_Bss",                                                    \
 		.start = (void *)&__user_bss_start[0],                                 \
 		.end = (void *)&__user_bss_end[0],                                     \
 		.attrs = MT_P_RW_U_RW,                                                 \
@@ -39,7 +39,7 @@
 	extern char __user_rodata_start[];                                         \
 	extern char __user_rodata_end[];                                           \
 	static const struct mem_range user_rodata_region = {                       \
-		.name = "user_rodata",                                                 \
+		.name = "User_Rodata",                                                 \
 		.start = (void *)&__user_rodata_start[0],                              \
 		.end = (void *)&__user_rodata_end[0],                                  \
 		.attrs = MT_P_RO_U_RO,                                                 \

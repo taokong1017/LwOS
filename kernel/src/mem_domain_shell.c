@@ -1,7 +1,7 @@
 #include <shell.h>
 #include <pgtable_prot.h>
 
-#define DOMAIN_CMD_HELP "Show all memory domains layout."
+#define DOMAIN_CMD_HELP "Show all memory domain layout(s)."
 #define KERNEL_DOMAIN_SUBCMD_HELP "Show kernel domain layout."
 #define USER_DOMAIN_SUBCMD_HELP "Show user domain layout."
 #define DOMAIN_CMD "domain"
