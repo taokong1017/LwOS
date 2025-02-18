@@ -3,6 +3,7 @@ menu "Shell"
 config CONFIG_SHELL
 	bool "Kernel Shell"
 	default y
+	select CONFIG_LIBC_STD
 	help
 		The shell is the common entry for user to interact with the kernel operation system.
 		It is also a command line interface to obtain system status and request system services.
