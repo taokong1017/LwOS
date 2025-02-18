@@ -28,4 +28,5 @@ obj-$(CONFIG_USER_SPACE) += \
 	user_space.o
 
 obj-$(CONFIG_SHELL) += \
-	mem_domain_shell.o
+	mem_domain_shell.o \
+	mem_shell.o

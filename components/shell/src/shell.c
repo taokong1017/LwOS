@@ -130,12 +130,11 @@ enum shell_state shell_state_get(const struct shell *shell) {
 	return shell->shell_context->state;
 }
 
-void shell_line_hexdump(struct shell *shell, int32_t offset, const char *data,
-						uint32_t len) {
+void shell_line_hexdump(struct shell *shell, const char *data, uint32_t len) {
 	int32_t index = 0;
 	char ch = 0;
 
-	shell_color_show(shell, SHELL_NORMAL, "%08X: ", offset);
+	shell_color_show(shell, SHELL_NORMAL, "%08X: ", data);
 
 	for (index = 0; index < CONFIG_SHELL_HEXDUMP_BYTES_PER_LINE; index++) {
 		if (index > 0 && !(index % 8)) {
@@ -176,7 +175,7 @@ void shell_hexdump(struct shell *shell, const char *data, size_t len) {
 	while (len) {
 		line_len = min(len, CONFIG_SHELL_HEXDUMP_BYTES_PER_LINE);
 
-		shell_line_hexdump(shell, ptr - data, ptr, line_len);
+		shell_line_hexdump(shell, ptr, line_len);
 
 		len -= line_len;
 		ptr += line_len;
