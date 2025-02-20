@@ -17,16 +17,7 @@ GEN_NAMED_OFFSET_SYM(struct task, task_context, TASK_OF_ARCH_TASK_CONTEXT);
 GEN_NAMED_OFFSET_SYM(struct task, mem_domain, TASK_OF_MEM_DOMAIN);
 GEN_NAMED_OFFSET_SYM(arch_task_context_t, callee_context,
 					 TASK_CONTEXT_OF_CALLEE_CONTEXT);
-GEN_NAMED_OFFSET_SYM(arch_callee_context_t, x0, CALLEE_CONTEXT_OF_X0_X1);
-GEN_NAMED_OFFSET_SYM(arch_callee_context_t, x2, CALLEE_CONTEXT_OF_X2_X3);
-GEN_NAMED_OFFSET_SYM(arch_callee_context_t, x4, CALLEE_CONTEXT_OF_X4_X5);
-GEN_NAMED_OFFSET_SYM(arch_callee_context_t, x6, CALLEE_CONTEXT_OF_X6_X7);
-GEN_NAMED_OFFSET_SYM(arch_callee_context_t, x8, CALLEE_CONTEXT_OF_X8_X9);
-GEN_NAMED_OFFSET_SYM(arch_callee_context_t, x10, CALLEE_CONTEXT_OF_X10_X11);
-GEN_NAMED_OFFSET_SYM(arch_callee_context_t, x12, CALLEE_CONTEXT_OF_X12_X13);
-GEN_NAMED_OFFSET_SYM(arch_callee_context_t, x14, CALLEE_CONTEXT_OF_X14_X15);
-GEN_NAMED_OFFSET_SYM(arch_callee_context_t, x16, CALLEE_CONTEXT_OF_X16_X17);
-GEN_NAMED_OFFSET_SYM(arch_callee_context_t, x18, CALLEE_CONTEXT_OF_X18_X19);
+GEN_NAMED_OFFSET_SYM(arch_callee_context_t, x19, CALLEE_CONTEXT_OF_X19);
 GEN_NAMED_OFFSET_SYM(arch_callee_context_t, x20, CALLEE_CONTEXT_OF_X20_X21);
 GEN_NAMED_OFFSET_SYM(arch_callee_context_t, x22, CALLEE_CONTEXT_OF_X22_X23);
 GEN_NAMED_OFFSET_SYM(arch_callee_context_t, x24, CALLEE_CONTEXT_OF_X24_X25);
