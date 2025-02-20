@@ -77,7 +77,8 @@
 #define ERRNO_TASK_NO_SCHEDLE ERRNO_OS_ERROR(MOD_ID_TASK, 0x10)
 #define ERRNO_TASK_INVALID_TIMEOUT ERRNO_OS_ERROR(MOD_ID_TASK, 0x11)
 #define ERRNO_TASK_WILL_SUSPEND ERRNO_OS_ERROR(MOD_ID_TASK, 0x12)
-#define ERRNO_TASK_MEM_DOMAIN_NULL ERRNO_OS_ERROR(MOD_ID_TASK, 0x12)
+#define ERRNO_TASK_MEM_DOMAIN_NULL ERRNO_OS_ERROR(MOD_ID_TASK, 0x13)
+#define ERRNO_TASK_INVALID_CPU_ID ERRNO_OS_ERROR(MOD_ID_TASK, 0x14)
 
 /* task cpu affinity */
 #define TASK_CPU_DEFAULT_AFFI TASK_CPU_AFFI_MASK
@@ -135,6 +136,7 @@ errno_t task_delay(uint64_t ticks);
 errno_t task_priority_set(task_id_t task_id, uint32_t prioriy);
 errno_t task_priority_get(task_id_t task_id, uint32_t *prioriy);
 errno_t task_cpu_affi_set(task_id_t task_id, uint32_t cpu_affi);
+errno_t task_cpu_bind(task_id_t task_id, uint32_t cpu);
 errno_t task_cpu_affi_get(task_id_t task_id, uint32_t *cpu_affi);
 task_id_t task_self_id();
 void task_lock();

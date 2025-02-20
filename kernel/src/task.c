@@ -297,6 +297,14 @@ errno_t task_cpu_affi_set(task_id_t task_id, uint32_t cpu_affi) {
 	return OK;
 }
 
+errno_t task_cpu_bind(task_id_t task_id, uint32_t cpu) {
+	if (cpu >= CONFIG_CPUS_MAX_NUM) {
+		return ERRNO_TASK_INVALID_CPU_ID;
+	}
+
+	return task_cpu_affi_set(task_id, BIT(cpu));
+}
+
 errno_t task_cpu_affi_get(task_id_t task_id, uint32_t *cpu_affi) {
 	struct task *task = ID_TO_TASK(task_id);
 	uint32_t key = 0;

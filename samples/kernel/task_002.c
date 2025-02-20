@@ -53,9 +53,9 @@ static void create_test_task1() {
 		return;
 	}
 
-	ret = task_cpu_affi_set(test_task1_id, 1);
+	ret = task_cpu_bind(test_task1_id, 0);
 	if (ret != OK) {
-		printf("set task %s cpu affinity failed\n", task_name);
+		printf("bind task %s to cpu 0 failed\n", task_name);
 		return;
 	}
 
@@ -100,9 +100,9 @@ static void create_test_task2() {
 		return;
 	}
 
-	ret = task_cpu_affi_set(test_task2_id, 2);
+	ret = task_cpu_bind(test_task2_id, 1);
 	if (ret != OK) {
-		printf("set task %s cpu affinity failed\n", task_name);
+		printf("bind task %s to cpu 1 failed\n", task_name);
 		return;
 	}
 
