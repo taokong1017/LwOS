@@ -7,7 +7,7 @@
 
 extern char __user_heap_start[];
 extern char __user_heap_end[];
-shared_data_section struct user_heap malloc_heap = {0};
+global_data_section struct user_heap malloc_heap = {0};
 
 void *malloc(size_t size) {
 	if (!malloc_heap.heap) {

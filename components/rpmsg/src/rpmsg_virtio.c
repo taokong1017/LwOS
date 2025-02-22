@@ -2,12 +2,13 @@
 #include <rpmsg.h>
 #include <rpmsg_virtio.h>
 #include <virtqueue.h>
+#include <mem_domain.h>
 
 static int rpmsg_virtio_send(struct rpmsg_device *rdev, void *data,
 							 uint32_t len);
 static int rpmsg_virtio_receive(struct rpmsg_device *rdev, void *buffer,
 								uint32_t len);
-static struct rpmsg_ops rpmsg_virtio_ops = {
+global_data_section static struct rpmsg_ops rpmsg_virtio_ops = {
 	.send = rpmsg_virtio_send,
 	.receive = rpmsg_virtio_receive,
 };

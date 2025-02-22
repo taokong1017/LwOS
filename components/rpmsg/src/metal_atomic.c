@@ -1,7 +1,8 @@
 #include <types.h>
 #include <metal_atomic.h>
+#include <mem_domain.h>
 
-static enum SHM_SYNC_TYPE sync_type = SHM_NO_SYNC;
+global_data_section static enum SHM_SYNC_TYPE sync_type = SHM_NO_SYNC;
 
 void atomic_thread_fence() {
 	if (sync_type == SHM_SYNC_INNER) {

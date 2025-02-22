@@ -17,7 +17,7 @@
 #define ERRNO_MEM_DOMAIN_OVERLAP ERRNO_OS_ERROR(MOD_ID_MEM_DOMAIN, 0x05)
 
 #define user_section(segment) __attribute__((section(#segment)))
-#define shared_data_section user_section(.shared_data)
+#define global_data_section user_section(.global_data)
 
 typedef uint64_t ttbr_t;
 
