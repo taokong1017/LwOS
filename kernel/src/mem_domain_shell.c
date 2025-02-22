@@ -2,8 +2,12 @@
 #include <pgtable_prot.h>
 
 #define DOMAIN_CMD_HELP "Show all memory domain layout(s)."
-#define KERNEL_DOMAIN_SUBCMD_HELP "Show kernel domain layout."
-#define USER_DOMAIN_SUBCMD_HELP "Show user domain layout."
+#define KERNEL_DOMAIN_SUBCMD_HELP                                              \
+	"Show kernel domain layout"                                                \
+	"\nUsage: domain kernel"
+#define USER_DOMAIN_SUBCMD_HELP                                                \
+	"Show user domain layout"                                                  \
+	"\nUsage: domain user"
 #define DOMAIN_CMD "domain"
 #define KERNEL_DOMAIN_SUBCMD "kernel"
 #define USER_DOMAIN_SUBCMD "user"
@@ -56,7 +60,6 @@ static int kernel_domain_show(struct shell *shell, int argc, char *argv[]) {
 		return -1;
 	}
 
-	shell_show(shell, "The kernel domain layout is shown as follows.\n");
 	shell_show(shell, separator);
 	shell_show(shell, "%-8s%-20s%-18s%-18s%-12s%-10s\n", "Index", "Range Name",
 			   "Virtual Address", "Physical Address", "Size", "Attribute");
@@ -89,7 +92,6 @@ static int user_domain_show(struct shell *shell, int argc, char *argv[]) {
 		return -1;
 	}
 
-	shell_show(shell, "The user domain layout is shown as follows.\n");
 	shell_show(shell, separator);
 	shell_show(shell, "%-8s%-20s%-18s%-18s%-12s%-10s\n", "Index", "Range Name",
 			   "Virtual Address", "Physical Address", "Size", "Attribute");

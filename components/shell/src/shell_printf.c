@@ -1,7 +1,27 @@
 #include <shell_printf.h>
 #include <stdio.h>
+#include <string.h>
 
 #define min(a, b) ((a) < (b) ? (a) : (b))
+
+int32_t shell_raw_printf(struct shell_printf *shell_printf, const char *data,
+						 size_t len) {
+	size_t min_len = 0;
+
+	if ((!shell_printf) || (!shell_printf->buffer)) {
+		return 0;
+	}
+
+	min_len = min(shell_printf->buffer_size, len);
+	memcpy(shell_printf->buffer, data, min_len);
+	shell_printf->control->buffer_count = min_len;
+
+	if (shell_printf->control->flush) {
+		shell_printf_flush(shell_printf);
+	}
+
+	return min_len;
+}
 
 int32_t shell_printf(struct shell_printf *shell_printf, const char *format,
 					 va_list args) {

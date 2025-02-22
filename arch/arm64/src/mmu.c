@@ -17,7 +17,7 @@
 static uint64_t
 	page_tables[CONFIG_PAGE_TABLE_MAX_NUM * PAGE_TABLE_ENTRY_SIZE] ALIGNED(
 		PAGE_TABLE_ENTRY_SIZE * sizeof(uint64_t)) = {0};
-static uint32_t page_tables_used_count[CONFIG_PAGE_TABLE_MAX_NUM] = {0};
+static uint16_t page_tables_used_count[CONFIG_PAGE_TABLE_MAX_NUM] = {0};
 SPIN_LOCK_DEFINE(mmu_locker, MMU_LOCKER);
 static uint8_t pgtable_next_asid = 1;
 

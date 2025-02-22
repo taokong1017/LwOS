@@ -32,7 +32,7 @@ static void shell_formatted_text_print(struct shell *shell, const char *str,
 			for (index = 0; index < length; index++) {
 				if (*(str + offset + index) == '\n') {
 					shell_transport_buffer_flush(shell);
-					shell_show(shell, str + offset, index);
+					shell_raw_printf(shell->shell_printf, str + offset, index);
 					offset += index + 1;
 					shell_cursor_next_line_move(shell);
 					shell_op_cursor_horiz_move(shell, terminal_offset);
@@ -40,7 +40,12 @@ static void shell_formatted_text_print(struct shell *shell, const char *str,
 				}
 			}
 
-			shell_show(shell, str + offset);
+			if (index != length) {
+				continue;
+			}
+
+			shell_raw_printf(shell->shell_printf, str + offset,
+							 shell_strlen(str) - offset);
 			break;
 		}
 
@@ -74,7 +79,7 @@ static void shell_formatted_text_print(struct shell *shell, const char *str,
 		 * before calling shell_write.
 		 */
 		shell_transport_buffer_flush(shell);
-		shell_show(shell, str + offset, length);
+		shell_raw_printf(shell->shell_printf, str + offset, length);
 		offset += length;
 
 		/* Calculating text offset to ensure that next line will

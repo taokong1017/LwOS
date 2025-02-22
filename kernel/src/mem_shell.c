@@ -4,9 +4,11 @@
 
 #define MEMORY_CMD_HELP "Show memory information"
 #define MEMORY_DUMP_HELP                                                       \
-	"Dump the specified memory imformation. Usage: memory dump <vaddr> <len>"
+	"Dump the specified memory imformation"                                    \
+	"\nUsage: memory dump <vaddr> <len>"
 #define MEMORY_TRANSLATE_HELP                                                  \
-	"Translate the virtual address to physical address. Usage: memory translate <vaddr>"
+	"Translate the virtual address to physical address"                        \
+	"\nUsage: memory translate <vaddr>"
 #define MEMORY_CMD "memory"
 #define MEMORY_DUMP_SUBCMD "dump"
 #define MEMORY_TRANSLATE_SUBCMD "translate"
@@ -32,8 +34,7 @@ static int memory_dump(struct shell *shell, int argc, char *argv[]) {
 	return 0;
 }
 
-static int memory_translate(struct shell *shell, int argc,
-								   char *argv[]) {
+static int memory_translate(struct shell *shell, int argc, char *argv[]) {
 	if (!shell) {
 		return -1;
 	}

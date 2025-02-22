@@ -34,7 +34,9 @@ struct shell_printf {
 	};
 
 /* Shell printf interface */
-int32_t shell_printf(struct shell_printf *shell_printf, const char *format,
+int32_t shell_raw_printf(struct shell_printf *shell_printf, const char *format,
+						 size_t len);
+int32_t shell_printf(struct shell_printf *shell_printf, const char *data,
 					 va_list args);
 void shell_printf_flush(struct shell_printf *shell_printf);
 
