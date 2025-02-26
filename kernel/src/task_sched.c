@@ -266,6 +266,8 @@ void task_sched_locked() {
 	struct task *current_task = current_task_get();
 	struct task *next_task = next_task_pick_up();
 	struct per_cpu *per_cpu = current_percpu_get();
+	uint32_t usable_affi = 0;
+	uint32_t cpu_id = 0;
 
 	if (!current_task || !next_task) {
 		return;
@@ -285,6 +287,10 @@ void task_sched_locked() {
 
 	sched_ready_queue_remove(current_task->cpu_id, current_task);
 	if (TASK_IS_READY(current_task) || TASK_IS_RUNNING(current_task)) {
+		usable_affi = current_task->cpu_affi & percpu_idle_mask_get();
+		cpu_id = mask_trailing_zeros(usable_affi ? usable_affi
+												 : current_task->cpu_affi);
+		current_task->cpu_id = cpu_id;
 		sched_ready_queue_add(current_task->cpu_id, current_task);
 		current_task->status = TASK_STATUS_READY;
 	} else {
@@ -307,6 +313,7 @@ void task_sched_unlocked() {
 	struct task *current_task = current_task_get();
 	struct task *next_task = next_task_pick_up();
 	struct per_cpu *per_cpu = current_percpu_get();
+	uint32_t usable_affi = 0;
 
 	if (!next_task || !current_task) {
 		return;
@@ -324,6 +331,9 @@ void task_sched_unlocked() {
 	key = sched_spin_lock();
 	current_task->status = TASK_STATUS_READY;
 	sched_ready_queue_remove(current_task->cpu_id, current_task);
+	usable_affi = current_task->cpu_affi & percpu_idle_mask_get();
+	current_task->cpu_id =
+		mask_trailing_zeros(usable_affi ? usable_affi : current_task->cpu_affi);
 	sched_ready_queue_add(current_task->cpu_id, current_task);
 
 	if (next_task->is_idle_task) {

@@ -30,10 +30,14 @@ extern uint64_t mask_trailing_zeros(uint64_t mask);
  * locked using the interface spin_lock_save.
  */
 bool task_delay_timeout(struct timeout *timeout) {
+	uint32_t usable_affi = 0;
 	struct task *task = container_of(timeout, struct task, timeout);
 	if (TASK_IS_PEND(task)) {
 		task->status = TASK_STATUS_READY;
 		task->is_timeout = true;
+		usable_affi = task->cpu_affi & percpu_idle_mask_get();
+		task->cpu_id =
+			mask_trailing_zeros(usable_affi ? usable_affi : task->cpu_affi);
 		sched_ready_queue_add(task->cpu_id, task);
 		return true;
 	} else {
@@ -241,33 +245,26 @@ errno_t task_priority_get(task_id_t task_id, uint32_t *prioriy) {
 
 errno_t task_cpu_affi_set(task_id_t task_id, uint32_t cpu_affi) {
 	struct task *task = ID_TO_TASK(task_id);
-	uint32_t cur_cpu_id = 0;
 	uint32_t key = 0;
-	uint32_t idle_affi = 0;
-	uint32_t use_affi = 0;
+	uint32_t usable_affi = 0;
 
 	if (!task || task->id != task_id) {
 		return ERRNO_TASK_ID_INVALID;
 	}
 
-	if (cpu_affi > TASK_CPU_AFFI_MASK) {
-		return ERRNO_TASK_CPU_AFFI_INAVLID;
-	}
-
-	if (cpu_affi == 0) {
+	if ((cpu_affi > TASK_CPU_AFFI_MASK) || !cpu_affi) {
 		return ERRNO_TASK_CPU_AFFI_INAVLID;
 	}
 
 	key = sched_spin_lock();
-	cur_cpu_id = arch_cpu_id_get();
-	idle_affi = percpu_idle_mask_get();
-	use_affi = cpu_affi & idle_affi;
-
 	task->cpu_affi = cpu_affi;
+	usable_affi = cpu_affi & percpu_idle_mask_get();
+
 	if (TASK_IS_RUNNING(task)) {
-		if (cur_cpu_id == task->id) {
+		if (current_task_get() == task) {
 			task_sched_locked();
 		} else {
+			log_info(TASK_TAG, "set running task affi on other cpu\n");
 			task->sig = TASK_SIG_AFFI;
 			smp_sched_notify();
 		}
@@ -275,23 +272,13 @@ errno_t task_cpu_affi_set(task_id_t task_id, uint32_t cpu_affi) {
 
 	if (TASK_IS_READY(task)) {
 		sched_ready_queue_remove(task->cpu_id, task);
-		if (use_affi) {
-			task->cpu_id = mask_trailing_zeros(use_affi);
-		} else {
-			task->cpu_id = mask_trailing_zeros(cpu_affi);
-		}
+		task->cpu_id =
+			mask_trailing_zeros(usable_affi ? usable_affi : cpu_affi);
 		sched_ready_queue_add(task->cpu_id, task);
+		log_info(TASK_TAG, "set ready %s task affi cpu%d\n", task->name,
+				 task->cpu_id);
 	}
 
-	if (TASK_IS_PEND(task)) {
-		timeout_queue_del(&task->timeout, task->cpu_id);
-		if (use_affi) {
-			task->cpu_id = mask_trailing_zeros(use_affi);
-		} else {
-			task->cpu_id = mask_trailing_zeros(cpu_affi);
-		}
-		timeout_queue_add(&task->timeout, task->cpu_id);
-	}
 	sched_spin_unlock(key);
 
 	return OK;
@@ -423,6 +410,7 @@ errno_t task_stop_self() { return task_stop(task_self_id()); }
 
 errno_t task_resume(task_id_t task_id) {
 	uint32_t key = 0;
+	uint32_t usable_affi = 0;
 	struct task *task = ID_TO_TASK(task_id);
 	struct task *current_task = current_task_get();
 
@@ -454,6 +442,9 @@ errno_t task_resume(task_id_t task_id) {
 
 	task->status &= ~TASK_STATUS_SUSPEND;
 	task->status |= TASK_STATUS_READY;
+	usable_affi = task->cpu_affi & percpu_idle_mask_get();
+	task->cpu_id =
+		mask_trailing_zeros(usable_affi ? usable_affi : task->cpu_affi);
 	sched_ready_queue_add(task->cpu_id, task);
 	task_sched_locked();
 	sched_spin_unlock(key);
@@ -619,6 +610,7 @@ errno_t task_wait_locked(struct wait_queue *wq, uint64_t ticks,
 }
 
 errno_t task_wakeup_locked(struct wait_queue *wq) {
+	uint32_t usable_affi = 0;
 	struct task *task = NULL;
 	uint32_t cur_cpuid = arch_cpu_id_get();
 
@@ -630,6 +622,9 @@ errno_t task_wakeup_locked(struct wait_queue *wq) {
 		task = list_first_entry(&wq->wait_list, struct task, pend_list);
 		list_del_init(wq->wait_list.next);
 		task->status = TASK_STATUS_READY;
+		usable_affi = task->cpu_affi & percpu_idle_mask_get();
+		task->cpu_id =
+			mask_trailing_zeros(usable_affi ? usable_affi : task->cpu_affi);
 		sched_ready_queue_add(task->cpu_id, task);
 		task->is_timeout = false;
 		if ((task->cpu_id == cur_cpuid) && (!is_in_irq())) {
