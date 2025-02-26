@@ -47,7 +47,6 @@ void percpu_init(uint32_t cpu_id) {
 
 	/* create service task */
 	idle_task_create(cpu_id);
-	system_task_create(cpu_id);
 }
 
 uint32_t percpu_idle_mask_get() {

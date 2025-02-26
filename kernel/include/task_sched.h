@@ -16,7 +16,6 @@ void task_sched_unlocked();
 bool is_in_irq();
 void idle_task_create(uint32_t cpu_id);
 void main_task_create(uint32_t cpu_id);
-void system_task_create(uint32_t cpu_id);
 void task_sched_start();
 void sched_spin_lock_dump();
 void task_sched_unlock();

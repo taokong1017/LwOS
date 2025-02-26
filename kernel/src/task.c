@@ -12,7 +12,6 @@
 #include <cpu.h>
 #include <smp.h>
 #include <msgq.h>
-#include <task_cmd.h>
 #include <user_space.h>
 
 #define TASK_TO_ID(task) ((task_id_t)task)
@@ -173,13 +172,6 @@ void task_kernel_entry_point(task_id_t task_id) {
 	task->entry(task->args[0], task->args[1], task->args[2], task->args[3]);
 	task_suspend_self();
 	forever();
-}
-
-static void task_service_notify(task_id_t id, enum task_cmd_type cmd_type) {
-	struct per_cpu *percpu = current_percpu_get();
-	struct task_cmd cmd = {.id = id, .cmd = cmd_type, .data = NULL};
-
-	msgq_send(percpu->msgq_id, &cmd, sizeof(cmd), MSGQ_WAIT_FOREVER);
 }
 
 errno_t task_priority_set(task_id_t task_id, uint32_t prioriy) {
@@ -370,7 +362,6 @@ task_id_t task_self_id() {
 
 errno_t task_stop(task_id_t task_id) {
 	struct task *task = ID_TO_TASK(task_id);
-	uint32_t cur_cpu_id = arch_cpu_id_get();
 	uint32_t key = 0;
 
 	if (!task || task->id != task_id) {
@@ -389,14 +380,9 @@ errno_t task_stop(task_id_t task_id) {
 	}
 
 	if (TASK_IS_RUNNING(task)) {
-		if (task->cpu_id == cur_cpu_id) {
-			sched_spin_unlock(key);
-			task_service_notify(task->id, TASK_CMD_STOP);
-			key = sched_spin_lock();
-		} else {
-			task->sig = TASK_SIG_STOP;
-			smp_sched_notify();
-		}
+		task->sig = TASK_SIG_STOP;
+		smp_sched_notify_all();
+		task_sched_locked();
 	} else {
 		task_reset(task);
 	}

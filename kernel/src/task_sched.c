@@ -1,7 +1,6 @@
 #include <task.h>
 #include <kernel.h>
 #include <cpu.h>
-#include <task_cmd.h>
 #include <task_sched.h>
 #include <string.h>
 #include <irq.h>
@@ -200,58 +199,6 @@ void main_task_create(uint32_t cpu_id) {
 	struct task *task = NULL;
 
 	task_create(&task_id, ROOT_TASK_NAME, main, NULL, NULL, NULL, NULL,
-				TASK_STACK_DEFAULT_SIZE, TASK_DEFAULT_FLAG);
-	task = ID_TO_TASK(task_id);
-	task->priority = TASK_PRIORITY_HIGHEST;
-	task->status = TASK_STATUS_READY;
-	task->cpu_affi = TASK_CPU_AFFI(cpu_id);
-	task->cpu_id = cpu_id;
-	task->mem_domain = &kernel_mem_domain;
-	sched_ready_queue_add(cpu_id, task);
-}
-
-static void system_task_entry(void *arg0, void *arg1, void *arg2, void *arg3) {
-	(void)arg0;
-	(void)arg1;
-	(void)arg2;
-	(void)arg3;
-
-	msgq_id_t msgq_id = (msgq_id_t)arg0;
-	struct task_cmd cmd = {.id = TASK_INVALID_ID,
-						   .cmd = TASK_CMD_NUM,
-						   .data = NULL};
-	uint32_t len = sizeof(struct task_cmd);
-	uint32_t key = 0;
-
-	forever() {
-		if (!msgq_receive(msgq_id, &cmd, &len, MSGQ_WAIT_FOREVER)) {
-			switch (cmd.cmd) {
-			case TASK_CMD_STOP:
-				key = sched_spin_lock();
-				task_reset(ID_TO_TASK(cmd.id));
-				sched_spin_unlock(key);
-				break;
-			default:
-				break;
-			}
-
-			cmd.id = TASK_INVALID_ID;
-			cmd.cmd = TASK_CMD_NUM;
-			cmd.data = NULL;
-			len = sizeof(struct task_cmd);
-		}
-	}
-
-	return;
-}
-
-void system_task_create(uint32_t cpu_id) {
-	struct per_cpu *percpu = percpu_get(cpu_id);
-	task_id_t task_id = 0;
-	struct task *task = NULL;
-
-	task_create(&task_id, SYSTEM_TASK_NAME, system_task_entry,
-				(void *)percpu->msgq_id, NULL, NULL, NULL,
 				TASK_STACK_DEFAULT_SIZE, TASK_DEFAULT_FLAG);
 	task = ID_TO_TASK(task_id);
 	task->priority = TASK_PRIORITY_HIGHEST;
