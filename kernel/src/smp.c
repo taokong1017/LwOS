@@ -16,7 +16,6 @@
 
 enum smp_ipi_type {
 	SMP_IPI_SCHED = 0,
-	SMP_IPI_HALT,
 };
 
 typedef void (*smp_init_func)(void *arg);
@@ -32,7 +31,6 @@ void smp_init() {
 
 	arch_irq_connect(SMP_IPI_SCHED, 160, smp_sched_handler, NULL,
 					 IRQ_TYPE_LEVEL);
-	arch_irq_connect(SMP_IPI_HALT, 160, smp_halt_handler, NULL, IRQ_TYPE_LEVEL);
 
 	atomic_clear(&cpu_start_flag);
 	for (i = 1; i < CONFIG_CPUS_MAX_NUM; i++) {
@@ -70,25 +68,10 @@ void smp_sched_notify() {
 	gic_raise_sgi(SMP_IPI_SCHED, no_use_affi, mask);
 }
 
-void smp_halt_notify() {
-	uint32_t cur_cpu_id = arch_cpu_id_get();
-	uint32_t mask = ALL_CPU_MASK & (~(1U << cur_cpu_id));
-	uint64_t no_use_affi = 0;
-
-	gic_raise_sgi(SMP_IPI_HALT, no_use_affi, mask);
-}
-
 void smp_sched_handler(const void *arg) {
 	(void)arg;
 	struct per_cpu *percpu = current_percpu_get();
 
 	percpu->pend_sched = true;
-	return;
-}
-
-void smp_halt_handler(const void *arg) {
-	(void)arg;
-
-	log_debug(LOG_TAG, "smp_halt_handler\n");
 	return;
 }
