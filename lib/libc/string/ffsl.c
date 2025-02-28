@@ -1,5 +1,5 @@
 #include <string.h>
-#include <atomic.h>
+#include "atomic.h"
 
 int ffsl(long i)
 {

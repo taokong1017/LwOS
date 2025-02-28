@@ -1,6 +1,6 @@
 #include <stdlib.h>
 #include <string.h>
-#include <atomic.h>
+#include "atomic.h"
 
 #define ntz(x) a_ctz_l((x))
 #define alloca __builtin_alloca
