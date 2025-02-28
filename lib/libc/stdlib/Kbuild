@@ -6,7 +6,6 @@ obj-$(CONFIG_LIBC_STD) := \
 	strtoul.o \
 	strtoll.o \
 	strtoull.o \
-	rand.o \
 	bsearch.o \
 	qsort.o \
 	abs.o \

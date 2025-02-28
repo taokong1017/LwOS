@@ -18,6 +18,15 @@ unsigned long long strtoull(const char *, char **, int);
 
 int rand(void);
 void srand(unsigned);
+long int random(void);
+void srandom(unsigned int);
+void lcong48(unsigned short [7]);
+long int lrand48(void);
+long int nrand48(unsigned short [3]);
+long mrand48(void);
+long jrand48(unsigned short [3]);
+void srand48(long);
+unsigned short *seed48(unsigned short [3]);
 
 void *malloc(size_t);
 void *calloc(size_t, size_t);

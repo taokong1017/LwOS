@@ -2,4 +2,5 @@ subdir-y += \
 	string \
 	stdlib \
 	malloc \
-	ctype
+	ctype \
+	prng
