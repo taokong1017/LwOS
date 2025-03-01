@@ -23,7 +23,7 @@ static inline uintptr_t arch_syscall_invoke6(uintptr_t arg1, uintptr_t arg2,
 					 : "=r"(ret)
 					 : [ svid ] "i"(SVC_CALL_SYSTEM_CALL), "r"(ret), "r"(r1),
 					   "r"(r2), "r"(r3), "r"(r4), "r"(r5), "r"(r8)
-					 : "memory");
+					 : "memory", "cc");
 
 	return ret;
 }
@@ -43,7 +43,7 @@ static inline uintptr_t arch_syscall_invoke5(uintptr_t arg1, uintptr_t arg2,
 					 : "=r"(ret)
 					 : [ svid ] "i"(SVC_CALL_SYSTEM_CALL), "r"(ret), "r"(r1),
 					   "r"(r2), "r"(r3), "r"(r4), "r"(r8)
-					 : "memory");
+					 : "memory", "cc");
 
 	return ret;
 }
@@ -61,7 +61,7 @@ static inline uintptr_t arch_syscall_invoke4(uintptr_t arg1, uintptr_t arg2,
 					 : "=r"(ret)
 					 : [ svid ] "i"(SVC_CALL_SYSTEM_CALL), "r"(ret), "r"(r1),
 					   "r"(r2), "r"(r3), "r"(r8)
-					 : "memory");
+					 : "memory", "cc");
 
 	return ret;
 }
@@ -78,7 +78,7 @@ static inline uintptr_t arch_syscall_invoke3(uintptr_t arg1, uintptr_t arg2,
 					 : "=r"(ret)
 					 : [ svid ] "i"(SVC_CALL_SYSTEM_CALL), "r"(ret), "r"(r1),
 					   "r"(r2), "r"(r8)
-					 : "memory");
+					 : "memory", "cc");
 
 	return ret;
 }
@@ -93,7 +93,7 @@ static inline uintptr_t arch_syscall_invoke2(uintptr_t arg1, uintptr_t arg2,
 					 : "=r"(ret)
 					 : [ svid ] "i"(SVC_CALL_SYSTEM_CALL), "r"(ret), "r"(r1),
 					   "r"(r8)
-					 : "memory");
+					 : "memory", "cc");
 
 	return ret;
 }
@@ -106,7 +106,7 @@ static inline uintptr_t arch_syscall_invoke1(uintptr_t arg1,
 	__asm__ volatile("svc %[svid]\n"
 					 : "=r"(ret)
 					 : [ svid ] "i"(SVC_CALL_SYSTEM_CALL), "r"(ret), "r"(r8)
-					 : "memory");
+					 : "memory", "cc");
 	return ret;
 }
 
@@ -117,7 +117,7 @@ static inline uintptr_t arch_syscall_invoke0(enum syscall_id call_id) {
 	__asm__ volatile("svc %[svid]\n"
 					 : "=r"(ret)
 					 : [ svid ] "i"(SVC_CALL_SYSTEM_CALL), "r"(ret), "r"(r8)
-					 : "memory");
+					 : "memory", "cc");
 
 	return ret;
 }

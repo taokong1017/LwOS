@@ -256,7 +256,6 @@ errno_t task_cpu_affi_set(task_id_t task_id, uint32_t cpu_affi) {
 		if (current_task_get() == task) {
 			task_sched_locked();
 		} else {
-			log_info(TASK_TAG, "set running task affi on other cpu\n");
 			task->sig = TASK_SIG_AFFI;
 			smp_sched_notify();
 		}
@@ -267,8 +266,6 @@ errno_t task_cpu_affi_set(task_id_t task_id, uint32_t cpu_affi) {
 		task->cpu_id =
 			mask_trailing_zeros(usable_affi ? usable_affi : cpu_affi);
 		sched_ready_queue_add(task->cpu_id, task);
-		log_info(TASK_TAG, "set ready %s task affi cpu%d\n", task->name,
-				 task->cpu_id);
 	}
 
 	sched_spin_unlock(key);
@@ -311,8 +308,8 @@ errno_t task_cpu_affi_get(task_id_t task_id, uint32_t *cpu_affi) {
 errno_t task_start(task_id_t task_id) {
 	struct task *task = ID_TO_TASK(task_id);
 	uint32_t key = 0;
-	uint32_t cur_cpu_id = arch_cpu_id_get();
-	uint64_t current_ticks = current_ticks_get();
+	uint32_t cur_cpu_id = 0;
+	uint64_t current_ticks = 0;
 
 	if (!task || task->id != task_id) {
 		return ERRNO_TASK_ID_INVALID;
@@ -335,6 +332,8 @@ errno_t task_start(task_id_t task_id) {
 	}
 
 	task->cpu_id = mask_trailing_zeros(task->cpu_affi);
+	cur_cpu_id = arch_cpu_id_get();
+	current_ticks = current_ticks_get();
 	if (task->cpu_id == cur_cpu_id) {
 		task->status = TASK_STATUS_READY;
 		sched_ready_queue_add(task->cpu_id, task);
@@ -398,17 +397,19 @@ errno_t task_resume(task_id_t task_id) {
 	uint32_t key = 0;
 	uint32_t usable_affi = 0;
 	struct task *task = ID_TO_TASK(task_id);
-	struct task *current_task = current_task_get();
+	struct task *current_task = NULL;
 
 	if (!task || task->id != task_id) {
 		return ERRNO_TASK_ID_INVALID;
 	}
 
+	key = sched_spin_lock();
+	current_task = current_task_get();
 	if (task == current_task) {
+		sched_spin_unlock(key);
 		return ERRNO_TASK_ID_INVALID;
 	}
 
-	key = sched_spin_lock();
 	if (task->status & TASK_STATUS_STOP) {
 		sched_spin_unlock(key);
 		return ERRNO_TASK_STATUS_INVALID;
@@ -441,7 +442,6 @@ errno_t task_resume(task_id_t task_id) {
 errno_t task_suspend(task_id_t task_id) {
 	uint32_t key = 0;
 	struct task *task = ID_TO_TASK(task_id);
-	struct task *current_task = current_task_get();
 
 	if (!task || task->id != task_id) {
 		return ERRNO_TASK_ID_INVALID;
@@ -478,7 +478,7 @@ errno_t task_suspend(task_id_t task_id) {
 	}
 
 	task->status |= TASK_STATUS_SUSPEND;
-	if (task == current_task) {
+	if (task == current_task_get()) {
 		task_sched_locked();
 	}
 	sched_spin_unlock(key);
@@ -489,8 +489,8 @@ errno_t task_suspend(task_id_t task_id) {
 errno_t task_suspend_self() { return task_suspend(task_self_id()); }
 
 errno_t task_delay(uint64_t ticks) {
-	struct task *task = current_task_get();
-	uint64_t current_ticks = current_ticks_get();
+	struct task *task = NULL;
+	uint64_t current_ticks = 0;
 	uint32_t key = 0;
 
 	if (is_in_irq()) {
@@ -501,11 +501,13 @@ errno_t task_delay(uint64_t ticks) {
 		return ERRNO_TASK_INVALID_TIMEOUT;
 	}
 
+	key = sched_spin_lock();
+	task = current_task_get();
 	if (task->flag & TASK_FLAG_SYSTEM) {
+		sched_spin_unlock(key);
 		return ERRNO_TASK_OPERATE_INVALID;
 	}
 
-	key = sched_spin_lock();
 	if (TASK_IS_LOCKED(task)) {
 		sched_spin_unlock(key);
 		return ERRNO_TASK_IS_LOCKED;
@@ -519,6 +521,7 @@ errno_t task_delay(uint64_t ticks) {
 	if (ticks >= 0) {
 		sched_ready_queue_remove(task->cpu_id, task);
 		task->status = TASK_STATUS_PEND;
+		current_ticks = current_ticks_get();
 		task->timeout.deadline_ticks = current_ticks + ticks;
 		timeout_queue_add(&task->timeout, task->cpu_id);
 	}

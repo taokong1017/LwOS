@@ -266,16 +266,19 @@ void task_sched_unlocked() {
 		return;
 	}
 
+	key = sched_spin_lock();
+
 	if (TASK_IS_LOCKED(current_task)) {
 		per_cpu->pend_sched = true;
+		sched_spin_unlock(key);
 		return;
 	}
 
 	if (current_task == next_task) {
+		sched_spin_unlock(key);
 		return;
 	}
 
-	key = sched_spin_lock();
 	current_task->status = TASK_STATUS_READY;
 	sched_ready_queue_remove(current_task->cpu_id, current_task);
 	usable_affi = current_task->cpu_affi & percpu_idle_mask_get();

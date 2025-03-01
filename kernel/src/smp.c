@@ -16,6 +16,7 @@
 
 enum smp_ipi_type {
 	SMP_IPI_SCHED = 0,
+	SMP_IPI_NUM,
 };
 
 typedef void (*smp_init_func)(void *arg);
