@@ -250,7 +250,6 @@ errno_t task_cpu_affi_set(task_id_t task_id, uint32_t cpu_affi) {
 
 	key = sched_spin_lock();
 	task->cpu_affi = cpu_affi;
-	usable_affi = cpu_affi & percpu_idle_mask_get();
 
 	if (TASK_IS_RUNNING(task)) {
 		task->sig = TASK_SIG_AFFI;
@@ -260,6 +259,7 @@ errno_t task_cpu_affi_set(task_id_t task_id, uint32_t cpu_affi) {
 
 	if (TASK_IS_READY(task)) {
 		sched_ready_queue_remove(task->cpu_id, task);
+		usable_affi = cpu_affi & percpu_idle_mask_get();
 		task->cpu_id =
 			mask_trailing_zeros(usable_affi ? usable_affi : cpu_affi);
 		sched_ready_queue_add(task->cpu_id, task);

@@ -16,4 +16,11 @@ config CONFIG_LIBC_STD
 	help
 		The C Standard Library provides standard interface.
 
+config CONFIG_LIBC_CRYPT
+	bool "Enable Library Crypt"
+	default n
+	help
+		It is primarily used for password hashing, which is a
+		fundamental security mechanism in the system.
+
 endmenu

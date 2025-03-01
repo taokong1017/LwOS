@@ -3,4 +3,5 @@ subdir-y += \
 	stdlib \
 	malloc \
 	ctype \
-	prng
+	prng \
+	crypt \

@@ -1,0 +1,9 @@
+obj-$(CONFIG_LIBC_CRYPT) := \
+	encrypt.o \
+	crypt_des.o \
+	crypt.o \
+	crypt_r.o \
+	crypt_blowfish.o \
+	crypt_md5.o \
+	crypt_sha256.o \
+	crypt_sha512.o

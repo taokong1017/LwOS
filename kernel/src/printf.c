@@ -704,3 +704,16 @@ int printf(const char *fmt, ...) {
 
 	return ret;
 }
+
+int vsprintf(char *restrict s, const char *restrict fmt, va_list ap) {
+	return vsnprintf(s, S32_MAX, fmt, ap);
+}
+
+int sprintf(char *restrict s, const char *restrict fmt, ...) {
+	int ret;
+	va_list ap;
+	va_start(ap, fmt);
+	ret = vsprintf(s, fmt, ap);
+	va_end(ap);
+	return ret;
+}
