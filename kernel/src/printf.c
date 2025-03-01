@@ -7,6 +7,7 @@
 #include <uart_pl011.h>
 #include <menuconfig.h>
 #include <spin_lock.h>
+#include <ctype.h>
 
 #define SIGN 1	   /* unsigned/signed, must be 1 */
 #define LEFT 2	   /* left justified */
@@ -49,8 +50,6 @@ struct printf_spec {
 static const char hex_asc_upper[] = "0123456789ABCDEF";
 static char buf[BUF_SIZE] = {0};
 
-static inline int isdigit(int c) { return '0' <= c && c <= '9'; }
-
 static int skip_atoi(const char **s) {
 	int i = 0;
 
@@ -59,17 +58,6 @@ static int skip_atoi(const char **s) {
 	} while (isdigit(**s));
 
 	return i;
-}
-
-static inline char _tolower(const char c) { return c | 0x20; }
-
-static inline int isalnum(int c) {
-	if ((c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z') ||
-		(c >= '0' && c <= '9')) {
-		return 1;
-	} else {
-		return 0;
-	}
 }
 
 static void set_field_width(struct printf_spec *spec, int width) {
@@ -473,7 +461,7 @@ precision:
 qualifier:
 	/* get the conversion qualifier */
 	qualifier = 0;
-	if (*fmt == 'h' || _tolower(*fmt) == 'l' || *fmt == 'z' || *fmt == 't') {
+	if (*fmt == 'h' || tolower(*fmt) == 'l' || *fmt == 'z' || *fmt == 't') {
 		qualifier = *fmt++;
 		if (qualifier == *fmt) {
 			if (qualifier == 'l') {
