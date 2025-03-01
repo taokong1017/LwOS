@@ -69,13 +69,6 @@ void smp_sched_notify() {
 	gic_raise_sgi(SMP_IPI_SCHED, no_use_affi, mask);
 }
 
-void smp_sched_notify_all() {
-	uint32_t mask = ALL_CPU_MASK;
-	uint64_t no_use_affi = 0;
-
-	gic_raise_sgi(SMP_IPI_SCHED, no_use_affi, mask);
-}
-
 void smp_sched_handler(const void *arg) {
 	(void)arg;
 	struct per_cpu *percpu = current_percpu_get();

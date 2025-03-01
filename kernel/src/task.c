@@ -253,12 +253,9 @@ errno_t task_cpu_affi_set(task_id_t task_id, uint32_t cpu_affi) {
 	usable_affi = cpu_affi & percpu_idle_mask_get();
 
 	if (TASK_IS_RUNNING(task)) {
-		if (current_task_get() == task) {
-			task_sched_locked();
-		} else {
-			task->sig = TASK_SIG_AFFI;
-			smp_sched_notify();
-		}
+		task->sig = TASK_SIG_AFFI;
+		smp_sched_notify();
+		task_sched_locked();
 	}
 
 	if (TASK_IS_READY(task)) {
@@ -380,7 +377,7 @@ errno_t task_stop(task_id_t task_id) {
 
 	if (TASK_IS_RUNNING(task)) {
 		task->sig = TASK_SIG_STOP;
-		smp_sched_notify_all();
+		smp_sched_notify();
 		task_sched_locked();
 	} else {
 		task_reset(task);
@@ -493,15 +490,16 @@ errno_t task_delay(uint64_t ticks) {
 	uint64_t current_ticks = 0;
 	uint32_t key = 0;
 
-	if (is_in_irq()) {
-		return ERRNO_TASK_IN_IRQ_STATUS;
-	}
-
 	if (ticks == TASK_WAIT_FOREVER) {
 		return ERRNO_TASK_INVALID_TIMEOUT;
 	}
 
 	key = sched_spin_lock();
+	if (is_in_irq()) {
+		sched_spin_unlock(key);
+		return ERRNO_TASK_IN_IRQ_STATUS;
+	}
+
 	task = current_task_get();
 	if (task->flag & TASK_FLAG_SYSTEM) {
 		sched_spin_unlock(key);
