@@ -263,6 +263,7 @@ errno_t task_cpu_affi_set(task_id_t task_id, uint32_t cpu_affi) {
 		task->cpu_id =
 			mask_trailing_zeros(usable_affi ? usable_affi : cpu_affi);
 		sched_ready_queue_add(task->cpu_id, task);
+		smp_sched_notify();
 	}
 
 	sched_spin_unlock(key);

@@ -9,6 +9,7 @@
 #include <percpu.h>
 #include <msgq.h>
 #include <arch_task.h>
+#include <smp.h>
 
 #define IDLE_TASK_NAME "idle_task"
 #define ROOT_TASK_NAME "main_task"
@@ -240,6 +241,7 @@ void task_sched_locked() {
 		current_task->cpu_id = cpu_id;
 		sched_ready_queue_add(current_task->cpu_id, current_task);
 		current_task->status = TASK_STATUS_READY;
+		smp_sched_notify();
 	} else {
 		current_task->status &= ~TASK_STATUS_RUNNING;
 	}
@@ -285,6 +287,7 @@ void task_sched_unlocked() {
 	current_task->cpu_id =
 		mask_trailing_zeros(usable_affi ? usable_affi : current_task->cpu_affi);
 	sched_ready_queue_add(current_task->cpu_id, current_task);
+	smp_sched_notify();
 
 	if (next_task->is_idle_task) {
 		per_cpu->is_idle = true;
