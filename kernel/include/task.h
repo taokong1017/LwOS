@@ -41,8 +41,7 @@
 /* task signal definition */
 #define TASK_SIG_NONE 0U
 #define TASK_SIG_SUSPEND 1U
-#define TASK_SIG_AFFI 2U
-#define TASK_SIG_STOP 3U
+#define TASK_SIG_STOP 2U
 
 /* task flag definition */
 #define TASK_FLAG_SYSTEM 0x0001U

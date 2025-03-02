@@ -251,12 +251,6 @@ errno_t task_cpu_affi_set(task_id_t task_id, uint32_t cpu_affi) {
 	key = sched_spin_lock();
 	task->cpu_affi = cpu_affi;
 
-	if (TASK_IS_RUNNING(task)) {
-		task->sig = TASK_SIG_AFFI;
-		smp_sched_notify();
-		task_sched_locked();
-	}
-
 	if (TASK_IS_READY(task)) {
 		sched_ready_queue_remove(task->cpu_id, task);
 		usable_affi = cpu_affi & percpu_idle_mask_get();
@@ -643,11 +637,6 @@ bool task_sig_handle() {
 	if (cur_task->sig == TASK_SIG_STOP) {
 		cur_task->sig &= ~TASK_SIG_STOP;
 		task_stop(cur_task->id);
-	}
-
-	if (cur_task->sig == TASK_SIG_AFFI) {
-		cur_task->sig &= ~TASK_SIG_AFFI;
-		task_cpu_affi_set(cur_task->id, cur_task->cpu_affi);
 	}
 
 	/* if the task is waiting for the signal, wake it up */
