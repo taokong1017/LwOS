@@ -31,6 +31,10 @@ config CONFIG_MUTEX_001
 config CONFIG_SEM_001
 	bool "Kernel SEM 001"
 
+config CONFIG_RPMSG_001
+	bool "Kernel RPMSG 001"
+	depends on CONFIG_RPMSG
+
 endchoice
 
 endmenu

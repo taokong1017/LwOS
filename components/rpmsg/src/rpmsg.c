@@ -5,7 +5,7 @@
 #include <log.h>
 
 #define RPMSG_TAG "rpmsg"
-#define IS_POWER_OF_TWO(n) ((n & (n - 1)) == 0)
+#define IS_POWER_OF_TWO(n) (((n) & (n - 1)) == 0)
 #define rpmsg_id_to_dev(id) ((struct rpmsg_device *)id)
 #define rpmsg_dev_to_id(dev) ((rpmsg_id_t)dev)
 #define rpmsg_buffer_size(msg_len) (msg_len + sizeof(struct rpmsg_hdr))

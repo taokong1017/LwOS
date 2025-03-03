@@ -7,3 +7,4 @@ obj-$(CONFIG_TIMER_001) := timer_001.o
 obj-$(CONFIG_MSGQ_001) := msgq_001.o
 obj-$(CONFIG_MUTEX_001) := mutex_001.o
 obj-$(CONFIG_SEM_001) := sem_001.o
+obj-$(CONFIG_RPMSG_001) := rpmsg_001.o
