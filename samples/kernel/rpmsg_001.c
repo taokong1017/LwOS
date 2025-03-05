@@ -16,8 +16,8 @@ static char buffer[BUFFER_SIZE] = {0};
 static struct rpmsg_buf_info buf_info = {
 	.h2r_buf_num = 4,
 	.h2r_buf_size = 100,
-	.r2h_buf_num = 4,
-	.r2h_buf_size = 100,
+	.r2h_buf_num = 0,
+	.r2h_buf_size = 0,
 };
 
 static void test_task1_entry(void *arg0, void *arg1, void *arg2, void *arg3) {

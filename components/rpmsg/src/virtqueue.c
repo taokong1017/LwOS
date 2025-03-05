@@ -6,10 +6,11 @@
 
 #define VIRTQUEUE_TAG "Virtqueue"
 
-#define VQ_PARAM_CHK(condition, status_var, status_err)                        \
+#define VQ_PARAM_CHK(condition, status_var, status_err, msg)                   \
 	do {                                                                       \
 		if (((status_var) == 0) && (condition)) {                              \
 			status_var = status_err;                                           \
+			printf("%s", msg);                                                 \
 		}                                                                      \
 	} while (0)
 
@@ -45,11 +46,11 @@ int virtqueue_create(struct virtio_device *virt_dev, uint16_t id,
 					 struct virtqueue *vq) {
 	int status = VQUEUE_SUCCESS;
 
-	VQ_PARAM_CHK(ring == NULL, status, ERROR_VQUEUE_INVLD_PARAM);
-	VQ_PARAM_CHK(ring->num_descs == 0, status, ERROR_VQUEUE_INVLD_PARAM);
+	VQ_PARAM_CHK(ring == NULL, status, ERROR_VQUEUE_INVLD_PARAM,
+				 "the vring is empty.\n");
 	VQ_PARAM_CHK(ring->num_descs & (ring->num_descs - 1), status,
-				 ERROR_VRING_ALIGN);
-	VQ_PARAM_CHK(vq == NULL, status, ERROR_NO_MEM);
+				 ERROR_VRING_ALIGN, "the vring number is not power of two.\n");
+	VQ_PARAM_CHK(vq == NULL, status, ERROR_NO_MEM, "virtual queue is empty.\n");
 
 	if (status == VQUEUE_SUCCESS) {
 		vq->vq_dev = virt_dev;
@@ -82,9 +83,13 @@ int virtqueue_add_buffer(struct virtqueue *vq, struct virtqueue_buf *buf_list,
 
 	needed = readable + writable;
 
-	VQ_PARAM_CHK(vq == NULL, status, ERROR_VQUEUE_INVLD_PARAM);
-	VQ_PARAM_CHK(needed < 1, status, ERROR_VQUEUE_INVLD_PARAM);
-	VQ_PARAM_CHK(vq->vq_free_cnt < needed, status, ERROR_VRING_FULL);
+	VQ_PARAM_CHK(vq == NULL, status, ERROR_VQUEUE_INVLD_PARAM,
+				 "fail to add empty virtqueue.\n");
+	VQ_PARAM_CHK(
+		needed < 1, status, ERROR_VQUEUE_INVLD_PARAM,
+		"the number of the read and write vring descripter is zero.\n");
+	VQ_PARAM_CHK(vq->vq_free_cnt < needed, status, ERROR_VRING_FULL,
+				 "the free vrings is less than needed ones.\n");
 	log_debug(VIRTQUEUE_TAG,
 			  "virtqueue_add_buffer vq_free_cnt = %d, needed = %d\n",
 			  vq->vq_free_cnt, needed);
