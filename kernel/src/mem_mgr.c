@@ -3,8 +3,11 @@
 #include <log.h>
 #include <string.h>
 #include <task_sched.h>
+#include <mutex.h>
+#include <task.h>
 
 #define MEM_TAG "MEM"
+#define MEM_MUTEX_NAME "kmem_mutex"
 #define MAX_FL_INDEX (30)
 #define FL_INDEX_OFFSET (6)
 #define FL_INDEX_NUM (MAX_FL_INDEX - FL_INDEX_OFFSET)
@@ -84,6 +87,7 @@ static const int32_t table[] = {
 	7,	7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7};
 
 static uint8_t *mp = NULL;
+static struct mutex mem_mutex;
 
 static int32_t ls_bit(int32_t i) {
 	uint32_t a = 0;
@@ -240,7 +244,7 @@ static void free_ex(void *ptr, void *mem_pool) {
 	struct bhdr *b = NULL, *tmp_b = NULL;
 	uint32_t fl = 0, sl = 0;
 
-	if (!ptr) {
+	if (!ptr || !mem_pool) {
 		return;
 	}
 
@@ -282,7 +286,7 @@ static errno_t kmem_init(void *mem, uint32_t size) {
 	}
 
 	if (!size || size < sizeof(struct tlsf) + BHDR_OVERHEAD * 8) {
-		log_err(MEM_TAG, "memory pool size is not enouph\n");
+		log_err(MEM_TAG, "memory pool size is not enough\n");
 		return ERRNO_MEM_NO_MEMORY;
 	}
 
@@ -315,6 +319,7 @@ static errno_t kmem_init(void *mem, uint32_t size) {
 }
 
 void kheap_init() {
+	mutex_init(&mem_mutex, MEM_MUTEX_NAME);
 	kmem_init((void *)__kernel_heap_start,
 			  __kernel_heap_end - __kernel_heap_start);
 }
@@ -355,9 +360,26 @@ static void *malloc_ex(uint32_t size, void *mem_pool) {
 	return (void *)b->ptr.buffer;
 }
 
-void *kmalloc(uint32_t size) { return malloc_ex(size, mp); }
+void *kmalloc(uint32_t size) {
+	void *ptr = NULL;
+	struct task *task = current_task_get();
 
-void kfree(void *ptr) { free_ex(ptr, mp); }
+	if (!task) {
+		return malloc_ex(size, mp);
+	}
+
+	mutex_take(mem_mutex.id, MUTEX_WAIT_FOREVER);
+	ptr = malloc_ex(size, mp);
+	mutex_give(mem_mutex.id);
+
+	return ptr;
+}
+
+void kfree(void *ptr) {
+	mutex_take(mem_mutex.id, MUTEX_WAIT_FOREVER);
+	free_ex(ptr, mp);
+	mutex_give(mem_mutex.id);
+}
 
 static void *realloc_ex(void *ptr, uint32_t new_size, void *mem_pool) {
 	struct tlsf *tlsf = (struct tlsf *)mem_pool;
@@ -368,13 +390,10 @@ static void *realloc_ex(void *ptr, uint32_t new_size, void *mem_pool) {
 	uint32_t tmp_size;
 
 	if (!ptr) {
-		if (new_size) {
-			return (void *)malloc_ex(new_size, mem_pool);
-		}
-		if (!new_size) {
-			return NULL;
-		}
-	} else if (!new_size) {
+		return malloc_ex(new_size, mem_pool);
+	}
+
+	if (!new_size) {
 		free_ex(ptr, mem_pool);
 		return NULL;
 	}
@@ -441,7 +460,20 @@ static void *realloc_ex(void *ptr, uint32_t new_size, void *mem_pool) {
 	return ptr_aux;
 }
 
-void *krealloc(void *ptr, uint32_t size) { return realloc_ex(ptr, size, mp); }
+void *krealloc(void *ptr, uint32_t size) {
+	void *new_ptr = NULL;
+	struct task *task = current_task_get();
+
+	if (!task) {
+		return realloc_ex(ptr, size, mp);
+	}
+
+	mutex_take(mem_mutex.id, MUTEX_WAIT_FOREVER);
+	new_ptr = realloc_ex(ptr, size, mp);
+	mutex_give(mem_mutex.id);
+
+	return new_ptr;
+}
 
 static void *calloc_ex(size_t nelem, size_t elem_size, void *mem_pool) {
 	void *ptr = NULL;
@@ -460,5 +492,16 @@ static void *calloc_ex(size_t nelem, size_t elem_size, void *mem_pool) {
 }
 
 void *kcalloc(uint32_t nelem, uint32_t elem_size) {
-	return calloc_ex(nelem, elem_size, mp);
+	void *ptr = NULL;
+	struct task *task = current_task_get();
+
+	if (!task) {
+		return calloc_ex(nelem, elem_size, mp);
+	}
+
+	mutex_take(mem_mutex.id, MUTEX_WAIT_FOREVER);
+	ptr = calloc_ex(nelem, elem_size, mp);
+	mutex_give(mem_mutex.id);
+
+	return ptr;
 }

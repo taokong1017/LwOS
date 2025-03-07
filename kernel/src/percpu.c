@@ -42,8 +42,6 @@ void percpu_init(uint32_t cpu_id) {
 	write_tpidrro_el0((uint64_t)percpu);
 	percpu->pend_sched = false;
 	percpu->is_idle = false;
-	msgq_create(SERVICE_MSGQ_NAME, SERVICE_MSGQ_NUM, SERVICE_MSGQ_SIZE,
-				&percpu->msgq_id);
 
 	/* create service task */
 	idle_task_create(cpu_id);

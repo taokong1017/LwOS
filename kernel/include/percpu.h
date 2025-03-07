@@ -25,7 +25,6 @@ struct ready_queue {
 struct per_cpu {
 	bool pend_sched;
 	bool is_idle;
-	msgq_id_t msgq_id;
 
 	/* interrupt related */
 	uint32_t irq_nested_cnt;
