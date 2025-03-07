@@ -44,7 +44,6 @@ static void test_task1_entry(void *arg0, void *arg1, void *arg2, void *arg3) {
 	};
 	rpmsg_id_t rpmsg_id = rpmsg_init(RPMSG_HOST, shm_mem, buf_info);
 	int data = 0, ret = 0;
-	uint64_t i = 0;
 
 	rpmsg_msg_cb_register(rpmsg_id, rpmsg_msg_callback);
 	arch_irq_connect(USER_IPI_MIN, 160, (irq_routine_t)rpmsg_receive_handler,
@@ -54,9 +53,7 @@ static void test_task1_entry(void *arg0, void *arg1, void *arg2, void *arg3) {
 	for (;;) {
 		data = rand();
 		ret = rpmsg_send(rpmsg_id, &data, sizeof(data));
-		if (ret > 0) {
-			// printf("send data 0x%lx, i = %llu\n", data, i++);
-		} else {
+		if (ret < 0) {
 			printf("send data ret = %d\n", ret);
 		}
 		task_delay(1);
