@@ -4,6 +4,9 @@
 #include <task.h>
 #include <rpmsg.h>
 #include <stdlib.h>
+#include <smp.h>
+#include <gic_v2.h>
+#include <irq.h>
 
 #define TEST_TASK1_NAME "test_task1"
 #define TEST_TASK2_NAME "test_task2"
@@ -16,9 +19,16 @@ static char buffer[BUFFER_SIZE] = {0};
 static struct rpmsg_buf_info buf_info = {
 	.h2r_buf_num = 4,
 	.h2r_buf_size = 100,
-	.r2h_buf_num = 0,
-	.r2h_buf_size = 0,
+	.r2h_buf_num = 4,
+	.r2h_buf_size = 100,
 };
+
+static int rpmsg_msg_callback(void *data, uint32_t len) {
+	int new_data = *(int *)data;
+
+	printf("callback data 0x%lx\n", new_data);
+	return len;
+}
 
 static void test_task1_entry(void *arg0, void *arg1, void *arg2, void *arg3) {
 	(void)arg0;
@@ -36,13 +46,16 @@ static void test_task1_entry(void *arg0, void *arg1, void *arg2, void *arg3) {
 	int data = 0, ret = 0;
 	uint64_t i = 0;
 
+	rpmsg_msg_cb_register(rpmsg_id, rpmsg_msg_callback);
+	arch_irq_connect(USER_IPI_MIN, 160, (irq_routine_t)rpmsg_receive_handler,
+					 (const void *)rpmsg_id, IRQ_TYPE_LEVEL);
 	srand(0);
 
 	for (;;) {
 		data = rand();
 		ret = rpmsg_send(rpmsg_id, &data, sizeof(data));
 		if (ret > 0) {
-			printf("send data 0x%lx, i = %llu\n", data, i++);
+			// printf("send data 0x%lx, i = %llu\n", data, i++);
 		} else {
 			printf("send data ret = %d\n", ret);
 		}
@@ -84,6 +97,12 @@ static void create_test_task1() {
 	return;
 }
 
+static int rpmsg_notify_cb(int32_t ipi, int32_t cpu_id) {
+	gic_raise_sgi(ipi, 0, BIT(cpu_id));
+
+	return 0;
+}
+
 static void test_task2_entry(void *arg0, void *arg1, void *arg2, void *arg3) {
 	(void)arg0;
 	(void)arg1;
@@ -98,18 +117,16 @@ static void test_task2_entry(void *arg0, void *arg1, void *arg2, void *arg3) {
 	};
 	rpmsg_id_t rpmsg_id = rpmsg_init(RPMSG_REMOTE, shm_mem, buf_info);
 	int32_t data = 0, ret = 0;
-	uint64_t i = 0;
 
-	task_delay(0);
+	rpmsg_notify_register(rpmsg_id, (rpmsg_notify)rpmsg_notify_cb,
+						  (void *)USER_IPI_MIN, (void *)1);
+
 	for (;;) {
 		data = 0;
 		ret = rpmsg_receive(rpmsg_id, &data, sizeof(data));
 		if (ret > 0) {
-			printf("receive data 0x%8lx, i = %llu\n", data, i++);
-		} else {
-			printf("receive data ret = %d\n", ret);
+			rpmsg_send(rpmsg_id, &data, sizeof(data));
 		}
-		task_delay(1);
 	}
 }
 

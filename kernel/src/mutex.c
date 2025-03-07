@@ -205,7 +205,7 @@ errno_t mutex_give(mutex_id_t id) {
 	key = sched_spin_lock();
 
 	if (is_in_irq()) {
-		log_err(MUTEX_TAG, "the mutex %s is in irq\n", mutex->name);
+		log_debug(MUTEX_TAG, "the mutex %s is in irq\n", mutex->name);
 		sched_spin_unlock(key);
 		return ERRNO_MUTEX_IN_IRQ;
 	}

@@ -7,6 +7,9 @@
 
 #ifndef __ASSEMBLY__
 #include <arch_regs.h>
+
+typedef void (*irq_routine_t)(const void *parameter);
+
 void arch_irq_enable(uint32_t irq);
 void arch_irq_disable(uint32_t irq);
 bool arch_irq_is_enabled(uint32_t irq);

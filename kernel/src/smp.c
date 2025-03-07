@@ -14,11 +14,6 @@
 #define LOG_TAG "SMP"
 #define ALL_CPU_MASK (((1U) << CONFIG_CPUS_MAX_NUM) - 1)
 
-enum smp_ipi_type {
-	SMP_IPI_SCHED = 0,
-	SMP_IPI_NUM,
-};
-
 typedef void (*smp_init_func)(void *arg);
 struct smp_init_callback {
 	smp_init_func init_func;
