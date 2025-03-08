@@ -118,7 +118,6 @@ void task_reset(struct task *task) {
 	}
 	task->status = TASK_STATUS_STOP;
 	task->is_timeout = false;
-	task->lock_cnt = 0;
 	arch_task_init(task->id);
 }
 
@@ -501,11 +500,6 @@ errno_t task_delay(uint64_t ticks) {
 		return ERRNO_TASK_OPERATE_INVALID;
 	}
 
-	if (TASK_IS_LOCKED(task)) {
-		sched_spin_unlock(key);
-		return ERRNO_TASK_IS_LOCKED;
-	}
-
 	if (task->status != TASK_STATUS_RUNNING) {
 		sched_spin_unlock(key);
 		return ERRNO_TASK_STATUS_INVALID;
@@ -525,37 +519,6 @@ errno_t task_delay(uint64_t ticks) {
 	sched_spin_unlock(key);
 
 	return OK;
-}
-
-void task_lock() {
-	uint32_t key = 0;
-	struct task *task = NULL;
-
-	key = sched_spin_lock();
-	task = current_task_get();
-	task->lock_cnt++;
-	sched_spin_unlock(key);
-
-	return;
-}
-
-void task_unlock() {
-	uint32_t key = 0;
-	struct task *task = NULL;
-
-	key = sched_spin_lock();
-	task = current_task_get();
-
-	if (task->lock_cnt > 0) {
-		task->lock_cnt--;
-	}
-
-	if (task->lock_cnt == 0) {
-		task_sched_locked();
-	}
-	sched_spin_unlock(key);
-
-	return;
 }
 
 errno_t task_wait_locked(struct wait_queue *wq, uint64_t ticks,
@@ -640,13 +603,9 @@ bool task_sig_handle() {
 	}
 
 	/* if the task is waiting for the signal, wake it up */
-	if (TASK_IS_LOCKED(cur_task)) {
-		per_cpu->pend_sched = true;
-	} else {
-		if (per_cpu->pend_sched) {
-			per_cpu->pend_sched = false;
-			need_sched = true;
-		}
+	if (per_cpu->pend_sched) {
+		per_cpu->pend_sched = false;
+		need_sched = true;
 	}
 
 	return need_sched;

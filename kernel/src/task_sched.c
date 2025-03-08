@@ -16,7 +16,6 @@
 #define SYSTEM_TASK_NAME "system_task"
 #define TASK_SCHED_TAG "TASK_SCHED"
 #define TASK_SCHED_LOCKER "SCHED_SPIN_LOCKER"
-#define TASK_IS_LOCKED(task) (task->lock_cnt > 0)
 
 SPIN_LOCK_DEFINE(sched_spinlocker, TASK_SCHED_LOCKER);
 extern void main(void *arg0, void *arg1, void *arg2, void *arg3);
@@ -221,11 +220,6 @@ void task_sched_locked() {
 		return;
 	}
 
-	if (TASK_IS_LOCKED(current_task)) {
-		per_cpu->pend_sched = true;
-		return;
-	}
-
 	if (current_task == next_task) {
 		return;
 	}
@@ -269,12 +263,6 @@ void task_sched_unlocked() {
 	}
 
 	key = sched_spin_lock();
-
-	if (TASK_IS_LOCKED(current_task)) {
-		per_cpu->pend_sched = true;
-		sched_spin_unlock(key);
-		return;
-	}
 
 	if (current_task == next_task) {
 		sched_spin_unlock(key);

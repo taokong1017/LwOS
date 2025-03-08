@@ -11,7 +11,6 @@
 #define ID_TO_TASK(task_id) ((struct task *)task_id)
 #define CPU_AFFI_MASK(cpu_id) (1 << cpu_id)
 #define TASK_WAIT_FOREVER WAIT_FOREVER
-#define TASK_IS_LOCKED(task) (task->lock_cnt > 0)
 #define TASK_IS_STOP(task) (task->status == TASK_STATUS_STOP)
 #define TASK_IS_READY(task) (task->status == TASK_STATUS_READY)
 #define TASK_IS_SUSPEND(task) (task->status == TASK_STATUS_SUSPEND)
@@ -70,14 +69,13 @@
 #define ERRNO_TASK_FLAG_INVALID ERRNO_OS_ERROR(MOD_ID_TASK, 0x0a)
 #define ERRNO_TASK_IN_IRQ_STATUS ERRNO_OS_ERROR(MOD_ID_TASK, 0x0b)
 #define ERRNO_TASK_OPERATE_INVALID ERRNO_OS_ERROR(MOD_ID_TASK, 0x0c)
-#define ERRNO_TASK_IS_LOCKED ERRNO_OS_ERROR(MOD_ID_TASK, 0x0d)
-#define ERRNO_TASK_CPU_AFFI_INAVLID ERRNO_OS_ERROR(MOD_ID_TASK, 0x0e)
-#define ERRNO_TASK_WAIT_TIMEOUT ERRNO_OS_ERROR(MOD_ID_TASK, 0x0f)
-#define ERRNO_TASK_NO_SCHEDLE ERRNO_OS_ERROR(MOD_ID_TASK, 0x10)
-#define ERRNO_TASK_INVALID_TIMEOUT ERRNO_OS_ERROR(MOD_ID_TASK, 0x11)
-#define ERRNO_TASK_WILL_SUSPEND ERRNO_OS_ERROR(MOD_ID_TASK, 0x12)
-#define ERRNO_TASK_MEM_DOMAIN_NULL ERRNO_OS_ERROR(MOD_ID_TASK, 0x13)
-#define ERRNO_TASK_INVALID_CPU_ID ERRNO_OS_ERROR(MOD_ID_TASK, 0x14)
+#define ERRNO_TASK_CPU_AFFI_INAVLID ERRNO_OS_ERROR(MOD_ID_TASK, 0x0d)
+#define ERRNO_TASK_WAIT_TIMEOUT ERRNO_OS_ERROR(MOD_ID_TASK, 0x0e)
+#define ERRNO_TASK_NO_SCHEDLE ERRNO_OS_ERROR(MOD_ID_TASK, 0x0f)
+#define ERRNO_TASK_INVALID_TIMEOUT ERRNO_OS_ERROR(MOD_ID_TASK, 0x10)
+#define ERRNO_TASK_WILL_SUSPEND ERRNO_OS_ERROR(MOD_ID_TASK, 0x11)
+#define ERRNO_TASK_MEM_DOMAIN_NULL ERRNO_OS_ERROR(MOD_ID_TASK, 0x12)
+#define ERRNO_TASK_INVALID_CPU_ID ERRNO_OS_ERROR(MOD_ID_TASK, 0x13)
 
 /* task cpu affinity */
 #define TASK_CPU_DEFAULT_AFFI TASK_CPU_AFFI_MASK
@@ -109,7 +107,6 @@ struct task {
 	uint32_t flag;
 	void *stack_ptr;
 	uint32_t stack_size;
-	uint64_t lock_cnt;
 	uint32_t cpu_id;
 	task_entry_func entry;
 	void *args[4];
@@ -138,8 +135,6 @@ errno_t task_cpu_affi_set(task_id_t task_id, uint32_t cpu_affi);
 errno_t task_cpu_bind(task_id_t task_id, uint32_t cpu);
 errno_t task_cpu_affi_get(task_id_t task_id, uint32_t *cpu_affi);
 task_id_t task_self_id();
-void task_lock();
-void task_unlock();
 errno_t task_wait_locked(struct wait_queue *wq, uint64_t ticks,
 						 bool need_sched);
 errno_t task_wakeup_locked(struct wait_queue *wq);

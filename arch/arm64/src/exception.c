@@ -140,7 +140,6 @@ static void show_current_task() {
 	printf("stack    : [0x%016llx, 0x%016llx]\n",
 		   cur_task->stack_ptr - cur_task->stack_size, cur_task->stack_ptr);
 	printf("cpu_id   : %016u\n", cur_task->cpu_id);
-	printf("lock_cnt : %016u\n", cur_task->lock_cnt);
 }
 
 static void show_interrupt() {

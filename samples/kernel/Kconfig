@@ -16,9 +16,6 @@ config CONFIG_TASK_003
 config CONFIG_TASK_004
 	bool "Kernel TASK 004"
 
-config CONFIG_TASK_005
-	bool "Kernel TASK 005"
-
 config CONFIG_TIMER_001
 	bool "Kernel Timer 001"
 

@@ -142,12 +142,6 @@ errno_t mutex_take(mutex_id_t id, uint32_t timeout) {
 		return ERRNO_MUTEX_IS_BUSY;
 	}
 
-	if (TASK_IS_LOCKED(cur_task)) {
-		log_debug(MUTEX_TAG, "the task %s is locked\n", cur_task->name);
-		sched_spin_unlock(key);
-		return ERRNO_MUTEX_IS_LOCKED;
-	}
-
 	/* raise mutex owner priority to the hightest of tasks in the wait queue */
 	if (mutex->owner->priority < cur_prio) {
 		mutex_owner_priority_set(mutex->owner, cur_prio);
@@ -224,12 +218,6 @@ errno_t mutex_give(mutex_id_t id) {
 				mutex->name, owner->name);
 		sched_spin_unlock(key);
 		return ERRNO_MUTEX_OHTER_OWNER;
-	}
-
-	if (TASK_IS_LOCKED(cur_task)) {
-		log_debug(MUTEX_TAG, "the task %s is locked\n", cur_task->name);
-		sched_spin_unlock(key);
-		return ERRNO_MUTEX_IS_LOCKED;
 	}
 
 	if (mutex->lock_count > 1U) {
