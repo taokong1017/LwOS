@@ -275,7 +275,6 @@ void task_sched_unlocked() {
 	current_task->cpu_id =
 		mask_trailing_zeros(usable_affi ? usable_affi : current_task->cpu_affi);
 	sched_ready_queue_add(current_task->cpu_id, current_task);
-	smp_sched_notify();
 
 	if (next_task->is_idle_task) {
 		per_cpu->is_idle = true;

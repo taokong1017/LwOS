@@ -237,7 +237,6 @@ errno_t task_priority_get(task_id_t task_id, uint32_t *prioriy) {
 errno_t task_cpu_affi_set(task_id_t task_id, uint32_t cpu_affi) {
 	struct task *task = ID_TO_TASK(task_id);
 	uint32_t key = 0;
-	uint32_t usable_affi = 0;
 
 	if (!task || task->id != task_id) {
 		return ERRNO_TASK_ID_INVALID;
@@ -249,16 +248,6 @@ errno_t task_cpu_affi_set(task_id_t task_id, uint32_t cpu_affi) {
 
 	key = sched_spin_lock();
 	task->cpu_affi = cpu_affi;
-
-	if (TASK_IS_READY(task)) {
-		sched_ready_queue_remove(task->cpu_id, task);
-		usable_affi = cpu_affi & percpu_idle_mask_get();
-		task->cpu_id =
-			mask_trailing_zeros(usable_affi ? usable_affi : cpu_affi);
-		sched_ready_queue_add(task->cpu_id, task);
-		smp_sched_notify();
-	}
-
 	sched_spin_unlock(key);
 
 	return OK;
@@ -299,7 +288,6 @@ errno_t task_cpu_affi_get(task_id_t task_id, uint32_t *cpu_affi) {
 errno_t task_start(task_id_t task_id) {
 	struct task *task = ID_TO_TASK(task_id);
 	uint32_t key = 0;
-	uint32_t cur_cpu_id = 0;
 	uint64_t current_ticks = 0;
 
 	if (!task || task->id != task_id) {
@@ -323,9 +311,8 @@ errno_t task_start(task_id_t task_id) {
 	}
 
 	task->cpu_id = mask_trailing_zeros(task->cpu_affi);
-	cur_cpu_id = arch_cpu_id_get();
 	current_ticks = current_ticks_get();
-	if (task->cpu_id == cur_cpu_id) {
+	if (task == current_task_get()) {
 		task->status = TASK_STATUS_READY;
 		sched_ready_queue_add(task->cpu_id, task);
 		task_sched_locked();
@@ -455,7 +442,7 @@ errno_t task_suspend(task_id_t task_id) {
 	}
 
 	/* The task is running on the other cpu */
-	if (TASK_IS_RUNNING(task) && task->cpu_id != arch_cpu_id_get()) {
+	if (TASK_IS_RUNNING(task) && task != current_task_get()) {
 		task->sig = TASK_SIG_SUSPEND;
 		smp_sched_notify();
 		sched_spin_unlock(key);
@@ -524,7 +511,6 @@ errno_t task_delay(uint64_t ticks) {
 errno_t task_wait_locked(struct wait_queue *wq, uint64_t ticks,
 						 bool need_sched) {
 	struct task *task = current_task_get();
-	uint32_t cur_cpuid = arch_cpu_id_get();
 
 	if (!wq) {
 		return ERRNO_TASK_PTR_NULL;
@@ -541,11 +527,7 @@ errno_t task_wait_locked(struct wait_queue *wq, uint64_t ticks,
 		timeout_queue_add(&task->timeout, task->cpu_id);
 	}
 	list_add_tail(&task->pend_list, &wq->wait_list);
-	if (task->cpu_id == cur_cpuid) {
-		task_sched_locked();
-	} else {
-		smp_sched_notify();
-	}
+	task_sched_locked();
 	if (task->is_timeout) {
 		task->is_timeout = false;
 		return ERRNO_TASK_WAIT_TIMEOUT;
@@ -557,7 +539,6 @@ errno_t task_wait_locked(struct wait_queue *wq, uint64_t ticks,
 errno_t task_wakeup_locked(struct wait_queue *wq) {
 	uint32_t usable_affi = 0;
 	struct task *task = NULL;
-	uint32_t cur_cpuid = arch_cpu_id_get();
 
 	if (!wq) {
 		return ERRNO_TASK_PTR_NULL;
@@ -572,7 +553,7 @@ errno_t task_wakeup_locked(struct wait_queue *wq) {
 			mask_trailing_zeros(usable_affi ? usable_affi : task->cpu_affi);
 		sched_ready_queue_add(task->cpu_id, task);
 		task->is_timeout = false;
-		if ((task->cpu_id == cur_cpuid) && (!is_in_irq())) {
+		if ((task == current_task_get()) && (!is_in_irq())) {
 			task_sched_locked();
 		} else {
 			smp_sched_notify();
