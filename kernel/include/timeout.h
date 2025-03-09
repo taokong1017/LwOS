@@ -3,7 +3,7 @@
 
 #include <types.h>
 #include <list.h>
-#include <errno.h>
+#include <kerrno.h>
 
 #define ERRNO_TIMEOUT_EMPTY_PTR ERRNO_OS_ERROR(MOD_ID_TIMEOUT, 0x00)
 

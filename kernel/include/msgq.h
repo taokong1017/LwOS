@@ -2,7 +2,7 @@
 #define __MSGQ_H__
 
 #include <types.h>
-#include <errno.h>
+#include <kerrno.h>
 
 #define MSGQ_INVALID_ID -1
 #define MSGQ_NAME_LEN 32

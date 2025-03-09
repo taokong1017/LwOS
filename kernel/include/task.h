@@ -3,7 +3,7 @@
 
 #include <list.h>
 #include <types.h>
-#include <errno.h>
+#include <kerrno.h>
 #include <timeout.h>
 #include <arch_task.h>
 #include <mem_domain.h>

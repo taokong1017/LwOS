@@ -2,7 +2,7 @@
 #define __ARM64_CPU_OPS_PSCI_H__
 
 #include <types.h>
-#include <errno.h>
+#include <kerrno.h>
 
 /* PSCI version decoding (independent of PSCI version) */
 #define PSCI_VERSION_MAJOR_SHIFT 16

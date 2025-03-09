@@ -1,7 +1,6 @@
 #include <stdarg.h>
 #include <stdio.h>
 #include <types.h>
-#include <errno.h>
 #include <string.h>
 #include <limits.h>
 #include <uart_pl011.h>

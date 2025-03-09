@@ -2,7 +2,6 @@
 #define __SPIN_LOCK_H__
 
 #include <types.h>
-#include <errno.h>
 #include <menuconfig.h>
 #include <arch_atomic.h>
 

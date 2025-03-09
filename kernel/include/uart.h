@@ -2,7 +2,7 @@
 #define __UART_H__
 
 #include <types.h>
-#include <errno.h>
+#include <kerrno.h>
 #include <device.h>
 
 enum uart_parity {

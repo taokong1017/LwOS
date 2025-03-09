@@ -2,7 +2,7 @@
 #define __MEMORY_MGR_H__
 
 #include <types.h>
-#include <errno.h>
+#include <kerrno.h>
 
 #define ERRNO_MEM_NULL_PTR ERRNO_OS_ERROR(MOD_ID_MEM, 0x00)
 #define ERRNO_MEM_NO_MEMORY ERRNO_OS_ERROR(MOD_ID_MEM, 0x01)

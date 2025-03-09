@@ -2,7 +2,7 @@
 #define __TIMER_H__
 
 #include <types.h>
-#include <errno.h>
+#include <kerrno.h>
 #include <timeout.h>
 #include <kernel.h>
 

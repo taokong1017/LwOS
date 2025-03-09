@@ -2,7 +2,7 @@
 #define __MUTEX_H__
 
 #include <types.h>
-#include <errno.h>
+#include <kerrno.h>
 #include <task.h>
 #include <kernel.h>
 

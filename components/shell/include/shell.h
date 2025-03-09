@@ -15,7 +15,7 @@
 #include <shell_vt100.h>
 #include <shell_util.h>
 #include <shell_ops.h>
-#include <errno.h>
+#include <kerrno.h>
 #include <sem.h>
 #include <arch_atomic.h>
 

@@ -2,7 +2,7 @@
 #define __SYSCALL_H__
 
 #include <types.h>
-#include <errno.h>
+#include <kerrno.h>
 
 #define ERRNO_SYSCALL_INVALID_ID ERRNO_OS_ERROR(MOD_ID_SYSCALL, 0x00)
 

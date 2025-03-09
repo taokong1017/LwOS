@@ -1,7 +1,7 @@
 #ifndef __MEM_DOMAIN_H__
 #define __MEM_DOMAIN_H__
 
-#include <errno.h>
+#include <kerrno.h>
 #include <list.h>
 #include <menuconfig.h>
 #include <mmu.h>

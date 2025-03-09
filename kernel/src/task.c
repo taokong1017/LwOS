@@ -1,6 +1,6 @@
 #include <types.h>
 #include <task.h>
-#include <errno.h>
+#include <kerrno.h>
 #include <mem_mgr.h>
 #include <string.h>
 #include <arch_task.h>
@@ -358,7 +358,6 @@ errno_t task_stop(task_id_t task_id) {
 
 	if (TASK_IS_RUNNING(task)) {
 		task->sig = TASK_SIG_STOP;
-		smp_sched_notify();
 		task_sched_locked();
 	} else {
 		task_reset(task);
