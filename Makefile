@@ -45,7 +45,7 @@ define MAKE_CLEAN_CMD
 	done
 endef
 
-.PHONY: all check menuconfig run dbg clean help obj defconfig gen
+.PHONY: all check menuconfig run gdb clean help obj defconfig gen
 
 all: obj
 	$(Q)python3 scripts/gen_app_ld.py -s 0x1000 -d $(BASE_DIR)/samples -o $(APP_LD)
@@ -82,7 +82,7 @@ endif
 run:
 	$(Q)$(QEMU_RUN) $(TARGET)
 
-dbg:
+gdb:
 	$(Q)$(QEMU_RUN) $(TARGET) -S -s
 
 menuconfig:
@@ -110,4 +110,4 @@ help:
 	@echo "make all:		make CROSS_COMPILE=~/aarch64-none-elf/bin/aarch64-none-elf- -j"
 	@echo "make clean:		make CROSS_COMPILE=~/aarch64-none-elf/bin/aarch64-none-elf- clean"
 	@echo "make run:		make CROSS_COMPILE=~/aarch64-none-elf/bin/aarch64-none-elf- run"
-	@echo "make dbg:		make CROSS_COMPILE=~/aarch64-none-elf/bin/aarch64-none-elf- dbg"
+	@echo "make gdb:		make CROSS_COMPILE=~/aarch64-none-elf/bin/aarch64-none-elf- gdb"

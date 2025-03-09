@@ -402,10 +402,10 @@ static uintptr_t syscall_mutex_destroy(uintptr_t arg1, uintptr_t arg2,
 	return mutex_destroy(id);
 }
 
-static uintptr_t syscall_libc_sched_yield(uintptr_t arg1, uintptr_t arg2,
-										  uintptr_t arg3, uintptr_t arg4,
-										  uintptr_t arg5, uintptr_t arg6,
-										  struct arch_regs *regs) {
+static uintptr_t syscall_sched_yield(uintptr_t arg1, uintptr_t arg2,
+									 uintptr_t arg3, uintptr_t arg4,
+									 uintptr_t arg5, uintptr_t arg6,
+									 struct arch_regs *regs) {
 	(void)arg1;
 	(void)arg2;
 	(void)arg3;
@@ -415,6 +415,36 @@ static uintptr_t syscall_libc_sched_yield(uintptr_t arg1, uintptr_t arg2,
 	(void)regs;
 
 	return task_delay(0);
+}
+
+static uintptr_t syscall_sched_get_priority_max(uintptr_t arg1, uintptr_t arg2,
+												uintptr_t arg3, uintptr_t arg4,
+												uintptr_t arg5, uintptr_t arg6,
+												struct arch_regs *regs) {
+	(void)arg1;
+	(void)arg2;
+	(void)arg3;
+	(void)arg4;
+	(void)arg5;
+	(void)arg6;
+	(void)regs;
+
+	return TASK_PRIORITY_HIGHEST;
+}
+
+static uintptr_t syscall_sched_get_priority_min(uintptr_t arg1, uintptr_t arg2,
+												uintptr_t arg3, uintptr_t arg4,
+												uintptr_t arg5, uintptr_t arg6,
+												struct arch_regs *regs) {
+	(void)arg1;
+	(void)arg2;
+	(void)arg3;
+	(void)arg4;
+	(void)arg5;
+	(void)arg6;
+	(void)regs;
+
+	return TASK_PRIORITY_LOWEST;
 }
 
 static uintptr_t default_syscall_handler(uintptr_t arg1, uintptr_t arg2,
@@ -461,7 +491,9 @@ const syscall_handler_t syscall_table[SYSCALL_ID_LIMIT] = {
 	[SYSCALL_MUTEX_TAKE] = syscall_mutex_take,
 	[SYSCALL_MUTEX_GIVE] = syscall_mutex_give,
 	[SYSCALL_MUTEX_DESTROY] = syscall_mutex_destroy,
-	[SYSCALL_LIBC_SCHED_YIELD] = syscall_libc_sched_yield,
+	[SYSCALL_SCHED_YIELD] = syscall_sched_yield,
+	[SYSCALL_SCHED_GET_PRIORITY_MAX] = syscall_sched_get_priority_max,
+	[SYSCALL_SCHED_GET_PRIORITY_MIN] = syscall_sched_get_priority_min,
 };
 
 void syscall_dispatch(struct arch_regs *regs) {

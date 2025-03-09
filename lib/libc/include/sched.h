@@ -7,7 +7,11 @@ extern "C" {
 
 #include <types.h>
 
+#define SCHED_RR 1
+
 int sched_yield(void);
+int sched_get_priority_max(int policy);
+int sched_get_priority_min(int policy);
 
 #ifdef __cplusplus
 }
