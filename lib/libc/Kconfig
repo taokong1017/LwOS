@@ -23,4 +23,10 @@ config CONFIG_LIBC_CRYPT
 		It is primarily used for password hashing, which is a
 		fundamental security mechanism in the system.
 
+config CONFIG_LIBC_SCHED
+	bool "Enable Library Sched"
+	default n
+	help
+		The C Standard Library provides a complete scheduling interface.
+
 endmenu

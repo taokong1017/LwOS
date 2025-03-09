@@ -1,0 +1,2 @@
+obj-$(CONFIG_LIBC_SCHED) := \
+	sched_yield.o

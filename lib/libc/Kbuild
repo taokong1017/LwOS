@@ -5,3 +5,4 @@ subdir-y += \
 	ctype \
 	prng \
 	crypt \
+	sched
