@@ -447,6 +447,23 @@ static uintptr_t syscall_sched_get_priority_min(uintptr_t arg1, uintptr_t arg2,
 	return TASK_PRIORITY_LOWEST;
 }
 
+static uintptr_t syscall_sched_get_param(uintptr_t arg1, uintptr_t arg2,
+										 uintptr_t arg3, uintptr_t arg4,
+										 uintptr_t arg5, uintptr_t arg6,
+										 struct arch_regs *regs) {
+	(void)arg2;
+	(void)arg3;
+	(void)arg4;
+	(void)arg5;
+	(void)arg6;
+	(void)regs;
+
+	uint32_t prioriy = 0;
+	errno_t errno = task_priority_get((task_id_t)arg1, &prioriy);
+
+	return errno ? -errno : prioriy;
+}
+
 static uintptr_t default_syscall_handler(uintptr_t arg1, uintptr_t arg2,
 										 uintptr_t arg3, uintptr_t arg4,
 										 uintptr_t arg5, uintptr_t arg6,
@@ -494,6 +511,7 @@ const syscall_handler_t syscall_table[SYSCALL_ID_LIMIT] = {
 	[SYSCALL_SCHED_YIELD] = syscall_sched_yield,
 	[SYSCALL_SCHED_GET_PRIORITY_MAX] = syscall_sched_get_priority_max,
 	[SYSCALL_SCHED_GET_PRIORITY_MIN] = syscall_sched_get_priority_min,
+	[SYSCALL_SCHED_GET_PARAM] = syscall_sched_get_param,
 };
 
 void syscall_dispatch(struct arch_regs *regs) {
