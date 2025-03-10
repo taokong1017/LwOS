@@ -4,5 +4,6 @@ obj-$(CONFIG_LIBC_SCHED) := \
 	sched_getparam.o \
 	sched_getscheduler.o \
 	sched_rr_get_interval.o \
-	sched_setscheduler.o
+	sched_setscheduler.o \
+	sched_setparam.o
 	
