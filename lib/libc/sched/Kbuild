@@ -1,5 +1,6 @@
 obj-$(CONFIG_LIBC_SCHED) := \
 	sched_yield.o \
 	sched_get_priority_max.o \
-	sched_getparam.o
+	sched_getparam.o \
+	sched_getscheduler.o
 	
