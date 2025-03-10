@@ -1,5 +1,4 @@
 #include <sched.h>
-#include <errno.h>
 #include <arch_syscall.h>
 
 int sched_getparam(pid_t pid, struct sched_param *param) {
