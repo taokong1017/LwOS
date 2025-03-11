@@ -6,5 +6,6 @@ obj-$(CONFIG_LIBC_SCHED) := \
 	sched_rr_get_interval.o \
 	sched_setscheduler.o \
 	sched_setparam.o \
-	sched_cpucount.o
+	sched_cpucount.o \
+	sched_getcpu.o
 	

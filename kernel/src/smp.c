@@ -58,7 +58,7 @@ void smp_cpu_start(uint32_t cpu_id) {
 
 void smp_sched_notify() {
 	uint32_t cur_cpu_id = arch_cpu_id_get();
-	uint32_t mask = ALL_CPU_MASK & (~(1U << cur_cpu_id));
+	uint32_t mask = ALL_CPU_MASK ^ (1U << cur_cpu_id);
 	uint64_t no_use_affi = 0;
 
 	gic_raise_sgi(SMP_IPI_SCHED, no_use_affi, mask);

@@ -497,6 +497,24 @@ static uintptr_t syscall_sched_set_param(uintptr_t arg1, uintptr_t arg2,
 	return -task_priority_set(task_id, prioriy);
 }
 
+static uintptr_t syscall_sched_getcpu(uintptr_t arg1, uintptr_t arg2,
+									  uintptr_t arg3, uintptr_t arg4,
+									  uintptr_t arg5, uintptr_t arg6,
+									  struct arch_regs *regs) {
+	(void)arg2;
+	(void)arg3;
+	(void)arg4;
+	(void)arg5;
+	(void)arg6;
+	(void)regs;
+
+	uint32_t *cpu = (uint32_t *)arg1;
+
+	extern uint32_t arch_cpu_id_get();
+	*cpu = arch_cpu_id_get();
+	return 0;
+}
+
 static uintptr_t default_syscall_handler(uintptr_t arg1, uintptr_t arg2,
 										 uintptr_t arg3, uintptr_t arg4,
 										 uintptr_t arg5, uintptr_t arg6,
@@ -547,6 +565,7 @@ const syscall_handler_t syscall_table[SYSCALL_ID_LIMIT] = {
 	[SYSCALL_SCHED_GET_PARAM] = syscall_sched_get_param,
 	[SYSCALL_SCHED_SET_SCHEDULER] = syscall_sched_set_scheduler,
 	[SYSCALL_SCHED_SET_PARAM] = syscall_sched_set_param,
+	[SYSCALL_SCHED_GETCPU] = syscall_sched_getcpu,
 };
 
 void syscall_dispatch(struct arch_regs *regs) {
