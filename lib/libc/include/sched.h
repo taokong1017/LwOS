@@ -16,6 +16,10 @@ extern "C" {
 
 typedef long pid_t;
 typedef int64_t time_t;
+typedef struct cpu_set_t {
+	unsigned long __bits[128 / sizeof(long)];
+} cpu_set_t;
+
 struct timespec {
 	time_t tv_sec;
 	long tv_nsec;
@@ -32,6 +36,10 @@ int sched_getscheduler(pid_t);
 int sched_rr_get_interval(pid_t, struct timespec *);
 int sched_setparam(pid_t, const struct sched_param *);
 int sched_setscheduler(pid_t, int, const struct sched_param *);
+int __sched_cpucount(size_t, const cpu_set_t *);
+int sched_getcpu(void);
+int sched_getaffinity(pid_t, size_t, cpu_set_t *);
+int sched_setaffinity(pid_t, size_t, const cpu_set_t *);
 
 #ifdef __cplusplus
 }

@@ -20,13 +20,13 @@ int rand(void);
 void srand(unsigned);
 long int random(void);
 void srandom(unsigned int);
-void lcong48(unsigned short [7]);
+void lcong48(unsigned short[7]);
 long int lrand48(void);
-long int nrand48(unsigned short [3]);
+long int nrand48(unsigned short[3]);
 long mrand48(void);
-long jrand48(unsigned short [3]);
+long jrand48(unsigned short[3]);
 void srand48(long);
-unsigned short *seed48(unsigned short [3]);
+unsigned short *seed48(unsigned short[3]);
 
 void *malloc(size_t);
 void *calloc(size_t, size_t);
@@ -34,16 +34,23 @@ void *realloc(void *, size_t);
 void free(void *);
 void *aligned_alloc(size_t, size_t);
 
-void *bsearch(const void *, const void *, size_t, size_t, int(*)(const void *, const void *));
-void qsort(void *, size_t, size_t, int(*)(const void *, const void *));
+void *bsearch(const void *, const void *, size_t, size_t,
+			  int (*)(const void *, const void *));
+void qsort(void *, size_t, size_t, int (*)(const void *, const void *));
 
 int abs(int);
 long labs(long);
 long long llabs(long long);
 
-typedef struct { int quot, rem; } div_t;
-typedef struct { long quot, rem; } ldiv_t;
-typedef struct { long long quot, rem; } lldiv_t;
+typedef struct {
+	int quot, rem;
+} div_t;
+typedef struct {
+	long quot, rem;
+} ldiv_t;
+typedef struct {
+	long long quot, rem;
+} lldiv_t;
 
 div_t div(int, int);
 ldiv_t ldiv(long, long);
