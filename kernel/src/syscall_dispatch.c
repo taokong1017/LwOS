@@ -11,6 +11,8 @@
 #include <sem.h>
 #include <mutex.h>
 #include <mem_domain.h>
+#include <sched.h>
+#include <limits.h>
 
 #define SYSCALL_TAG "SYSCALL"
 typedef uintptr_t (*syscall_handler_t)(uintptr_t arg1, uintptr_t arg2,
@@ -515,6 +517,68 @@ static uintptr_t syscall_sched_getcpu(uintptr_t arg1, uintptr_t arg2,
 	return 0;
 }
 
+static uintptr_t syscall_sched_set_affinity(uintptr_t arg1, uintptr_t arg2,
+											uintptr_t arg3, uintptr_t arg4,
+											uintptr_t arg5, uintptr_t arg6,
+											struct arch_regs *regs) {
+	(void)arg4;
+	(void)arg5;
+	(void)arg6;
+	(void)regs;
+
+	task_id_t task_id = (task_id_t)arg1;
+	size_t size = (size_t)arg2;
+	cpu_set_t *set = (cpu_set_t *)arg3;
+	uint32_t cpu_affi = 0;
+	int32_t i = 0;
+
+	if (size > 32) {
+		return -ERRNO_TASK_CPU_AFFI_INAVLID;
+	}
+
+	for (i = 0; i < size; i++) {
+		if (CPU_ISSET(i, set)) {
+			cpu_affi |= BIT(i);
+		}
+	}
+
+	return -task_cpu_affi_set(task_id, cpu_affi);
+}
+
+static uintptr_t syscall_sched_get_affinity(uintptr_t arg1, uintptr_t arg2,
+											uintptr_t arg3, uintptr_t arg4,
+											uintptr_t arg5, uintptr_t arg6,
+											struct arch_regs *regs) {
+	(void)arg4;
+	(void)arg5;
+	(void)arg6;
+	(void)regs;
+
+	task_id_t task_id = (task_id_t)arg1;
+	size_t size = (size_t)arg2;
+	cpu_set_t *set = (cpu_set_t *)arg3;
+	uint32_t cpu_affi = 0;
+	int32_t i = 0;
+	errno_t errno = OK;
+
+	for (i = 0; i < size; i++) {
+		CPU_CLR(i, set);
+	}
+
+	errno = task_cpu_affi_get(task_id, &cpu_affi);
+	if (errno != OK) {
+		return -errno;
+	}
+
+	for (i = 0; (i < 32) && (i < size); i++) {
+		if (cpu_affi & BIT(i)) {
+			CPU_SET(i, set);
+		}
+	}
+
+	return 0;
+}
+
 static uintptr_t default_syscall_handler(uintptr_t arg1, uintptr_t arg2,
 										 uintptr_t arg3, uintptr_t arg4,
 										 uintptr_t arg5, uintptr_t arg6,
@@ -566,6 +630,8 @@ const syscall_handler_t syscall_table[SYSCALL_ID_LIMIT] = {
 	[SYSCALL_SCHED_SET_SCHEDULER] = syscall_sched_set_scheduler,
 	[SYSCALL_SCHED_SET_PARAM] = syscall_sched_set_param,
 	[SYSCALL_SCHED_GETCPU] = syscall_sched_getcpu,
+	[SYSCALL_SCHED_SET_AFFINITY] = syscall_sched_set_affinity,
+	[SYSCALL_SCHED_GET_AFFINITY] = syscall_sched_get_affinity,
 };
 
 void syscall_dispatch(struct arch_regs *regs) {

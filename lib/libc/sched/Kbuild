@@ -7,5 +7,6 @@ obj-$(CONFIG_LIBC_SCHED) := \
 	sched_setscheduler.o \
 	sched_setparam.o \
 	sched_cpucount.o \
-	sched_getcpu.o
+	sched_getcpu.o \
+	affinity.o
 	
