@@ -29,7 +29,7 @@ static void test_task1_entry(void *arg0, void *arg1, void *arg2, void *arg3) {
 	for (;;) {
 		arch_stack_default_walk(TEST_TASK1_NAME, current_task_get(), NULL);
 
-		printf("%s - cpu%u: %d\n", TEST_TASK1_NAME, arch_cpu_id_get(), i++);
+		printf("%s - cpu%u: %u\n", TEST_TASK1_NAME, arch_cpu_id_get(), i++);
 		task_delay(10);
 	}
 }
@@ -76,7 +76,7 @@ static void test_task2_entry(void *arg0, void *arg1, void *arg2, void *arg3) {
 	uint32_t i = 0;
 
 	for (;;) {
-		printf("%s - cpu%u: %d\n", TEST_TASK2_NAME, arch_cpu_id_get(), i++);
+		printf("%s - cpu%u: %u\n", TEST_TASK2_NAME, arch_cpu_id_get(), i++);
 		task_delay(10);
 	}
 }
@@ -123,7 +123,7 @@ static void test_task3_entry(void *arg0, void *arg1, void *arg2, void *arg3) {
 	uint32_t i = 0;
 
 	for (;;) {
-		printf("%s - cpu%u: %d\n", TEST_TASK3_NAME, arch_cpu_id_get(), i++);
+		printf("%s - cpu%u: %u\n", TEST_TASK3_NAME, arch_cpu_id_get(), i++);
 		task_delay(10);
 	}
 

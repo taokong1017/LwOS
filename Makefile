@@ -45,7 +45,7 @@ define MAKE_CLEAN_CMD
 	done
 endef
 
-.PHONY: all check menuconfig run gdb clean help obj defconfig gen
+.PHONY: all check menuconfig run gdb clean help obj defconfig gen analyze
 
 all: obj
 	$(Q)python3 scripts/gen_app_ld.py -s 0x1000 -d $(BASE_DIR)/samples -o $(APP_LD)
@@ -103,6 +103,10 @@ clean:
 	$(Q)$(call MAKE_CLEAN_CMD, $(SUB_DIRS))
 	$(Q)$(RM) $(TARGET) $(LOGO) $(APP_LD) $(PROJECT).map $(PROJECT).sym $(PROJECT).stat
 	$(Q)$(RM) $(shell find $(SUB_DIRS) -name "*.o*")
+
+analyze:
+	$(Q)cppcheck -v --suppress=unusedVariable --suppress=unusedFunction --suppress=variableScope \
+	 --suppress=unreadVariable --enable=all . 2> static_analysis.txt
 
 help:
 	@echo "make config:		make CROSS_COMPILE=~/aarch64-none-elf/bin/aarch64-none-elf- menuconfig"

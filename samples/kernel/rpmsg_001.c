@@ -26,7 +26,7 @@ static struct rpmsg_buf_info buf_info = {
 static int rpmsg_msg_callback(void *data, uint32_t len) {
 	int new_data = *(int *)data;
 
-	printf("callback data 0x%lx\n", new_data);
+	printf("callback data 0x%x\n", new_data);
 	return len;
 }
 

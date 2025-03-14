@@ -65,14 +65,14 @@ static void timer_oneshot_cb(void *arg) {
 	uint64_t *timer_count = (uint64_t *)arg;
 
 	(*timer_count)++;
-	printf("oneshot - cpu%u: %d\n", arch_cpu_id_get(), *timer_count);
+	printf("oneshot - cpu%u: %lu\n", arch_cpu_id_get(), *timer_count);
 }
 
 static void timer_periodic_cb(void *arg) {
 	uint64_t *timer_count = (uint64_t *)arg;
 
 	(*timer_count)++;
-	printf("periodicshot - cpu%u: %d\n", arch_cpu_id_get(), *timer_count);
+	printf("periodicshot - cpu%u: %lu\n", arch_cpu_id_get(), *timer_count);
 }
 
 static void create_timers() {

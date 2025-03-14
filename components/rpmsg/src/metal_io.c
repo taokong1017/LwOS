@@ -101,7 +101,6 @@ int metal_io_block_set(struct metal_io_region *io, unsigned long offset,
 	if ((offset + len) > io->size) {
 		len = io->size - offset;
 	}
-	retlen = len;
 
 	unsigned int cint = value;
 	unsigned int i;

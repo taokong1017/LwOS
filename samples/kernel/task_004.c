@@ -22,7 +22,7 @@ static void test_task1_entry(void *arg0, void *arg1, void *arg2, void *arg3) {
 	uint32_t i = 0;
 
 	for (;;) {
-		printf("%s - cpu%u: %d\n", TEST_TASK1_NAME, arch_cpu_id_get(), i++);
+		printf("%s - cpu%u: %u\n", TEST_TASK1_NAME, arch_cpu_id_get(), i++);
 		task_delay(10);
 	}
 }
@@ -69,7 +69,7 @@ static void test_task2_entry(void *arg0, void *arg1, void *arg2, void *arg3) {
 	uint32_t i = 0;
 
 	for (;;) {
-		printf("%s - cpu%u: %d\n", TEST_TASK2_NAME, arch_cpu_id_get(), i++);
+		printf("%s - cpu%u: %u\n", TEST_TASK2_NAME, arch_cpu_id_get(), i++);
 		task_delay(10);
 	}
 }
@@ -118,17 +118,17 @@ static void test_task3_entry(void *arg0, void *arg1, void *arg2, void *arg3) {
 	for (;;) {
 		task_cpu_affi_set(test_task1_id, 1);
 		task_cpu_affi_set(test_task2_id, 1);
-		printf("%s - cpu%u: %d\n", TEST_TASK3_NAME, arch_cpu_id_get(), i++);
+		printf("%s - cpu%u: %u\n", TEST_TASK3_NAME, arch_cpu_id_get(), i++);
 		printf("%s has set affinity 1\n", TEST_TASK3_NAME);
 		task_delay(60);
 		task_cpu_affi_set(test_task1_id, 2);
 		task_cpu_affi_set(test_task2_id, 2);
-		printf("%s - cpu%u: %d\n", TEST_TASK3_NAME, arch_cpu_id_get(), i);
+		printf("%s - cpu%u: %u\n", TEST_TASK3_NAME, arch_cpu_id_get(), i);
 		printf("%s has set affinity 2\n", TEST_TASK3_NAME);
 		task_delay(60);
 		task_cpu_affi_set(test_task1_id, 3);
 		task_cpu_affi_set(test_task2_id, 3);
-		printf("%s - cpu%u: %d\n", TEST_TASK3_NAME, arch_cpu_id_get(), i);
+		printf("%s - cpu%u: %u\n", TEST_TASK3_NAME, arch_cpu_id_get(), i);
 		printf("%s has set affinity 3\n", TEST_TASK3_NAME);
 		task_delay(60);
 	}

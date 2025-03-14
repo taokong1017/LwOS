@@ -22,7 +22,7 @@ static void test_task1_entry(void *arg0, void *arg1, void *arg2, void *arg3) {
 	uint32_t i = 0;
 
 	for (;;) {
-		printf("%s - cpu%u: %d\n", TEST_TASK1_NAME, arch_cpu_id_get(), i++);
+		printf("%s - cpu%u: %u\n", TEST_TASK1_NAME, arch_cpu_id_get(), i++);
 		task_delay(10);
 	}
 }
@@ -69,7 +69,7 @@ static void test_task2_entry(void *arg0, void *arg1, void *arg2, void *arg3) {
 	uint32_t i = 0;
 
 	for (;;) {
-		printf("%s - cpu%u: %d\n", TEST_TASK2_NAME, arch_cpu_id_get(), i++);
+		printf("%s - cpu%u: %u\n", TEST_TASK2_NAME, arch_cpu_id_get(), i++);
 		task_delay(10);
 	}
 }
@@ -116,7 +116,7 @@ static void test_task3_entry(void *arg0, void *arg1, void *arg2, void *arg3) {
 	uint32_t i = 0;
 
 	for (;;) {
-		printf("%s - cpu%u: %d\n", TEST_TASK3_NAME, arch_cpu_id_get(), i++);
+		printf("%s - cpu%u: %u\n", TEST_TASK3_NAME, arch_cpu_id_get(), i++);
 		task_suspend(test_task1_id);
 		task_suspend(test_task2_id);
 		printf("%s has suspend other tasks\n", TEST_TASK3_NAME);
