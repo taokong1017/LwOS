@@ -9,7 +9,7 @@ CONFIG     :=
 
 CROSS_COMPILE :=
 LOGO       := kernel/src/logo.c
-TEMP_FILE  := $(shell mktemp)
+ANALYZE_OUT:= analysis.txt
 
 ifeq ($(V),1)
 	export quiet =
@@ -104,7 +104,7 @@ clean:
 	$(Q)$(call MAKE_CLEAN_CMD, $(SUB_DIRS))
 	$(Q)$(RM) $(TARGET) $(LOGO) $(APP_LD) $(PROJECT).map $(PROJECT).sym $(PROJECT).stat
 	$(Q)$(RM) $(shell find $(SUB_DIRS) -name "*.o*")
-	$(Q)$(RM) analysis.txt
+	$(Q)$(RM) $(ANALYZE_OUT)
 
 analyze:
 	@if command -v cppcheck > /dev/null 2>&1; then \
@@ -112,14 +112,11 @@ analyze:
     else \
 		echo "Error: cppcheck tool is not installed."; \
 		exit 1; \
-    fi
-	$(Q)$(RM) "analysis.txt";
+	fi
 	$(Q)cppcheck -v --suppress=unusedFunction --suppress=variableScope \
 	 --suppress=unreadVariable --suppress=oppositeExpression \
-	 --suppress=missingIncludeSystem --enable=all . 2> "$(TEMP_FILE)"
-	@if [ -s "$(TEMP_FILE)" ]; then \
-		$(MV) "$(TEMP_FILE)" "analysis.txt"; \
-	fi
+	 --suppress=missingIncludeSystem --enable=all . 2> $(ANALYZE_OUT)
+	$(Q)echo $$(lizard . > $(ANALYZE_OUT))
 
 help:
 	@echo "make config:		make CROSS_COMPILE=~/aarch64-none-elf/bin/aarch64-none-elf- menuconfig"
