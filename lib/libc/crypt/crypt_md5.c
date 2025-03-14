@@ -54,13 +54,13 @@ static void processblock(struct md5 *s, const uint8_t *buf) {
 
 	i = 0;
 	while (i < 16) {
-		FF(a, b, c, d, W[i], 7, tab[i]);
+		FF(a, b, c, d, W[i % 16], 7, tab[i]);
 		i++;
-		FF(d, a, b, c, W[i], 12, tab[i]);
+		FF(d, a, b, c, W[i % 16], 12, tab[i]);
 		i++;
-		FF(c, d, a, b, W[i], 17, tab[i]);
+		FF(c, d, a, b, W[i % 16], 17, tab[i]);
 		i++;
-		FF(b, c, d, a, W[i], 22, tab[i]);
+		FF(b, c, d, a, W[i % 16], 22, tab[i]);
 		i++;
 	}
 	while (i < 32) {
@@ -84,13 +84,13 @@ static void processblock(struct md5 *s, const uint8_t *buf) {
 		i++;
 	}
 	while (i < 64) {
-		II(a, b, c, d, W[7 * i % 16], 6, tab[i]);
+		II(a, b, c, d, W[7 * i % 16], 6, tab[i % 64]);
 		i++;
-		II(d, a, b, c, W[7 * i % 16], 10, tab[i]);
+		II(d, a, b, c, W[7 * i % 16], 10, tab[i % 64]);
 		i++;
-		II(c, d, a, b, W[7 * i % 16], 15, tab[i]);
+		II(c, d, a, b, W[7 * i % 16], 15, tab[i % 64]);
 		i++;
-		II(b, c, d, a, W[7 * i % 16], 21, tab[i]);
+		II(b, c, d, a, W[7 * i % 16], 21, tab[i % 64]);
 		i++;
 	}
 
