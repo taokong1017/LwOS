@@ -9,6 +9,7 @@ CONFIG     :=
 
 CROSS_COMPILE :=
 LOGO       := kernel/src/logo.c
+TEMP_FILE  := $(shell mktemp)
 
 ifeq ($(V),1)
 	export quiet =
@@ -103,11 +104,22 @@ clean:
 	$(Q)$(call MAKE_CLEAN_CMD, $(SUB_DIRS))
 	$(Q)$(RM) $(TARGET) $(LOGO) $(APP_LD) $(PROJECT).map $(PROJECT).sym $(PROJECT).stat
 	$(Q)$(RM) $(shell find $(SUB_DIRS) -name "*.o*")
-	$(Q)$(RM) static_analysis.txt
+	$(Q)$(RM) analysis.txt
 
 analyze:
-	$(Q)cppcheck -v --suppress=unusedVariable --suppress=unusedFunction --suppress=variableScope \
-	 --suppress=unreadVariable --suppress=oppositeExpression --enable=all . 2> static_analysis.txt
+	@if command -v cppcheck > /dev/null 2>&1; then \
+		echo "cppcheck tool is installed. Proceeding with the build."; \
+    else \
+		echo "Error: cppcheck tool is not installed."; \
+		exit 1; \
+    fi
+	$(Q)$(RM) "analysis.txt";
+	$(Q)cppcheck -v --suppress=unusedFunction --suppress=variableScope \
+	 --suppress=unreadVariable --suppress=oppositeExpression \
+	 --suppress=missingIncludeSystem --enable=all . 2> "$(TEMP_FILE)"
+	@if [ -s "$(TEMP_FILE)" ]; then \
+		$(MV) "$(TEMP_FILE)" "analysis.txt"; \
+	fi
 
 help:
 	@echo "make config:		make CROSS_COMPILE=~/aarch64-none-elf/bin/aarch64-none-elf- menuconfig"

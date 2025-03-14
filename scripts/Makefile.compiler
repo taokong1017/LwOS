@@ -11,3 +11,4 @@ NM       = $(CROSS_COMPILE)nm
 READELF  = $(CROSS_COMPILE)readelf
 MAKE     = make
 RM       = rm -rf
+MV       = mv -f
