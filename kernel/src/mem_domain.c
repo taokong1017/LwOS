@@ -102,13 +102,13 @@ static struct mem_range kernel_mem_ranges[] = {
 	{
 		.name = "Uart",
 		.start = (void *)UART_REG_BASE,
-		.end = (void *)UART_REG_BASE + UART_REG_SIZE,
+		.end = (void *)((uintptr_t)UART_REG_BASE + UART_REG_SIZE),
 		.attrs = MT_P_RW_U_NA,
 	},
 	{
 		.name = "GICv2",
 		.start = (void *)GIC_BASE,
-		.end = (void *)GIC_BASE + GIC_SIZE,
+		.end = (void *)((uintptr_t)GIC_BASE + GIC_SIZE),
 		.attrs = MT_P_RW_U_NA,
 	},
 };
@@ -285,7 +285,7 @@ struct mmu_pgtable kernel_mem_domain_page_table_get() {
 phys_addr_t page_table_page_alloc(size_t size) {
 	size_t align_size = PAGE_ALIGN(size);
 	void *start_ptr = (void *)page_table_pool;
-	void *next_ptr = (void *)page_table_pool + align_size;
+	void *next_ptr = (void *)((uintptr_t)page_table_pool + align_size);
 	void *end_ptr = (void *)__page_table_pool_end;
 
 	if (next_ptr >= end_ptr) {

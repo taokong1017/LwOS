@@ -73,6 +73,6 @@ void free(void *ptr) {
 #ifdef CONFIG_USER_SPACE
 void uheap_init() {
 	user_heap_init(&malloc_heap, __user_heap_start,
-				   __user_heap_end - __user_heap_start);
+				   (uintptr_t)__user_heap_end - (uintptr_t)__user_heap_start);
 }
 #endif

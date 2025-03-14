@@ -5,6 +5,7 @@
 #include <task_sched.h>
 #include <mutex.h>
 #include <task.h>
+#include <limits.h>
 
 #define MEM_TAG "MEM"
 #define MEM_MUTEX_NAME "kmem_mutex"
@@ -142,14 +143,14 @@ static void mapping_insert(uint32_t _r, uint32_t *_fl, uint32_t *_sl) {
 
 static struct bhdr *find_suitable_block(struct tlsf *_tlsf, uint32_t *_fl,
 										uint32_t *_sl) {
-	uint32_t _tmp = _tlsf->sl_bitmap[*_fl] & (~0 << *_sl);
+	uint32_t _tmp = _tlsf->sl_bitmap[*_fl] & (U32_MAX << *_sl);
 	struct bhdr *_b = NULL;
 
 	if (_tmp) {
 		*_sl = ls_bit(_tmp);
 		_b = _tlsf->matrix[*_fl][*_sl];
 	} else {
-		*_fl = ls_bit(_tlsf->fl_bitmap & (~0 << (*_fl + 1)));
+		*_fl = ls_bit(_tlsf->fl_bitmap & (U32_MAX << (*_fl + 1)));
 		if (*_fl > 0) {
 			*_sl = ls_bit(_tlsf->sl_bitmap[*_fl]);
 			_b = _tlsf->matrix[*_fl][*_sl];
@@ -321,7 +322,7 @@ static errno_t kmem_init(void *mem, uint32_t size) {
 void kheap_init() {
 	mutex_init(&mem_mutex, MEM_MUTEX_NAME);
 	kmem_init((void *)__kernel_heap_start,
-			  __kernel_heap_end - __kernel_heap_start);
+			  (uintptr_t)__kernel_heap_end - (uintptr_t)__kernel_heap_start);
 }
 
 static void *malloc_ex(uint32_t size, void *mem_pool) {
@@ -478,7 +479,7 @@ void *krealloc(void *ptr, uint32_t size) {
 static void *calloc_ex(size_t nelem, size_t elem_size, void *mem_pool) {
 	void *ptr = NULL;
 
-	if (nelem <= 0 || elem_size <= 0) {
+	if (nelem == 0 || elem_size == 0) {
 		return NULL;
 	}
 

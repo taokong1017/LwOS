@@ -106,7 +106,7 @@ void sched_ready_queue_dump(uint32_t cpu_id) {
 	uint32_t prio = 0;
 	struct task *task = NULL;
 
-	printf("\nCPU %d ready queue:\n", cpu_id);
+	printf("\nCPU %u ready queue:\n", cpu_id);
 	for (; prio <= TASK_PRIORITY_HIGHEST; ++prio) {
 		queue = &prio_mq->queues[prio];
 		if (list_empty(queue)) {

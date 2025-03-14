@@ -91,16 +91,17 @@ static void print_pstate(struct arch_regs *regs) {
 	const char *btype_str =
 		btypes[(pstate & PSR_BTYPE_MASK) >> PSR_BTYPE_SHIFT];
 
-	printf("pstate: %08llx (%c%c%c%c %c%c%c%c %cPAN %cUAO %cTCO %cDIT %cSSBS "
+	printf("pstate: %08lx (%c%c%c%c %c%c%c%c %cPAN %cUAO %cTCO %cDIT %cSSBS "
 		   "BTYPE=%s)\n",
-		   pstate, pstate & PSR_N_BIT ? 'N' : 'n',
-		   pstate & PSR_Z_BIT ? 'Z' : 'z', pstate & PSR_C_BIT ? 'C' : 'c',
-		   pstate & PSR_V_BIT ? 'V' : 'v', pstate & PSR_D_BIT ? 'D' : 'd',
-		   pstate & PSR_A_BIT ? 'A' : 'a', pstate & PSR_I_BIT ? 'I' : 'i',
-		   pstate & PSR_F_BIT ? 'F' : 'f', pstate & PSR_PAN_BIT ? '+' : '-',
-		   pstate & PSR_UAO_BIT ? '+' : '-', pstate & PSR_TCO_BIT ? '+' : '-',
-		   pstate & PSR_DIT_BIT ? '+' : '-', pstate & PSR_SSBS_BIT ? '+' : '-',
-		   btype_str);
+		   pstate, (pstate & PSR_N_BIT) ? 'N' : 'n',
+		   (pstate & PSR_Z_BIT) ? 'Z' : 'z', (pstate & PSR_C_BIT) ? 'C' : 'c',
+		   (pstate & PSR_V_BIT) ? 'V' : 'v', (pstate & PSR_D_BIT) ? 'D' : 'd',
+		   (pstate & PSR_A_BIT) ? 'A' : 'a', (pstate & PSR_I_BIT) ? 'I' : 'i',
+		   (pstate & PSR_F_BIT) ? 'F' : 'f', (pstate & PSR_PAN_BIT) ? '+' : '-',
+		   (pstate & PSR_UAO_BIT) ? '+' : '-',
+		   (pstate & PSR_TCO_BIT) ? '+' : '-',
+		   (pstate & PSR_DIT_BIT) ? '+' : '-',
+		   (pstate & PSR_SSBS_BIT) ? '+' : '-', btype_str);
 }
 
 static void show_regs(struct arch_regs *regs) {

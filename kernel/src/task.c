@@ -491,13 +491,11 @@ errno_t task_delay(uint64_t ticks) {
 		return ERRNO_TASK_STATUS_INVALID;
 	}
 
-	if (ticks >= 0) {
-		sched_ready_queue_remove(task->cpu_id, task);
-		task->status = TASK_STATUS_PEND;
-		current_ticks = current_ticks_get();
-		task->timeout.deadline_ticks = current_ticks + ticks;
-		timeout_queue_add(&task->timeout, task->cpu_id);
-	}
+	sched_ready_queue_remove(task->cpu_id, task);
+	task->status = TASK_STATUS_PEND;
+	current_ticks = current_ticks_get();
+	task->timeout.deadline_ticks = current_ticks + ticks;
+	timeout_queue_add(&task->timeout, task->cpu_id);
 
 	log_debug(TASK_TAG, "%s delay %d ticks\n", task->name, ticks);
 	task->is_timeout = false;

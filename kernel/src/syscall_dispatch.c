@@ -652,9 +652,10 @@ void syscall_dispatch(struct arch_regs *regs) {
 
 	if (syscall_table[syscall_id] == NULL) {
 		do_syscall = default_syscall_handler;
+	} else {
+		do_syscall = syscall_table[syscall_id];
 	}
 
-	do_syscall = syscall_table[syscall_id];
 	ttbr = mem_domain_save();
 	regs->gprs[0] = do_syscall(arg1, arg2, arg3, arg4, arg5, arg6, regs);
 	mem_domain_restore(ttbr);

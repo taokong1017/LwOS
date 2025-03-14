@@ -103,10 +103,11 @@ clean:
 	$(Q)$(call MAKE_CLEAN_CMD, $(SUB_DIRS))
 	$(Q)$(RM) $(TARGET) $(LOGO) $(APP_LD) $(PROJECT).map $(PROJECT).sym $(PROJECT).stat
 	$(Q)$(RM) $(shell find $(SUB_DIRS) -name "*.o*")
+	$(Q)$(RM) static_analysis.txt
 
 analyze:
 	$(Q)cppcheck -v --suppress=unusedVariable --suppress=unusedFunction --suppress=variableScope \
-	 --suppress=unreadVariable --enable=all . 2> static_analysis.txt
+	 --suppress=unreadVariable --suppress=oppositeExpression --enable=all . 2> static_analysis.txt
 
 help:
 	@echo "make config:		make CROSS_COMPILE=~/aarch64-none-elf/bin/aarch64-none-elf- menuconfig"

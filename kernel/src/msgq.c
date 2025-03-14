@@ -29,7 +29,8 @@
  */
 #define msgq_buffer_size(msg_size) ((msg_size) + sizeof(uint32_t))
 #define msgq_buffer_len_addr(buffer) ((uint32_t *)buffer)
-#define msgq_buffer_msg_addr(buffer) ((void *)buffer + sizeof(uint32_t))
+#define msgq_buffer_msg_addr(buffer)                                           \
+	((void *)((char *)buffer + sizeof(uint32_t)))
 
 errno_t msgq_create(const char *name, uint32_t max_msgs, uint32_t max_msg_size,
 					msgq_id_t *id) {
@@ -73,7 +74,7 @@ errno_t msgq_create(const char *name, uint32_t max_msgs, uint32_t max_msg_size,
 	}
 
 	buffer = (char *)kmalloc(max_msgs * msgq_buffer_size(max_msg_size));
-	if (!msgq) {
+	if (!buffer) {
 		kfree(msgq);
 		log_err(MSGQ_TAG, "malloc memory failed for creating buffer\n");
 		return ERRNO_MSGQ_NO_MEMORY;
