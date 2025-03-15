@@ -1,8 +1,4 @@
-obj-$(CONFIG_USER_TASK_001) := user_task_001.o
-obj-$(CONFIG_USER_TASK_002) := user_task_002.o
-obj-$(CONFIG_USER_TASK_003) := user_task_003.o
-obj-$(CONFIG_USER_MSGQ_001) := user_msgq_001.o
-obj-$(CONFIG_USER_SEM_001) := user_sem_001.o
-obj-$(CONFIG_USER_MUTEX_001) := user_mutex_001.o
-obj-$(CONFIG_USER_LIBC_STRING) := user_libc_string.o
-obj-$(CONFIG_USER_LIBC_STD) := user_libc_std.o
+obj-$(CONFIG_SAMPLE_USER_TASK) := sample_user_task.o
+obj-$(CONFIG_SAMPLE_USER_MSGQ) := sample_user_msgq.o
+obj-$(CONFIG_SAMPLE_USER_SEM) := sample_user_sem.o
+obj-$(CONFIG_SAMPLE_USER_MUTEX) := sample_user_mutex.o

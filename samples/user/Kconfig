@@ -2,29 +2,31 @@ menu "User Applications"
 
 choice
 	bool "Select User Application"
-	default CONFIG_USER_TASK_001
+	default CONFIG_SAMPLE_USER_TASK
 
-config CONFIG_USER_TASK_001
-	bool "User TASK 001"
+config CONFIG_SAMPLE_USER_TASK
+	bool "Sample User Task"
+	help
+		This configuration enables a simple user task example that demonstrates
+		how to use the task interface.
 
-config CONFIG_USER_TASK_002
-	bool "User TASK 002"
+config CONFIG_SAMPLE_USER_MSGQ
+	bool "Sample User Message Queue"
+	help
+		This configuration enables a simple user message queue example that demonstrates
+		how to use the message queue interface.
 
-config CONFIG_USER_MSGQ_001
-	bool "User MSGQ 001"
+config CONFIG_SAMPLE_USER_MUTEX
+	bool "Sample User MUTEX"
+	help
+		This configuration enables a simple user mutex example that demonstrates
+		how to use the mutex interface.
 
-config CONFIG_USER_MUTEX_001
-	bool "User MUTEX 001"
-
-config CONFIG_USER_SEM_001
-	bool "User SEM 001"
-
-config CONFIG_USER_LIBC_STRING
-	bool "User LIBC String"
-
-config CONFIG_USER_LIBC_STD
-	bool "User LIBC STD"
-	depends on CONFIG_LIBC_STD
+config CONFIG_SAMPLE_USER_SEM
+	bool "Sample User Semphore"
+	help
+		This configuration enables a simple user semaphore example that demonstrates
+		how to use the semaphore interface.
 
 endchoice
 
