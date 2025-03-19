@@ -2,58 +2,58 @@ menu "Kernel Applications"
 
 choice
 	bool "Select Kernel Application"
-	default CONFIG_TASK_DELAY
+	default CONFIG_SAMPLE_TASK_DELAY
 
-config CONFIG_TASK_DELAY
-	bool "Kernel Task Delay"
+config CONFIG_SAMPLE_TASK_DELAY
+	bool "Kernel Task Delay Sample"
 	help
 		This configuration enables a simple task delay example implementation
 		that demonstrates how to delay a task for a specified number of ticks.
 
-config CONFIG_TASK_STOP
-	bool "Kernel Task Stop"
+config CONFIG_SAMPLE_TASK_STOP
+	bool "Kernel Task Stop Sample"
 	help
 		This configuration enables a simple task stopping example implementation
 		that demonstrates how to gracefully stop a task.
 
-config CONFIG_TASK_SUSPEND
-	bool "Kernel Task Suspend"
+config CONFIG_SAMPLE_TASK_SUSPEND
+	bool "Kernel Task Suspend Sample"
 	help
 		This configuration enables a simple task suspending example implementation
 		that demonstrates how to suspend a task.
 
-config CONFIG_TASK_AFFINITY
-	bool "Kernel Task Affinity"
+config CONFIG_SAMPLE_TASK_AFFINITY
+	bool "Kernel Task Affinity Sample"
 	help
 		This configuration enables a simple task affinity example implementation
 		that demonstrates how to set the task affinity.
 
-config CONFIG_TIMER_EXAMPLE
-	bool "Kernel Timer Example"
+config CONFIG_SAMPLE_TIMER
+	bool "Kernel Timer Sample"
 	help
 		This configuration enables a simple timer example that demonstrates how 
 		to use a timer within the kernel.
 
-config CONFIG_MSGQ_EXAMPLE
-	bool "Kernel Messge Queue Example"
+config CONFIG_SAMPLE_MSGQ
+	bool "Kernel Messge Queue Sample"
 	help
 		This configuration enables a simple message queue example that demonstrates
 		how to use a message queue within the kernel.
 
-config CONFIG_MUTEX_EXAMPLE
-	bool "Kernel Mutex Example"
+config CONFIG_SAMPLE_MUTEX
+	bool "Kernel Mutex Sample"
 	help
 		This configuration enables a simple mutex example that demonstrates how to 
 		use a mutex within the kernel.
 
-config CONFIG_SEM_EXAMPLE
-	bool "Kernel Semphore Example"
+config CONFIG_SAMPLE_SEM
+	bool "Kernel Semphore Sample"
 	help
 		This configuration enables a simple semaphore example that demonstrates how
 		to use a semaphore within the kernel.
 
-config CONFIG_RPMSG_EXAMPLE
-	bool "Kernel Remote Rrocessor Message Example"
+config CONFIG_SAMPLE_RPMSG
+	bool "Kernel Remote Rrocessor Message Sample"
 	depends on CONFIG_RPMSG
 	help
 		This configuration enables a simple remote process message example that 
