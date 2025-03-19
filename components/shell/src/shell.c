@@ -609,13 +609,82 @@ static bool shell_new_line_process(struct shell *shell, char data) {
 	return false;
 }
 
+static void shell_default_state_handle(struct shell *shell, char data) {
+	if (shell_new_line_process(shell, data)) {
+		if (!shell->shell_context->cmd_buffer_length) {
+			shell_cursor_next_line_move(shell);
+		} else {
+			shell_cmd_interal_execute(shell);
+		}
+		shell_history_mode_exit(shell->shell_history);
+		shell_state_set(shell, SHELL_STATE_ACTIVE);
+		return;
+	}
+
+	switch (data) {
+	case SHELL_VT100_ASCII_ESC:
+		shell_receive_state_change(shell, SHELL_RECEIVE_ESC);
+		break;
+	case SHELL_VT100_ASCII_BSPACE:
+	case SHELL_VT100_ASCII_DEL:
+		shell_op_char_backspace(shell);
+		break;
+	case '\t':
+		shell_tab_handle(shell);
+		break;
+	case '\0':
+		break;
+	default:
+		if (isprint((int)data)) {
+			shell_op_char_insert(shell, data);
+		} else {
+			shell_ctrl_metakeys_handle(shell, data);
+		}
+		break;
+	}
+}
+
+static void shell_esc_sequence_handle(struct shell *shell, char data) {
+	shell_receive_state_change(shell, SHELL_RECEIVE_DEFAULT);
+	switch (data) {
+	case 'A':
+		shell_history_handle(shell, true);
+		break;
+	case 'B':
+		shell_history_handle(shell, false);
+		break;
+	case 'C':
+		shell_op_cursor_right_arrow(shell);
+		break;
+	case 'D':
+		shell_op_cursor_left_arrow(shell);
+		break;
+	case 'F':
+		shell_op_cursor_end_move(shell);
+		break;
+	case 'H':
+		shell_op_cursor_home_move(shell);
+		break;
+	}
+}
+
+static void shell_esc_state_handle(struct shell *shell, char data) {
+	if (data == '[') {
+		shell_receive_state_change(shell, SHELL_RECEIVE_ESC_SEQ);
+	} else {
+		shell_alt_metakeys_handle(shell, data);
+		shell_receive_state_change(shell, SHELL_RECEIVE_DEFAULT);
+	}
+}
+
 static void shell_state_process(struct shell *shell) {
-	int32_t count = 0;
+	int32_t count;
 	char data;
 
 	while (true) {
 		count = shell->shell_transport->transport_ops->read(
 			shell->shell_transport, &data, 1);
+
 		if (count <= 0) {
 			return;
 		}
@@ -626,72 +695,15 @@ static void shell_state_process(struct shell *shell) {
 
 		switch (shell->shell_context->receive_state) {
 		case SHELL_RECEIVE_DEFAULT:
-			if (shell_new_line_process(shell, data)) {
-				if (!shell->shell_context->cmd_buffer_length) {
-					shell_cursor_next_line_move(shell);
-				} else {
-					shell_cmd_interal_execute(shell);
-				}
-				shell_history_mode_exit(shell->shell_history);
-				shell_state_set(shell, SHELL_STATE_ACTIVE);
-				continue;
-			}
-
-			switch (data) {
-			case SHELL_VT100_ASCII_ESC: /* ESCAPE */
-				shell_receive_state_change(shell, SHELL_RECEIVE_ESC);
-				break;
-			case SHELL_VT100_ASCII_BSPACE: /* BACKSPACE */
-			case SHELL_VT100_ASCII_DEL:	   /* DELETE */
-				shell_op_char_backspace(shell);
-				break;
-			case '\t': /* TAB */
-				shell_tab_handle(shell);
-				break;
-			case '\0':
-				break;
-			default:
-				if (isprint((int)data) != 0) {
-					shell_op_char_insert(shell, data);
-				} else {
-					shell_ctrl_metakeys_handle(shell, data);
-				}
-				break;
-			}
+			shell_default_state_handle(shell, data);
 			break;
 
 		case SHELL_RECEIVE_ESC:
-			if (data == '[') {
-				shell_receive_state_change(shell, SHELL_RECEIVE_ESC_SEQ);
-				break;
-			} else {
-				shell_alt_metakeys_handle(shell, data);
-			}
-			shell_receive_state_change(shell, SHELL_RECEIVE_DEFAULT);
+			shell_esc_state_handle(shell, data);
 			break;
 
 		case SHELL_RECEIVE_ESC_SEQ:
-			shell_receive_state_change(shell, SHELL_RECEIVE_DEFAULT);
-			switch (data) {
-			case 'A': /* UP arrow */
-				shell_history_handle(shell, true);
-				break;
-			case 'B': /* DOWN arrow */
-				shell_history_handle(shell, false);
-				break;
-			case 'C': /* RIGHT arrow */
-				shell_op_cursor_right_arrow(shell);
-				break;
-			case 'D': /* LEFT arrow */
-				shell_op_cursor_left_arrow(shell);
-				break;
-			case 'F': /* END Button */
-				shell_op_cursor_end_move(shell);
-				break;
-			case 'H': /* HOME Button */
-				shell_op_cursor_home_move(shell);
-				break;
-			}
+			shell_esc_sequence_handle(shell, data);
 			break;
 
 		default:
