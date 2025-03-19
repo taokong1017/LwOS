@@ -20,15 +20,7 @@
 SPIN_LOCK_DECLARE(sched_spinlocker);
 extern uint64_t mask_trailing_zeros(uint64_t mask);
 
-/*
- * when the delay task exceeds timeout, it will be added to ready
- * queue and then the task will be scheduled.
- *
- * Here, we don't need to use shched locker to protect task status,
- * because the task which put in the percpu timer queue is already
- * locked using the interface spin_lock_save.
- */
-bool task_delay_timeout(struct timeout *timeout) {
+void task_delay_timeout(struct timeout *timeout) {
 	uint32_t usable_affi = 0;
 	struct task *task = container_of(timeout, struct task, timeout);
 	if (TASK_IS_PEND(task)) {
@@ -38,10 +30,8 @@ bool task_delay_timeout(struct timeout *timeout) {
 		task->cpu_id =
 			mask_trailing_zeros(usable_affi ? usable_affi : task->cpu_affi);
 		sched_ready_queue_add(task->cpu_id, task);
-		return true;
 	} else {
 		task->status &= ~TASK_STATUS_PEND;
-		return false;
 	}
 }
 
@@ -109,16 +99,16 @@ static void task_init(struct task *task, const char *name,
 	task_inherit_perm(task);
 }
 
-void task_reset(struct task *task) {
+static void task_reset(struct task *task) {
 	if (TASK_IS_READY(task) || TASK_IS_RUNNING(task)) {
 		sched_ready_queue_remove(task->cpu_id, task);
 	}
 	if (TASK_IS_PEND(task)) {
 		timeout_queue_del(&task->timeout, task->cpu_id);
 	}
-	task->status = TASK_STATUS_STOP;
 	task->is_timeout = false;
 	arch_task_init(task->id);
+	task->status = TASK_STATUS_STOP;
 }
 
 errno_t task_create(task_id_t *task_id, const char *name, task_entry_func entry,
@@ -356,13 +346,17 @@ errno_t task_stop(task_id_t task_id) {
 		return ERRNO_TASK_STATUS_INVALID;
 	}
 
-	if (TASK_IS_RUNNING(task)) {
+	/* the task is running on the other cpu */
+	if (TASK_IS_RUNNING(task) && task != current_task_get()) {
 		task->sig = TASK_SIG_STOP;
-		task_sched_locked();
-	} else {
-		task_reset(task);
+		sched_spin_unlock(key);
+		return ERRNO_TASK_WILL_STOP;
 	}
 
+	task_reset(task);
+	if (task == current_task_get()) {
+		task_sched_locked();
+	}
 	sched_spin_unlock(key);
 
 	return OK;
@@ -381,6 +375,11 @@ errno_t task_resume(task_id_t task_id) {
 	}
 
 	key = sched_spin_lock();
+	if (is_in_irq()) {
+		sched_spin_unlock(key);
+		return ERRNO_TASK_IN_IRQ_STATUS;
+	}
+
 	current_task = current_task_get();
 	if (task == current_task) {
 		sched_spin_unlock(key);
@@ -443,7 +442,6 @@ errno_t task_suspend(task_id_t task_id) {
 	/* The task is running on the other cpu */
 	if (TASK_IS_RUNNING(task) && task != current_task_get()) {
 		task->sig = TASK_SIG_SUSPEND;
-		smp_sched_notify();
 		sched_spin_unlock(key);
 		return ERRNO_TASK_WILL_SUSPEND;
 	}
@@ -552,8 +550,6 @@ errno_t task_wakeup_locked(struct wait_queue *wq) {
 		task->is_timeout = false;
 		if ((task == current_task_get()) && (!is_in_irq())) {
 			task_sched_locked();
-		} else {
-			smp_sched_notify();
 		}
 	}
 
@@ -561,32 +557,31 @@ errno_t task_wakeup_locked(struct wait_queue *wq) {
 }
 
 bool task_sig_handle() {
-	bool need_sched = false;
 	struct task *cur_task = current_task_get();
 	struct per_cpu *per_cpu = current_percpu_get();
 
 	if (spin_lock_is_locked(&sched_spinlocker)) {
-		return need_sched;
+		return false;
 	}
 
 	/* task signal is set by other cpu */
 	if (cur_task->sig == TASK_SIG_SUSPEND) {
 		cur_task->sig &= ~TASK_SIG_SUSPEND;
-		task_suspend(cur_task->id);
+		// task_suspend(cur_task->id);
 	}
 
 	if (cur_task->sig == TASK_SIG_STOP) {
 		cur_task->sig &= ~TASK_SIG_STOP;
-		task_stop(cur_task->id);
+		// task_stop(cur_task->id);
 	}
 
-	/* if the task is waiting for the signal, wake it up */
+	/* if the task does not need to be scheduled, return directly */
 	if (per_cpu->pend_sched) {
 		per_cpu->pend_sched = false;
-		need_sched = true;
+		return false;
 	}
 
-	return need_sched;
+	return true;
 }
 
 errno_t task_mem_domain_add(task_id_t task_id, struct mem_domain *domain) {

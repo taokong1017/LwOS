@@ -136,11 +136,12 @@ static void show_current_task() {
 
 	printf("[CURRENT TASK] info:\n");
 	printf("name     : %s\n", cur_task->name);
-	printf("priority : %016d\n", cur_task->priority);
-	printf("flag     : %016d\n", cur_task->flag);
+	printf("priority : %016x\n", cur_task->priority);
+	printf("flag     : %016x\n", cur_task->flag);
 	printf("stack    : [0x%016llx, 0x%016llx]\n",
 		   cur_task->stack_ptr - cur_task->stack_size, cur_task->stack_ptr);
-	printf("cpu_id   : %016u\n", cur_task->cpu_id);
+	printf("cpu_id   : %016x\n", cur_task->cpu_id);
+	printf("status   : %016x\n", cur_task->status);
 }
 
 static void show_interrupt() {
@@ -149,7 +150,7 @@ static void show_interrupt() {
 	printf("[INTERRUPT] info:\n");
 	printf("stack    : [0x%016llx, 0x%016llx]\n", irq_stack.low,
 		   irq_stack.high);
-	printf("irq_cnt  : %016u\n", current_percpu_get()->irq_nested_cnt);
+	printf("irq_cnt  : %016x\n", current_percpu_get()->irq_nested_cnt);
 }
 
 static void panic_unhandled(struct arch_regs *regs, const char *vector,

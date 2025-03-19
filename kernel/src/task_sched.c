@@ -19,7 +19,6 @@
 
 SPIN_LOCK_DEFINE(sched_spinlocker, TASK_SCHED_LOCKER);
 extern void main(void *arg0, void *arg1, void *arg2, void *arg3);
-extern void task_reset(struct task *task);
 extern struct mem_domain kernel_mem_domain;
 
 struct prio_info {
@@ -235,7 +234,6 @@ void task_sched_locked() {
 		current_task->cpu_id = cpu_id;
 		sched_ready_queue_add(current_task->cpu_id, current_task);
 		current_task->status = TASK_STATUS_READY;
-		smp_sched_notify();
 	} else {
 		current_task->status &= ~TASK_STATUS_RUNNING;
 	}

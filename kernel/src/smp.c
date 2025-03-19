@@ -56,12 +56,12 @@ void smp_cpu_start(uint32_t cpu_id) {
 	arch_cpu_start(cpu_id, smp_cpu_start_callback, NULL);
 }
 
-void smp_sched_notify() {
-	uint32_t cur_cpu_id = arch_cpu_id_get();
-	uint32_t mask = ALL_CPU_MASK ^ (1U << cur_cpu_id);
-	uint64_t no_use_affi = 0;
+void smp_sched_broadcast_notify() {
+	gic_raise_sgi(SMP_IPI_SCHED, 0, ALL_CPU_MASK);
+}
 
-	gic_raise_sgi(SMP_IPI_SCHED, no_use_affi, mask);
+void smp_sched_direct_notify(uint32_t cpu_mask) {
+	gic_raise_sgi(SMP_IPI_SCHED, 0, cpu_mask);
 }
 
 void smp_sched_handler(const void *arg) {

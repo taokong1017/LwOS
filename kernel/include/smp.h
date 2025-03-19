@@ -12,7 +12,8 @@ enum smp_ipi_type {
 
 void smp_init();
 void smp_cpu_start(uint32_t cpu_id);
-void smp_sched_notify();
+void smp_sched_broadcast_notify();
+void smp_sched_direct_notify(uint32_t cpu_mask);
 void smp_sched_handler(const void *arg);
 
 #endif

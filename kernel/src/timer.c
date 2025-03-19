@@ -39,7 +39,7 @@ static errno_t timer_param_check(const char *name, enum timer_type type,
 	return OK;
 }
 
-static bool timer_timeout_handler(struct timeout *timeout) {
+static void timer_timeout_handler(struct timeout *timeout) {
 	struct timer *timer = container_of(timeout, struct timer, timeout);
 	timer_cb *call_back = timer->cb;
 	void *arg = timer->arg;
@@ -57,8 +57,6 @@ static bool timer_timeout_handler(struct timeout *timeout) {
 		timer->timeout.deadline_ticks += timer->ticks;
 		timeout_queue_add(&timer->timeout, cpu_id);
 	}
-
-	return false;
 }
 
 errno_t timer_create(const char *name, enum timer_type type, uint64_t ticks,

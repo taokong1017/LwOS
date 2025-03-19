@@ -11,7 +11,6 @@ SPIN_LOCK_DECLARE(sched_spinlocker);
 void timeout_queue_handle(uint64_t cur_ticks) {
 	struct list_head *queue = NULL;
 	struct timeout *timeout = NULL, *next = NULL;
-	bool need_sched = false;
 	struct per_cpu *per_cpu = current_percpu_get();
 	uint32_t key = sched_spin_lock();
 
@@ -19,15 +18,8 @@ void timeout_queue_handle(uint64_t cur_ticks) {
 	list_for_each_entry_safe(timeout, next, queue, node) {
 		if (timeout && cur_ticks >= timeout->deadline_ticks) {
 			timeout_queue_del(timeout, arch_cpu_id_get());
-			if (timeout->func) {
-				need_sched |= timeout->func(timeout);
-			}
+			timeout->func(timeout);
 		}
-	}
-
-	if (need_sched) {
-		per_cpu->pend_sched = true;
-		smp_sched_notify();
 	}
 
 	sched_spin_unlock(key);
