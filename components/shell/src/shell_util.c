@@ -201,9 +201,62 @@ shell_row_span_with_buffer_offsets_get(struct shell_multiline_cons *cons,
 		   shell_line_num_with_buffer_offset_get(cons, offset1);
 }
 
+static bool shell_escape_sequence_handle(char **cmd) {
+	char *current = *cmd;
+	char next = *(current + 1);
+	uint8_t value = 0;
+	uint8_t i = 0;
+	char digit = 0;
+
+	if (next == '0') {
+		for (i = 2; i < 5; i++) {
+			digit = *(current + i);
+			if (digit >= '0' && digit <= '7') {
+				value = (value << 3) | (digit - '0');
+			} else {
+				break;
+			}
+		}
+
+		if (i > 2) {
+			memmove(current, current + (i - 1),
+					shell_strlen(current) - (i - 2));
+			*current = value;
+			*cmd = current + 1;
+			return true;
+		}
+	}
+
+	if (next == 'x') {
+		for (i = 2; i < 4; i++) {
+			digit = *(current + i);
+			if (digit >= '0' && digit <= '9') {
+				value = (value << 4) | (digit - '0');
+			} else if ((digit >= 'a') && (digit <= 'f')) {
+				value = (value << 4) | (digit - 'a' + 10);
+			} else if ((digit >= 'A') && (digit <= 'F')) {
+				value = (value << 4) | (digit - 'A' + 10);
+			} else {
+				break;
+			}
+		}
+
+		if (i > 2) {
+			memmove(current, current + (i - 1),
+					shell_strlen(current) - (i - 2));
+			*current = value;
+			*cmd = current + 1;
+			return true;
+		}
+	}
+
+	return false;
+}
+
 static char shell_internal_make_argv(char **ppcmd, uint8_t c) {
 	char *cmd = *ppcmd;
 	char quote = 0;
+	char next = 0;
 
 	while (1) {
 		c = *cmd;
@@ -236,58 +289,16 @@ static char shell_internal_make_argv(char **ppcmd, uint8_t c) {
 		}
 
 		if (quote && c == '\\') {
-			char t = *(cmd + 1);
+			next = *(cmd + 1);
 
-			if (t == quote) {
+			if (next == quote) {
 				memmove(cmd, cmd + 1, shell_strlen(cmd));
 				cmd += 1;
 				continue;
 			}
 
-			if (t == '0') {
-				uint8_t i;
-				uint8_t v = 0;
-
-				for (i = 2; i < (2 + 3); i++) {
-					t = *(cmd + i);
-
-					if (t >= '0' && t <= '7') {
-						v = (v << 3) | (t - '0');
-					} else {
-						break;
-					}
-				}
-
-				if (i > 2) {
-					memmove(cmd, cmd + (i - 1), shell_strlen(cmd) - (i - 2));
-					*cmd++ = v;
-					continue;
-				}
-			}
-
-			if (t == 'x') {
-				uint8_t i;
-				uint8_t v = 0;
-
-				for (i = 2; i < (2 + 2); i++) {
-					t = *(cmd + i);
-
-					if (t >= '0' && t <= '9') {
-						v = (v << 4) | (t - '0');
-					} else if ((t >= 'a') && (t <= 'f')) {
-						v = (v << 4) | (t - 'a' + 10);
-					} else if ((t >= 'A') && (t <= 'F')) {
-						v = (v << 4) | (t - 'A' + 10);
-					} else {
-						break;
-					}
-				}
-
-				if (i > 2) {
-					memmove(cmd, cmd + (i - 1), shell_strlen(cmd) - (i - 2));
-					*cmd++ = v;
-					continue;
-				}
+			if (shell_escape_sequence_handle(&cmd)) {
+				continue;
 			}
 		}
 
