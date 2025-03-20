@@ -263,97 +263,137 @@ static int32_t virtio_vring_init(struct virtio_vring_info *vrings_info,
 	return RPMSG_SUCCESS;
 }
 
-rpmsg_id_t rpmsg_init(int32_t role, struct shm_mem_info shm,
-					  struct rpmsg_buf_info buf_info) {
-	struct virtio_device *vdev = NULL;
-	struct rpmsg_virtio_device *rvdev = NULL;
-	struct metal_io_region *shm_io = NULL;
-	metal_phys_addr_t *physmap = NULL;
-	struct rpmsg_virtio_shm_pool *shpool = NULL;
-	struct virtio_vring_info *vrings_info = NULL;
-	struct rpmsg_virtio_config config = {
-		.h2r_buf_size = rpmsg_buffer_size(buf_info.h2r_buf_size),
-		.r2h_buf_size = rpmsg_buffer_size(buf_info.r2h_buf_size),
-	};
-	int32_t ret = 0;
-	uint32_t min_size = 0;
+static bool rpmsg_role_is_valid(int32_t role) {
+	return (role == RPMSG_REMOTE || role == RPMSG_HOST);
+}
 
-	/* Check input parameters */
-	if ((role != RPMSG_REMOTE) && (role != RPMSG_HOST)) {
-		log_err(RPMSG_TAG, "invalid role[%d].\n", role);
-		return INVALID_RPMSG_ID;
-	}
-
+static bool shm_info_is_valid(struct shm_mem_info shm) {
 	if (!shm.phys || !shm.virt || rpmsg_sync_type_is_invalid(shm.sync_type)) {
 		log_err(RPMSG_TAG,
 				"invalid physical address[0x%x], virtual address[0x%x], or "
 				"sync type[%d].\n",
 				shm.phys, shm.virt, shm.sync_type);
-		return INVALID_RPMSG_ID;
+		return false;
 	}
 
-	min_size = rpmsg_min_buf_size(buf_info.r2h_buf_num, buf_info.r2h_buf_size,
-								  buf_info.h2r_buf_num, buf_info.h2r_buf_size,
-								  RPMSG_VRING_ALIGN);
-	if (shm.size < min_size) {
+	return true;
+}
+
+static bool buf_info_is_valid(struct rpmsg_buf_info buf_info,
+							  uint32_t shm_size) {
+	uint32_t min_size = rpmsg_min_buf_size(
+		buf_info.r2h_buf_num, buf_info.r2h_buf_size, buf_info.h2r_buf_num,
+		buf_info.h2r_buf_size, RPMSG_VRING_ALIGN);
+
+	if (shm_size < min_size) {
 		log_err(RPMSG_TAG, "invalid memory size[%u], is less than [%u].\n",
-				shm.size, min_size);
-		return INVALID_RPMSG_ID;
+				shm_size, min_size);
+		return false;
 	}
 
-	if ((!IS_POWER_OF_TWO(buf_info.r2h_buf_num)) ||
-		(!IS_POWER_OF_TWO(buf_info.h2r_buf_num))) {
+	if (!IS_POWER_OF_TWO(buf_info.r2h_buf_num) ||
+		!IS_POWER_OF_TWO(buf_info.h2r_buf_num)) {
 		log_err(
 			RPMSG_TAG,
 			"the r2h_buf_num %d and h2r_buf_num %d should be power of two.\n",
 			buf_info.r2h_buf_num, buf_info.h2r_buf_num);
-		return INVALID_RPMSG_ID;
+		return false;
 	}
 
 	if (rpmsg_buf_info_is_invalid(buf_info)) {
 		log_err(RPMSG_TAG,
 				"the buffer size and buffer number are both zeros.\n");
-		return INVALID_RPMSG_ID;
+		return false;
 	}
 
-	/* Set the memory barrier type */
-	atomic_type_set(shm.sync_type);
+	return true;
+}
 
-	/* Initialize shared memory IO */
+static struct metal_io_region *io_region_init(struct shm_mem_info shm) {
+	struct metal_io_region *shm_io = NULL;
+	metal_phys_addr_t *physmap = NULL;
+
 	shm_io = (struct metal_io_region *)metal_allocate_memory(
 		sizeof(struct metal_io_region));
 	physmap =
 		(metal_phys_addr_t *)metal_allocate_memory(sizeof(metal_phys_addr_t));
+
 	if (!shm_io || !physmap) {
 		log_err(RPMSG_TAG, "fails to malloc memory for shared IO.\n");
-		goto err0;
+		metal_free_memory(shm_io);
+		metal_free_memory(physmap);
+		return NULL;
 	}
-	physmap[0] = shm.phys;
-	metal_io_init(
-		shm_io, shm.virt, physmap, shm.size,
-		-1 /* the input shared memory in the same memory mapped block */);
 
-	/* Initialize virtio device */
+	physmap[0] = shm.phys;
+	metal_io_init(shm_io, shm.virt, physmap, shm.size, -1);
+
+	return shm_io;
+}
+
+static struct virtio_device *virtio_device_init(int32_t role) {
+	struct virtio_device *vdev = NULL;
+	struct virtio_vring_info *vrings_info = NULL;
+
 	vdev = (struct virtio_device *)metal_allocate_memory(
 		sizeof(struct virtio_device));
 	vrings_info = (struct virtio_vring_info *)metal_allocate_memory(
 		RPMSG_NUM_VRINGS * sizeof(struct virtio_vring_info));
+
 	if (!vdev || !vrings_info) {
 		log_err(RPMSG_TAG, "fails to malloc memory for virtual device.\n");
-		goto err1;
+		metal_free_memory(vdev);
+		metal_free_memory(vrings_info);
+		return NULL;
 	}
+
 	vdev->role = role;
 	vdev->func = &virtio_dispatch;
 	vdev->vrings_num = RPMSG_NUM_VRINGS;
 	vdev->priv = NULL;
 	vdev->vrings_info = vrings_info;
 
-	/* Initialize Vrings */
+	return vdev;
+}
+
+rpmsg_id_t rpmsg_init(int32_t role, struct shm_mem_info shm,
+					  struct rpmsg_buf_info buf_info) {
+	struct virtio_device *vdev = NULL;
+	struct rpmsg_virtio_device *rvdev = NULL;
+	struct metal_io_region *shm_io = NULL;
+	struct rpmsg_virtio_shm_pool *shpool = NULL;
+	struct virtio_vring_info *vrings_info = NULL;
+	int32_t ret = 0;
+
+	if (!rpmsg_role_is_valid(role) || !shm_info_is_valid(shm) ||
+		!buf_info_is_valid(buf_info, shm.size)) {
+		return INVALID_RPMSG_ID;
+	}
+
+	atomic_type_set(shm.sync_type);
+
+	shm_io = io_region_init(shm);
+	if (!shm_io) {
+		return INVALID_RPMSG_ID;
+	}
+
+	vdev = virtio_device_init(role);
+	if (!vdev) {
+		metal_free_memory(shm_io->physmap);
+		metal_free_memory(shm_io);
+		return INVALID_RPMSG_ID;
+	}
+	vrings_info = vdev->vrings_info;
+
 	ret = virtio_vring_init(&vrings_info[0], role, buf_info.r2h_buf_num,
 							rpmsg_vring0_addr(shm_io->virt), RPMSG_VRING_ALIGN,
 							shm_io);
 	if (ret) {
-		goto err2;
+		metal_free_memory(vrings_info);
+		metal_free_memory(vdev);
+		metal_free_memory(shm_io->physmap);
+		metal_free_memory(shm_io);
+		return INVALID_RPMSG_ID;
 	}
 
 	ret =
@@ -362,16 +402,27 @@ rpmsg_id_t rpmsg_init(int32_t role, struct shm_mem_info shm,
 											RPMSG_VRING_ALIGN),
 						  RPMSG_VRING_ALIGN, shm_io);
 	if (ret) {
-		goto err3;
+		metal_free_memory(vrings_info[0].vq);
+		metal_free_memory(vrings_info);
+		metal_free_memory(vdev);
+		metal_free_memory(shm_io->physmap);
+		metal_free_memory(shm_io);
+		return INVALID_RPMSG_ID;
 	}
 
-	/* Initialize shared pool */
 	shpool = (struct rpmsg_virtio_shm_pool *)metal_allocate_memory(
 		sizeof(struct rpmsg_virtio_shm_pool));
 	if (!shpool) {
 		log_err(RPMSG_TAG, "fails to malloc memory for shared memory pool.\n");
-		goto err4;
+		metal_free_memory(vrings_info[1].vq);
+		metal_free_memory(vrings_info[0].vq);
+		metal_free_memory(vrings_info);
+		metal_free_memory(vdev);
+		metal_free_memory(shm_io->physmap);
+		metal_free_memory(shm_io);
+		return INVALID_RPMSG_ID;
 	}
+
 	rpmsg_virtio_init_shm_pool(
 		shpool,
 		rpmsg_pool_addr(shm_io->virt, buf_info.r2h_buf_num,
@@ -379,34 +430,28 @@ rpmsg_id_t rpmsg_init(int32_t role, struct shm_mem_info shm,
 		rpmsg_pool_size(buf_info.r2h_buf_num, buf_info.r2h_buf_size,
 						buf_info.h2r_buf_num, buf_info.h2r_buf_size));
 
-	/* Initialize RPMsg virtio device */
 	rvdev = (struct rpmsg_virtio_device *)metal_allocate_memory(
 		sizeof(struct rpmsg_virtio_device));
 	if (!rvdev) {
 		log_err(RPMSG_TAG,
 				"fails to malloc memory for rpmsg virtual device.\n");
-		goto err5;
+		metal_free_memory(shpool);
+		metal_free_memory(vrings_info[1].vq);
+		metal_free_memory(vrings_info[0].vq);
+		metal_free_memory(vrings_info);
+		metal_free_memory(vdev);
+		metal_free_memory(shm_io->physmap);
+		metal_free_memory(shm_io);
+		return INVALID_RPMSG_ID;
 	}
+
+	struct rpmsg_virtio_config config = {
+		.h2r_buf_size = rpmsg_buffer_size(buf_info.h2r_buf_size),
+		.r2h_buf_size = rpmsg_buffer_size(buf_info.r2h_buf_size),
+	};
+
 	rpmsg_virtio_init(rvdev, vdev, shm_io, shpool, &config);
-
 	return rpmsg_dev_to_id(rvdev);
-
-err5:
-	metal_free_memory(rvdev);
-err4:
-	metal_free_memory(shpool);
-err3:
-	metal_free_memory(vrings_info[1].vq);
-err2:
-	metal_free_memory(vrings_info[0].vq);
-err1:
-	metal_free_memory(vdev);
-	metal_free_memory(vrings_info);
-err0:
-	metal_free_memory(shm_io->physmap);
-	metal_free_memory(shm_io);
-
-	return INVALID_RPMSG_ID;
 }
 
 void rpmsg_deinit(rpmsg_id_t id) {
