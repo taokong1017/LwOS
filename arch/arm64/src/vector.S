@@ -75,8 +75,8 @@ ready_sp_\label:
 	ldr x0, [sp], #16
 	mov sp, x0
 
-	/* process task signal and check schedule */
-	bl task_sig_handle
+	/* task schedule check */
+	bl task_sched_check
 	cbz w0, nested_exit_\label
 	bl task_sched_unlocked
 

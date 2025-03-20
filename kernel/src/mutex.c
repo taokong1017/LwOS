@@ -166,7 +166,7 @@ errno_t mutex_take(mutex_id_t id, uint32_t timeout) {
 	priority = mutex->priority;
 	if (!list_empty(&mutex->wait_queue.wait_list)) {
 		pend_task = list_first_entry(&mutex->wait_queue.wait_list, struct task,
-									 pend_list);
+									 task_node);
 		if (pend_task->priority > priority) {
 			priority = pend_task->priority;
 		}
@@ -244,7 +244,7 @@ errno_t mutex_give(mutex_id_t id) {
 	}
 
 	mutex->owner =
-		list_first_entry(&mutex->wait_queue.wait_list, struct task, pend_list);
+		list_first_entry(&mutex->wait_queue.wait_list, struct task, task_node);
 	mutex->lock_count = 1;
 	mutex->priority = mutex->owner->priority;
 	log_debug(MUTEX_TAG, "wakeup mutex owner %s(pri:%u) by task %s(pri:%u)\n",

@@ -80,7 +80,6 @@ static void task_init(struct task *task, const char *name,
 	strncpy(task->name, name, TASK_NAME_LEN);
 	task->name[TASK_NAME_LEN - 1] = '\0';
 	task->status = TASK_STATUS_STOP;
-	task->sig = TASK_SIG_NONE;
 	task->stack_ptr = stack_ptr;
 	task->stack_size = stack_size;
 	task->cpu_affi = TASK_CPU_DEFAULT_AFFI;
@@ -94,8 +93,7 @@ static void task_init(struct task *task, const char *name,
 	task->args[3] = arg3;
 	task->timeout.func = task_delay_timeout;
 	INIT_LIST_HEAD(&task->timeout.node);
-	INIT_LIST_HEAD(&task->task_list);
-	INIT_LIST_HEAD(&task->pend_list);
+	INIT_LIST_HEAD(&task->task_node);
 	task_inherit_perm(task);
 }
 
@@ -302,7 +300,7 @@ errno_t task_start(task_id_t task_id) {
 
 	task->cpu_id = mask_trailing_zeros(task->cpu_affi);
 	current_ticks = current_ticks_get();
-	if (task == current_task_get()) {
+	if (task->cpu_id == arch_cpu_id_get()) {
 		task->status = TASK_STATUS_READY;
 		sched_ready_queue_add(task->cpu_id, task);
 		task_sched_locked();
@@ -348,13 +346,12 @@ errno_t task_stop(task_id_t task_id) {
 
 	/* the task is running on the other cpu */
 	if (TASK_IS_RUNNING(task) && task != current_task_get()) {
-		task->sig = TASK_SIG_STOP;
 		sched_spin_unlock(key);
 		return ERRNO_TASK_WILL_STOP;
 	}
 
 	task_reset(task);
-	if (task == current_task_get()) {
+	if (task->cpu_id == arch_cpu_id_get()) {
 		task_sched_locked();
 	}
 	sched_spin_unlock(key);
@@ -441,7 +438,6 @@ errno_t task_suspend(task_id_t task_id) {
 
 	/* The task is running on the other cpu */
 	if (TASK_IS_RUNNING(task) && task != current_task_get()) {
-		task->sig = TASK_SIG_SUSPEND;
 		sched_spin_unlock(key);
 		return ERRNO_TASK_WILL_SUSPEND;
 	}
@@ -453,7 +449,7 @@ errno_t task_suspend(task_id_t task_id) {
 	}
 
 	task->status |= TASK_STATUS_SUSPEND;
-	if (task == current_task_get()) {
+	if (task->cpu_id == arch_cpu_id_get()) {
 		task_sched_locked();
 	}
 	sched_spin_unlock(key);
@@ -521,7 +517,7 @@ errno_t task_wait_locked(struct wait_queue *wq, uint64_t ticks,
 		task->timeout.deadline_ticks = current_ticks_get() + ticks;
 		timeout_queue_add(&task->timeout, task->cpu_id);
 	}
-	list_add_tail(&task->pend_list, &wq->wait_list);
+	list_add_tail(&task->task_node, &wq->wait_list);
 	task_sched_locked();
 	if (task->is_timeout) {
 		task->is_timeout = false;
@@ -540,7 +536,7 @@ errno_t task_wakeup_locked(struct wait_queue *wq) {
 	}
 
 	if (!list_empty(&wq->wait_list)) {
-		task = list_first_entry(&wq->wait_list, struct task, pend_list);
+		task = list_first_entry(&wq->wait_list, struct task, task_node);
 		list_del_init(wq->wait_list.next);
 		task->status = TASK_STATUS_READY;
 		usable_affi = task->cpu_affi & percpu_idle_mask_get();
@@ -548,7 +544,7 @@ errno_t task_wakeup_locked(struct wait_queue *wq) {
 			mask_trailing_zeros(usable_affi ? usable_affi : task->cpu_affi);
 		sched_ready_queue_add(task->cpu_id, task);
 		task->is_timeout = false;
-		if ((task == current_task_get()) && (!is_in_irq())) {
+		if ((task->cpu_id == arch_cpu_id_get()) && (!is_in_irq())) {
 			task_sched_locked();
 		}
 	}
@@ -556,26 +552,14 @@ errno_t task_wakeup_locked(struct wait_queue *wq) {
 	return OK;
 }
 
-bool task_sig_handle() {
-	struct task *cur_task = current_task_get();
+bool task_sched_check() {
 	struct per_cpu *per_cpu = current_percpu_get();
 
 	if (spin_lock_is_locked(&sched_spinlocker)) {
 		return false;
 	}
 
-	/* task signal is set by other cpu */
-	if (cur_task->sig == TASK_SIG_SUSPEND) {
-		cur_task->sig &= ~TASK_SIG_SUSPEND;
-		// task_suspend(cur_task->id);
-	}
-
-	if (cur_task->sig == TASK_SIG_STOP) {
-		cur_task->sig &= ~TASK_SIG_STOP;
-		// task_stop(cur_task->id);
-	}
-
-	/* if the task does not need to be scheduled, return directly */
+	/* task does not need to schedule */
 	if (per_cpu->pend_sched) {
 		per_cpu->pend_sched = false;
 		return false;

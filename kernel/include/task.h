@@ -36,11 +36,8 @@
 #define TASK_STATUS_SUSPEND 0x0004U
 #define TASK_STATUS_PEND 0x0008U
 #define TASK_STATUS_RUNNING 0x0010U
-
-/* task signal definition */
-#define TASK_SIG_NONE 0U
-#define TASK_SIG_SUSPEND 1U
-#define TASK_SIG_STOP 2U
+#define TASK_STATUS_STOPING 0x0020U
+#define TASK_STATUS_SUSPENDING 0x0040U
 
 /* task flag definition */
 #define TASK_FLAG_SYSTEM 0x0001U
@@ -102,17 +99,17 @@ struct task {
 	task_id_t id;
 	char name[TASK_NAME_LEN];
 	uint32_t status;
-	uint32_t sig;
 	uint32_t priority;
-	uint32_t cpu_affi;
 	uint32_t flag;
-	void *stack_ptr;
+	uint32_t cpu_affi;
 	uint32_t stack_size;
 	uint32_t cpu_id;
+	void *stack_ptr;
 	task_entry_func entry;
 	void *args[4];
-	struct list_head task_list; /* ready queue */
-	struct list_head pend_list; /* pend queue */
+	struct list_head task_node;
+	struct wait_queue halt_queue;
+	struct wait_queue join_queue;
 	struct timeout timeout;
 	struct arch_task_context task_context;
 	struct mem_domain *mem_domain;
@@ -139,7 +136,6 @@ task_id_t task_self_id();
 errno_t task_wait_locked(struct wait_queue *wq, uint64_t ticks,
 						 bool need_sched);
 errno_t task_wakeup_locked(struct wait_queue *wq);
-bool task_sig_handle();
 bool task_is_user(task_id_t task_id);
 errno_t task_mem_domain_add(task_id_t task_id, struct mem_domain *domain);
 
