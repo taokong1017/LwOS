@@ -23,16 +23,18 @@ extern uint64_t mask_trailing_zeros(uint64_t mask);
 void task_delay_timeout(struct timeout *timeout) {
 	uint32_t usable_affi = 0;
 	struct task *task = container_of(timeout, struct task, timeout);
-	if (TASK_IS_PEND(task)) {
-		task->status = TASK_STATUS_READY;
-		task->is_timeout = true;
-		usable_affi = task->cpu_affi & percpu_idle_mask_get();
-		task->cpu_id =
-			mask_trailing_zeros(usable_affi ? usable_affi : task->cpu_affi);
-		sched_ready_queue_add(task->cpu_id, task);
-	} else {
-		task->status &= ~TASK_STATUS_PEND;
+	task->status &= ~TASK_STATUS_PEND;
+
+	if (TASK_IS_SUSPEND(task) || TASK_IS_SUSPENDING(task)) {
+		return;
 	}
+
+	task->is_timeout = true;
+	usable_affi = task->cpu_affi & percpu_idle_mask_get();
+	task->cpu_id =
+		mask_trailing_zeros(usable_affi ? usable_affi : task->cpu_affi);
+	sched_ready_queue_add(task->cpu_id, task);
+	task->status = TASK_STATUS_READY;
 }
 
 static errno_t task_params_check(task_id_t *task_id, const char *name,
@@ -180,7 +182,7 @@ errno_t task_priority_set(task_id_t task_id, uint32_t prioriy) {
 		return ERRNO_TASK_IN_IRQ_STATUS;
 	}
 
-	if (TASK_IS_STOP(task)) {
+	if (TASK_IS_STOP(task) || TASK_IS_STOPING(task)) {
 		task->priority = prioriy;
 		sched_spin_unlock(key);
 		return OK;
@@ -236,6 +238,10 @@ errno_t task_cpu_affi_set(task_id_t task_id, uint32_t cpu_affi) {
 	}
 
 	key = sched_spin_lock();
+	if (is_in_irq()) {
+		sched_spin_unlock(key);
+		return ERRNO_TASK_IN_IRQ_STATUS;
+	}
 	task->cpu_affi = cpu_affi;
 	sched_spin_unlock(key);
 
@@ -289,7 +295,7 @@ errno_t task_start(task_id_t task_id) {
 		return ERRNO_TASK_IN_IRQ_STATUS;
 	}
 
-	if (task->status != TASK_STATUS_STOP) {
+	if (!TASK_IS_STOP(task)) {
 		sched_spin_unlock(key);
 		return ERRNO_TASK_STATUS_INVALID;
 	}
@@ -372,18 +378,29 @@ errno_t task_stop(task_id_t task_id) {
 	}
 
 	key = sched_spin_lock();
+	if (is_in_irq()) {
+		sched_spin_unlock(key);
+		return ERRNO_TASK_IN_IRQ_STATUS;
+	}
+
 	if (task->flag & TASK_FLAG_SYSTEM) {
 		sched_spin_unlock(key);
 		return ERRNO_TASK_OPERATE_INVALID;
 	}
 
-	if (TASK_IS_STOP(task)) {
+	if (TASK_IS_STOP(task) || TASK_IS_STOPING(task)) {
+		sched_spin_unlock(key);
+		return OK;
+	}
+
+	/* The task does not support stopping itself */
+	if (TASK_IS_RUNNING(task) || (task == current_task_get())) {
 		sched_spin_unlock(key);
 		return ERRNO_TASK_STATUS_INVALID;
 	}
 
-	/* the task is running on the other cpu */
-	if (TASK_IS_RUNNING(task) && task != current_task_get()) {
+	/* the task is running on another cpu */
+	if (TASK_IS_RUNNING(task) || (TASK_IS_STOPING(task))) {
 		task->status = TASK_STATUS_STOPING;
 		task_wait_locked(&task->halt_queue, TASK_WAIT_FOREVER);
 		sched_spin_unlock(key);
@@ -404,13 +421,10 @@ errno_t task_stop(task_id_t task_id) {
 	return OK;
 }
 
-errno_t task_stop_self() { return task_stop(task_self_id()); }
-
 errno_t task_resume(task_id_t task_id) {
 	uint32_t key = 0;
 	uint32_t usable_affi = 0;
 	struct task *task = ID_TO_TASK(task_id);
-	struct task *current_task = NULL;
 
 	if (!task || task->id != task_id) {
 		return ERRNO_TASK_ID_INVALID;
@@ -422,35 +436,25 @@ errno_t task_resume(task_id_t task_id) {
 		return ERRNO_TASK_IN_IRQ_STATUS;
 	}
 
-	current_task = current_task_get();
-	if (task == current_task) {
-		sched_spin_unlock(key);
-		return ERRNO_TASK_ID_INVALID;
-	}
-
-	if (task->status & TASK_STATUS_STOP) {
-		sched_spin_unlock(key);
-		return ERRNO_TASK_STATUS_INVALID;
-	}
-
-	if ((task->status & TASK_STATUS_RUNNING) ||
-		(task->status & TASK_STATUS_READY)) {
+	if (TASK_IS_RUNNING(task) || TASK_IS_READY(task)) {
 		sched_spin_unlock(key);
 		return OK;
 	}
 
-	if (task->status & TASK_STATUS_PEND) {
-		task->status &= ~TASK_STATUS_SUSPEND;
+	if (TASK_IS_STOP(task) || TASK_IS_STOPING(task) ||
+		TASK_IS_SUSPENDING(task)) {
 		sched_spin_unlock(key);
 		return ERRNO_TASK_STATUS_INVALID;
 	}
 
 	task->status &= ~TASK_STATUS_SUSPEND;
-	task->status |= TASK_STATUS_READY;
-	usable_affi = task->cpu_affi & percpu_idle_mask_get();
-	task->cpu_id =
-		mask_trailing_zeros(usable_affi ? usable_affi : task->cpu_affi);
-	sched_ready_queue_add(task->cpu_id, task);
+	if (!TASK_IS_PEND(task)) {
+		usable_affi = task->cpu_affi & percpu_idle_mask_get();
+		task->cpu_id =
+			mask_trailing_zeros(usable_affi ? usable_affi : task->cpu_affi);
+		sched_ready_queue_add(task->cpu_id, task);
+		task->status = TASK_STATUS_READY;
+	}
 	task_sched_locked();
 	sched_spin_unlock(key);
 
@@ -466,22 +470,22 @@ errno_t task_suspend(task_id_t task_id) {
 	}
 
 	key = sched_spin_lock();
-	if (task->status & TASK_STATUS_SUSPEND) {
+	if (is_in_irq()) {
+		sched_spin_unlock(key);
+		return ERRNO_TASK_IN_IRQ_STATUS;
+	}
+
+	if (TASK_IS_SUSPEND(task) || TASK_IS_SUSPENDING(task)) {
 		sched_spin_unlock(key);
 		return OK;
 	}
 
-	if (TASK_IS_STOP(task)) {
+	if (TASK_IS_STOP(task) || TASK_IS_STOPING(task)) {
 		sched_spin_unlock(key);
 		return ERRNO_TASK_STATUS_INVALID;
 	}
 
-	if (task->status & TASK_STATUS_READY) {
-		task->status &= ~TASK_STATUS_READY;
-		sched_ready_queue_remove(task->cpu_id, task);
-	}
-
-	/* The task is running on the other cpu */
+	/* The task is running on other cpu */
 	if (TASK_IS_RUNNING(task) && task != current_task_get()) {
 		task->status = TASK_STATUS_SUSPENDING;
 		task_wait_locked(&task->halt_queue, TASK_WAIT_FOREVER);
@@ -489,20 +493,19 @@ errno_t task_suspend(task_id_t task_id) {
 		return OK;
 	}
 
-	/* task is running on the current cpu */
-	if (task->status & TASK_STATUS_RUNNING) {
-		task->status &= ~TASK_STATUS_RUNNING;
+	if (TASK_IS_READY(task) || TASK_IS_RUNNING(task)) {
+		task->status = TASK_STATUS_SUSPEND;
 		sched_ready_queue_remove(task->cpu_id, task);
 	}
 
+	/* task is pending on the other task waiting for resource */
 	if (task->pended_on) {
 		task_unpend_no_timeout(task->pended_on, task);
 	}
+
 	task_unpend_all_locked(&task->halt_queue);
 	task->status |= TASK_STATUS_SUSPEND;
-	if (task->cpu_id == arch_cpu_id_get()) {
-		task_sched_locked();
-	}
+	task_sched_locked();
 	sched_spin_unlock(key);
 
 	return OK;
@@ -531,7 +534,7 @@ errno_t task_delay(uint64_t ticks) {
 		return ERRNO_TASK_OPERATE_INVALID;
 	}
 
-	if (task->status != TASK_STATUS_RUNNING) {
+	if (!TASK_IS_RUNNING(task)) {
 		sched_spin_unlock(key);
 		return ERRNO_TASK_STATUS_INVALID;
 	}

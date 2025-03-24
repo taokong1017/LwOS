@@ -234,8 +234,6 @@ void task_sched_locked() {
 		current_task->cpu_id = cpu_id;
 		sched_ready_queue_add(current_task->cpu_id, current_task);
 		current_task->status = TASK_STATUS_READY;
-	} else {
-		current_task->status &= ~TASK_STATUS_RUNNING;
 	}
 
 	if (next_task->is_idle_task) {

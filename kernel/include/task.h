@@ -11,14 +11,16 @@
 #define ID_TO_TASK(task_id) ((struct task *)task_id)
 #define CPU_AFFI_MASK(cpu_id) (1 << cpu_id)
 #define TASK_WAIT_FOREVER WAIT_FOREVER
-#define TASK_IS_STOP(task) (task->status == TASK_STATUS_STOP)
-#define TASK_IS_READY(task) (task->status == TASK_STATUS_READY)
-#define TASK_IS_SUSPEND(task) (task->status == TASK_STATUS_SUSPEND)
-#define TASK_IS_PEND(task) (task->status == TASK_STATUS_PEND)
-#define TASK_IS_RUNNING(task) (task->status == TASK_STATUS_RUNNING)
-#define TASK_IS_SUSPENDING(task) (task->status == TASK_STATUS_SUSPENDING)
-#define TASK_IS_STOPING(task) (task->status == TASK_STATUS_STOPING)
 #define TASK_IS_PERM_INHERIT(task) (task->flag & TASK_FLAG_INHERIT_PERM)
+
+/* task status check */
+#define TASK_IS_READY(task) (task->status == TASK_STATUS_READY)
+#define TASK_IS_RUNNING(task) (task->status == TASK_STATUS_RUNNING)
+#define TASK_IS_PEND(task) (task->status & TASK_STATUS_PEND)
+#define TASK_IS_SUSPEND(task) (task->status & TASK_STATUS_SUSPEND)
+#define TASK_IS_SUSPENDING(task) (task->status & TASK_STATUS_SUSPENDING)
+#define TASK_IS_STOP(task) (task->status == TASK_STATUS_STOP)
+#define TASK_IS_STOPING(task) (task->status == TASK_STATUS_STOPING)
 
 /* task default invalid ID definition */
 #define TASK_INVALID_CPUID 0xFFFF
@@ -123,7 +125,6 @@ errno_t task_create(task_id_t *task_id, const char *name, task_entry_func entry,
 					uint32_t stack_size, uint32_t flag);
 errno_t task_start(task_id_t task_id);
 errno_t task_stop(task_id_t task_id);
-errno_t task_stop_self();
 errno_t task_resume(task_id_t task_id);
 errno_t task_suspend(task_id_t task_id);
 errno_t task_suspend_self();
