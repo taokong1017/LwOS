@@ -69,7 +69,7 @@ errno_t sem_take(sem_id_t id, uint64_t timeout) {
 		return ret;
 	}
 
-	ret = task_wait_locked(&sem->wait_queue, timeout, true);
+	ret = task_wait_locked(&sem->wait_queue, timeout);
 	if (ret != OK) {
 		ret = ERRNO_SEM_TIMEOUT;
 		log_err(SEM_TAG, "the sem %s is taken failed\n", sem->name);

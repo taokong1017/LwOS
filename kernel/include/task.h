@@ -16,6 +16,8 @@
 #define TASK_IS_SUSPEND(task) (task->status == TASK_STATUS_SUSPEND)
 #define TASK_IS_PEND(task) (task->status == TASK_STATUS_PEND)
 #define TASK_IS_RUNNING(task) (task->status == TASK_STATUS_RUNNING)
+#define TASK_IS_SUSPENDING(task) (task->status == TASK_STATUS_SUSPENDING)
+#define TASK_IS_STOPING(task) (task->status == TASK_STATUS_STOPING)
 #define TASK_IS_PERM_INHERIT(task) (task->flag & TASK_FLAG_INHERIT_PERM)
 
 /* task default invalid ID definition */
@@ -70,10 +72,8 @@
 #define ERRNO_TASK_WAIT_TIMEOUT ERRNO_OS_ERROR(MOD_ID_TASK, 0x0e)
 #define ERRNO_TASK_NO_SCHEDLE ERRNO_OS_ERROR(MOD_ID_TASK, 0x0f)
 #define ERRNO_TASK_INVALID_TIMEOUT ERRNO_OS_ERROR(MOD_ID_TASK, 0x10)
-#define ERRNO_TASK_WILL_SUSPEND ERRNO_OS_ERROR(MOD_ID_TASK, 0x11)
-#define ERRNO_TASK_MEM_DOMAIN_NULL ERRNO_OS_ERROR(MOD_ID_TASK, 0x12)
-#define ERRNO_TASK_INVALID_CPU_ID ERRNO_OS_ERROR(MOD_ID_TASK, 0x13)
-#define ERRNO_TASK_WILL_STOP ERRNO_OS_ERROR(MOD_ID_TASK, 0x14)
+#define ERRNO_TASK_MEM_DOMAIN_NULL ERRNO_OS_ERROR(MOD_ID_TASK, 0x11)
+#define ERRNO_TASK_INVALID_CPU_ID ERRNO_OS_ERROR(MOD_ID_TASK, 0x12)
 
 /* task cpu affinity */
 #define TASK_CPU_DEFAULT_AFFI TASK_CPU_AFFI_MASK
@@ -110,6 +110,7 @@ struct task {
 	struct list_head task_node;
 	struct wait_queue halt_queue;
 	struct wait_queue join_queue;
+	struct wait_queue *pended_on;
 	struct timeout timeout;
 	struct arch_task_context task_context;
 	struct mem_domain *mem_domain;
@@ -133,8 +134,7 @@ errno_t task_cpu_affi_set(task_id_t task_id, uint32_t cpu_affi);
 errno_t task_cpu_bind(task_id_t task_id, uint32_t cpu);
 errno_t task_cpu_affi_get(task_id_t task_id, uint32_t *cpu_affi);
 task_id_t task_self_id();
-errno_t task_wait_locked(struct wait_queue *wq, uint64_t ticks,
-						 bool need_sched);
+errno_t task_wait_locked(struct wait_queue *wq, uint64_t ticks);
 errno_t task_wakeup_locked(struct wait_queue *wq);
 bool task_is_user(task_id_t task_id);
 errno_t task_mem_domain_add(task_id_t task_id, struct mem_domain *domain);

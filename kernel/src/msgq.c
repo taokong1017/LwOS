@@ -178,7 +178,7 @@ errno_t msgq_send(msgq_id_t id, const void *msg, uint32_t size,
 		ret = ERRNO_MSGQ_QUEUE_FULL;
 	} else {
 		msgq->msg_stime = current_ticks;
-		ret = task_wait_locked(&msgq->send_queue, timeout, true);
+		ret = task_wait_locked(&msgq->send_queue, timeout);
 		msgq->msg_ctime = MSGQ_INIT_TIME;
 		if (ret == OK) {
 			msgq_send_copy(msgq, msg, size);
@@ -241,7 +241,7 @@ errno_t msgq_receive(msgq_id_t id, void *msg, uint32_t *size,
 		ret = ERRNO_MSGQ_QUEUE_EMPTY;
 	} else {
 		msgq->msg_rtime = current_ticks;
-		ret = task_wait_locked(&msgq->rec_queue, timeout, true);
+		ret = task_wait_locked(&msgq->rec_queue, timeout);
 		msgq->msg_ctime = MSGQ_INIT_TIME;
 		if (ret == OK) {
 			msgq_receive_copy(msgq, msg, size);

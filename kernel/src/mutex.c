@@ -155,7 +155,7 @@ errno_t mutex_take(mutex_id_t id, uint32_t timeout) {
 	log_debug(MUTEX_TAG, "task %s waits for mutex %s\n", cur_task->name,
 			  mutex->name);
 	/* current task is wakeup with timeout */
-	if (task_wait_locked(&mutex->wait_queue, timeout, true)) {
+	if (task_wait_locked(&mutex->wait_queue, timeout)) {
 		log_debug(MUTEX_TAG, "task %s is wakeup with timeout\n",
 				  cur_task->name);
 		sched_spin_unlock(key);
