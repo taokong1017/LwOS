@@ -20,6 +20,7 @@
 SPIN_LOCK_DEFINE(sched_spinlocker, TASK_SCHED_LOCKER);
 extern void main(void *arg0, void *arg1, void *arg2, void *arg3);
 extern struct mem_domain kernel_mem_domain;
+extern void task_halting_handle(struct task *task);
 
 struct prio_info {
 	uint32_t prio;
@@ -160,6 +161,9 @@ static void current_task_update(struct task *task) {
 }
 
 static struct task *next_task_pick_up() {
+	struct task *task = current_task_get();
+
+	task_halting_handle(task);
 	return prio_mq_best(&current_percpu_get()->ready_queue.run_queue);
 }
 
@@ -249,16 +253,18 @@ void task_sched_locked() {
 
 void task_sched_unlocked() {
 	uint32_t key = 0;
-	struct task *current_task = current_task_get();
-	struct task *next_task = next_task_pick_up();
+	struct task *current_task = NULL;
+	struct task *next_task = NULL;
 	struct per_cpu *per_cpu = current_percpu_get();
 	uint32_t usable_affi = 0;
 
+	key = sched_spin_lock();
+
+	current_task = current_task_get();
+	next_task = next_task_pick_up();
 	if (!next_task || !current_task) {
 		return;
 	}
-
-	key = sched_spin_lock();
 
 	if (current_task == next_task) {
 		sched_spin_unlock(key);

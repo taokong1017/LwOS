@@ -388,7 +388,7 @@ errno_t task_stop(task_id_t task_id) {
 		return ERRNO_TASK_OPERATE_INVALID;
 	}
 
-	if (TASK_IS_STOP(task) || TASK_IS_STOPING(task)) {
+	if (TASK_IS_STOP(task)) {
 		sched_spin_unlock(key);
 		return OK;
 	}
@@ -475,7 +475,7 @@ errno_t task_suspend(task_id_t task_id) {
 		return ERRNO_TASK_IN_IRQ_STATUS;
 	}
 
-	if (TASK_IS_SUSPEND(task) || TASK_IS_SUSPENDING(task)) {
+	if (TASK_IS_SUSPEND(task)) {
 		sched_spin_unlock(key);
 		return OK;
 	}
@@ -486,7 +486,8 @@ errno_t task_suspend(task_id_t task_id) {
 	}
 
 	/* The task is running on other cpu */
-	if (TASK_IS_RUNNING(task) && task != current_task_get()) {
+	if ((TASK_IS_RUNNING(task) && task != current_task_get()) ||
+		TASK_IS_SUSPENDING(task)) {
 		task->status = TASK_STATUS_SUSPENDING;
 		task_wait_locked(&task->halt_queue, TASK_WAIT_FOREVER);
 		sched_spin_unlock(key);
@@ -632,6 +633,39 @@ errno_t task_mem_domain_add(task_id_t task_id, struct mem_domain *domain) {
 	task->mem_domain = domain;
 
 	return OK;
+}
+
+static void task_suspending_handle(struct task *task) {
+	sched_ready_queue_remove(task->cpu_id, task);
+	if (task->pended_on) {
+		task_unpend_no_timeout(task->pended_on, task);
+	}
+	task_unpend_all_locked(&task->halt_queue);
+	task->status = TASK_STATUS_SUSPEND;
+}
+
+static void task_stoping_handle(struct task *task) {
+	task_reset(task);
+	if (task->pended_on) {
+		task_unpend_no_timeout(task->pended_on, task);
+	}
+	task_unpend_all_locked(&task->halt_queue);
+	task_unpend_all_locked(&task->join_queue);
+	task->status = TASK_STATUS_STOP;
+}
+
+void task_halting_handle(struct task *task) {
+	if (!task) {
+		return;
+	}
+
+	if (TASK_IS_SUSPENDING(task)) {
+		task_suspending_handle(task);
+	}
+
+	if (TASK_IS_STOPING(task)) {
+		task_stoping_handle(task);
+	}
 }
 
 #ifdef CONFIG_USER_SPACE
