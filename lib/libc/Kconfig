@@ -25,8 +25,14 @@ config CONFIG_LIBC_CRYPT
 
 config CONFIG_LIBC_SCHED
 	bool "Enable Library Sched"
-	default n
+	default y
 	help
 		The C Standard Library provides a complete scheduling interface.
+
+config CONFIG_LIBC_THREAD
+	bool "Enable Library Thread"
+	default y
+	help
+		The C Standard Library provides a complete thread interface.
 
 endmenu

@@ -1,0 +1,12 @@
+obj-$(CONFIG_LIBC_THREAD) := \
+	sem_init.o \
+	sem_close.o \
+	sem_destroy.o \
+	sem_getvalue.o \
+	sem_open.o \
+	sem_post.o \
+	sem_timedwait.o \
+	sem_trywait.o \
+	sem_unlink.o \
+	sem_wait.o \
+	
