@@ -8,7 +8,7 @@
 #include <user_mem_domain.h>
 #include <task.h>
 #include <msgq.h>
-#include <sem.h>
+#include <ksem.h>
 #include <mutex.h>
 
 #ifdef CONFIG_USER_SPACE

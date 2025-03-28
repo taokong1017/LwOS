@@ -2,7 +2,7 @@
 #include <task.h>
 #include <string.h>
 #include <cpu.h>
-#include <sem.h>
+#include <ksem.h>
 #include <tick.h>
 
 #define TEST_TASK1_NAME "test_task1"
@@ -18,9 +18,9 @@ static task_id_t test_task3_id = 0;
 static sem_id_t test_sem1_id = 0;
 static sem_id_t test_sem2_id = 0;
 
-static void create_sem() {
-	sem_create(TEST_SEM1_NAME, 0, TEST_SEM_NUM, &test_sem1_id);
-	sem_create(TEST_SEM2_NAME, 0, TEST_SEM_NUM, &test_sem2_id);
+static void create_ksem() {
+	ksem_create(TEST_SEM1_NAME, 0, TEST_SEM_NUM, &test_sem1_id);
+	ksem_create(TEST_SEM2_NAME, 0, TEST_SEM_NUM, &test_sem2_id);
 }
 
 static void test_task1_entry(void *arg0, void *arg1, void *arg2, void *arg3) {
@@ -32,7 +32,7 @@ static void test_task1_entry(void *arg0, void *arg1, void *arg2, void *arg3) {
 	uint32_t cpu_id = arch_cpu_id_get();
 
 	for (;;) {
-		sem_take(test_sem1_id, SEM_WAIT_FOREVER);
+		ksem_take(test_sem1_id, SEM_WAIT_FOREVER);
 		printf("%s - cpu%u - %lu\n", TEST_TASK1_NAME, cpu_id, i++);
 	}
 }
@@ -80,7 +80,7 @@ static void test_task2_entry(void *arg0, void *arg1, void *arg2, void *arg3) {
 	uint32_t cpu_id = arch_cpu_id_get();
 
 	for (;;) {
-		sem_take(test_sem2_id, SEM_WAIT_FOREVER);
+		ksem_take(test_sem2_id, SEM_WAIT_FOREVER);
 		printf("%s - cpu%u - %lu\n", TEST_TASK2_NAME, cpu_id, i++);
 	}
 }
@@ -128,8 +128,8 @@ static void test_task3_entry(void *arg0, void *arg1, void *arg2, void *arg3) {
 	uint32_t cpu_id = arch_cpu_id_get();
 
 	for (;;) {
-		sem_give(test_sem1_id);
-		sem_give(test_sem2_id);
+		ksem_give(test_sem1_id);
+		ksem_give(test_sem2_id);
 		printf("%s - cpu%u - %lu\n", TEST_TASK3_NAME, cpu_id, i++);
 		task_delay(13);
 	}
@@ -173,7 +173,7 @@ static void create_test_task3() {
 
 int main() {
 	printf("enter root task\n");
-	create_sem();
+	create_ksem();
 	create_test_task1();
 	create_test_task2();
 	create_test_task3();

@@ -5,7 +5,7 @@
 #include <task_sched.h>
 #include <stack_trace.h>
 #include <msgq.h>
-#include <sem.h>
+#include <ksem.h>
 #include <mutex.h>
 #include <timer.h>
 #include <task.h>

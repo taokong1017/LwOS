@@ -6,7 +6,7 @@ extern "C" {
 #endif
 
 #include <types.h>
-#include <sem.h>
+#include <ksem.h>
 
 typedef struct sem sem_t;
 

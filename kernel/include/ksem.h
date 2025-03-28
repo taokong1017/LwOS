@@ -25,7 +25,7 @@
 
 typedef long sem_id_t;
 
-struct sem {
+struct ksem {
 	sem_id_t id;			 /* semphore id */
 	char name[SEM_NAME_LEN]; /* semphore name */
 
@@ -34,11 +34,11 @@ struct sem {
 	struct wait_queue wait_queue; /* pending queue */
 };
 
-errno_t sem_create(const char *name, uint32_t count, uint32_t max_count,
-				   sem_id_t *id);
-errno_t sem_take(sem_id_t id, uint64_t timeout);
-errno_t sem_give(sem_id_t id);
-errno_t sem_irq_give(sem_id_t id);
-errno_t sem_destroy(sem_id_t id);
+errno_t ksem_create(const char *name, uint32_t count, uint32_t max_count,
+					sem_id_t *id);
+errno_t ksem_take(sem_id_t id, uint64_t timeout);
+errno_t ksem_give(sem_id_t id);
+errno_t ksem_irq_give(sem_id_t id);
+errno_t ksem_destroy(sem_id_t id);
 
 #endif

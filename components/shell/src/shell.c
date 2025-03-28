@@ -35,7 +35,7 @@ static void shell_transport_notifier(enum shell_transport_event event,
 		return;
 	}
 
-	sem_irq_give(shell->shell_sem_id);
+	ksem_irq_give(shell->shell_sem_id);
 }
 
 void shell_output(void *context, char *data, uint32_t len) {
@@ -719,7 +719,7 @@ void shell_entry(struct shell *shell) {
 	errno_t ret = OK;
 
 	while (true) {
-		ret = sem_take(shell->shell_sem_id, SEM_WAIT_FOREVER);
+		ret = ksem_take(shell->shell_sem_id, SEM_WAIT_FOREVER);
 		if (ret != OK) {
 			task_delay(ms2tick(CONFIG_SHELL_UART_TIMER_INTERVAL));
 			continue;
@@ -750,7 +750,7 @@ errno_t shell_init(struct shell *shell, void *transport_config) {
 #endif
 	memset(shell->shell_context, 0x0, sizeof(struct shell_context));
 	shell_history_init(shell->shell_history);
-	sem_create(SHELL_SEM_NAME, 0, SHELL_SEM_MAX_COUNT, &shell->shell_sem_id);
+	ksem_create(SHELL_SEM_NAME, 0, SHELL_SEM_MAX_COUNT, &shell->shell_sem_id);
 
 	shell->shell_context->cur_prompt = shell->prompt;
 	shell->shell_context->state = SHELL_STATE_UNINITIALIZED;

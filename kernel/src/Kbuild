@@ -9,7 +9,7 @@ obj-y := \
 	spin_lock.o \
 	timeout.o \
 	msgq.o \
-	sem.o \
+	ksem.o \
 	mutex.o \
 	log.o \
 	percpu.o \

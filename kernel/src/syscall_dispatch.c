@@ -8,7 +8,7 @@
 #include <sync_exc.h>
 #include <irq.h>
 #include <msgq.h>
-#include <sem.h>
+#include <ksem.h>
 #include <mutex.h>
 #include <mem_domain.h>
 #include <sched.h>
@@ -296,7 +296,7 @@ static uintptr_t syscall_sem_create(uintptr_t arg1, uintptr_t arg2,
 	uint32_t max_count = (uint32_t)arg3;
 	sem_id_t *id = (sem_id_t *)arg4;
 
-	return sem_create(name, init_count, max_count, id);
+	return ksem_create(name, init_count, max_count, id);
 }
 
 static uintptr_t syscall_sem_take(uintptr_t arg1, uintptr_t arg2,
@@ -311,7 +311,7 @@ static uintptr_t syscall_sem_take(uintptr_t arg1, uintptr_t arg2,
 	sem_id_t id = (sem_id_t)arg1;
 	uint64_t timeout = (uint64_t)arg2;
 
-	return sem_take(id, timeout);
+	return ksem_take(id, timeout);
 }
 
 static uintptr_t syscall_sem_give(uintptr_t arg1, uintptr_t arg2,
@@ -326,7 +326,7 @@ static uintptr_t syscall_sem_give(uintptr_t arg1, uintptr_t arg2,
 	(void)regs;
 	sem_id_t id = (sem_id_t)arg1;
 
-	return sem_give(id);
+	return ksem_give(id);
 }
 
 static uintptr_t syscall_sem_destroy(uintptr_t arg1, uintptr_t arg2,
@@ -341,7 +341,7 @@ static uintptr_t syscall_sem_destroy(uintptr_t arg1, uintptr_t arg2,
 	(void)regs;
 	sem_id_t id = (sem_id_t)arg1;
 
-	return sem_destroy(id);
+	return ksem_destroy(id);
 }
 
 static uintptr_t syscall_mutex_create(uintptr_t arg1, uintptr_t arg2,

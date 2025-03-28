@@ -16,7 +16,7 @@
 #include <shell_util.h>
 #include <shell_ops.h>
 #include <kerrno.h>
-#include <sem.h>
+#include <ksem.h>
 #include <arch_atomic.h>
 
 #define SHELL_NAME_LEN 32

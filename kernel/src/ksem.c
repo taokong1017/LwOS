@@ -1,16 +1,16 @@
 #include <string.h>
-#include <sem.h>
+#include <ksem.h>
 #include <mem_mgr.h>
 #include <log.h>
 #include <task_sched.h>
 
 #define SEM_TAG "SEM"
 #define sem2id(sem) ((sem_id_t)sem)
-#define id2sem(id) ((struct sem *)id)
+#define id2sem(id) ((struct ksem *)id)
 
-errno_t sem_create(const char *name, uint32_t count, uint32_t max_count,
-				   sem_id_t *id) {
-	struct sem *sem = NULL;
+errno_t ksem_create(const char *name, uint32_t count, uint32_t max_count,
+					sem_id_t *id) {
+	struct ksem *sem = NULL;
 
 	if (!name) {
 		log_err(SEM_TAG, "the sem name is empty\n");
@@ -33,7 +33,7 @@ errno_t sem_create(const char *name, uint32_t count, uint32_t max_count,
 		return ERRNO_SEM_PTR_NULL;
 	}
 
-	sem = (struct sem *)kmalloc(sizeof(struct sem));
+	sem = (struct ksem *)kmalloc(sizeof(struct ksem));
 	if (!sem) {
 		log_err(SEM_TAG, "the memory is not enough\n");
 		return ERRNO_SEM_NO_MEMORY;
@@ -50,8 +50,8 @@ errno_t sem_create(const char *name, uint32_t count, uint32_t max_count,
 	return OK;
 }
 
-errno_t sem_take(sem_id_t id, uint64_t timeout) {
-	struct sem *sem = id2sem(id);
+errno_t ksem_take(sem_id_t id, uint64_t timeout) {
+	struct ksem *sem = id2sem(id);
 	uint32_t key = 0;
 	errno_t ret = OK;
 
@@ -82,8 +82,8 @@ errno_t sem_take(sem_id_t id, uint64_t timeout) {
 	return ret;
 }
 
-errno_t sem_give(sem_id_t id) {
-	struct sem *sem = id2sem(id);
+errno_t ksem_give(sem_id_t id) {
+	struct ksem *sem = id2sem(id);
 	uint32_t key = 0;
 
 	if (!sem || id != sem->id) {
@@ -112,8 +112,8 @@ errno_t sem_give(sem_id_t id) {
 	return OK;
 }
 
-errno_t sem_irq_give(sem_id_t id) {
-	struct sem *sem = id2sem(id);
+errno_t ksem_irq_give(sem_id_t id) {
+	struct ksem *sem = id2sem(id);
 
 	if (!sem || id != sem->id) {
 		log_err(SEM_TAG, "the sem id %ld is invalid\n", id);
@@ -136,8 +136,8 @@ errno_t sem_irq_give(sem_id_t id) {
 	return OK;
 }
 
-errno_t sem_destroy(sem_id_t id) {
-	struct sem *sem = id2sem(id);
+errno_t ksem_destroy(sem_id_t id) {
+	struct ksem *sem = id2sem(id);
 
 	if (!sem || id != sem->id) {
 		log_err(SEM_TAG, "the sem id %ld is invalid\n", id);
