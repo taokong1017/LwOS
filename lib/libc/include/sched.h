@@ -25,6 +25,7 @@ struct timespec {
 	time_t tv_sec;
 	long tv_nsec;
 };
+
 struct sched_param {
 	int sched_priority;
 };

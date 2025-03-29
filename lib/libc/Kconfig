@@ -46,6 +46,7 @@ config CONFIG_LIBC_SCHED
 config CONFIG_LIBC_THREAD
 	bool "Enable Library Thread"
 	default y
+	depends on CONFIG_USER_SPACE
 	help
 		The C Standard Library provides a complete thread interface including
 		thread creation, synchronization primitives. When enabled, applications
@@ -56,6 +57,7 @@ config CONFIG_LIBC_SEM_VALUE_MAX
 	int "Maximum Semaphore Value"
 	default 32
 	range 1 64
+	depends on CONFIG_LIBC_THREAD
 	help
 		Maximum value that a semaphore can hold in the system. This value
 		determines the upper limit for semaphore counts during operations
