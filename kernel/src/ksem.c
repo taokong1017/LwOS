@@ -5,7 +5,6 @@
 #include <task_sched.h>
 
 #define SEM_TAG "SEM"
-#define sem2id(sem) ((sem_id_t)sem)
 #define id2sem(id) ((struct ksem *)id)
 
 errno_t ksem_create(const char *name, uint32_t count, uint32_t max_count,
@@ -138,19 +137,44 @@ errno_t ksem_irq_give(sem_id_t id) {
 
 errno_t ksem_destroy(sem_id_t id) {
 	struct ksem *sem = id2sem(id);
+	uint32_t key = 0;
 
 	if (!sem || id != sem->id) {
 		log_err(SEM_TAG, "the sem id %ld is invalid\n", id);
 		return ERRNO_SEM_ID_INVALID;
 	}
 
+	key = sched_spin_lock();
 	if (!list_empty(&sem->wait_queue.wait_list)) {
 		log_err(SEM_TAG, "the sem %s is busy\n", sem->name);
+		sched_spin_unlock(key);
 		return ERRNO_SEM_IS_BUSY;
 	}
 
 	sem->id = SEM_INVALID_ID;
+	sched_spin_unlock(key);
 	kfree(sem);
+
+	return OK;
+}
+
+errno_t ksem_value_get(sem_id_t id, uint32_t *value) {
+	struct ksem *sem = id2sem(id);
+	uint32_t key = 0;
+
+	if (!sem || id != sem->id) {
+		log_err(SEM_TAG, "the sem id %ld is invalid\n", id);
+		return ERRNO_SEM_ID_INVALID;
+	}
+
+	if (!value) {
+		log_err(SEM_TAG, "the sem id %ld value is empty\n", id);
+		return ERRNO_SEM_PTR_NULL;
+	}
+
+	key = sched_spin_lock();
+	*value = sem->cur_count;
+	sched_spin_unlock(key);
 
 	return OK;
 }

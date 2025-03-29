@@ -7,8 +7,9 @@ extern "C" {
 
 #include <types.h>
 #include <ksem.h>
+#include <sched.h>
 
-typedef struct sem sem_t;
+typedef struct ksem sem_t;
 
 int sem_close(sem_t *);
 int sem_destroy(sem_t *);

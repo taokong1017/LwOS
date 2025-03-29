@@ -49,6 +49,7 @@ errno_t user_sem_create(const char *name, uint32_t count, uint32_t max_count,
 errno_t user_sem_take(sem_id_t id, uint64_t timeout);
 errno_t user_sem_give(sem_id_t id);
 errno_t user_sem_destroy(sem_id_t id);
+errno_t user_sem_value_get(sem_id_t id, uint32_t *value);
 
 /* user mutex module */
 errno_t user_mutex_create(const char *name, mutex_id_t *id);

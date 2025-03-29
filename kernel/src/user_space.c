@@ -109,6 +109,10 @@ errno_t user_sem_destroy(sem_id_t id) {
 	return arch_syscall_invoke1(id, SYSCALL_SEM_DESTROY);
 }
 
+errno_t user_sem_value_get(sem_id_t id, uint32_t *value) {
+	return arch_syscall_invoke2(id, (uintptr_t)value, SYSCALL_SEM_VALUE_GET);
+}
+
 errno_t user_mutex_create(const char *name, mutex_id_t *id) {
 	return arch_syscall_invoke2((uintptr_t)name, (uintptr_t)id,
 								SYSCALL_MUTEX_CREATE);

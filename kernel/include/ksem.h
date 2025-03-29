@@ -23,6 +23,8 @@
 #define ERRNO_SEM_COUNT_FULL ERRNO_OS_ERROR(MOD_ID_SEM, 0x07)
 #define ERRNO_SEM_IS_BUSY ERRNO_OS_ERROR(MOD_ID_SEM, 0x08)
 
+#define sem2id(sem) ((sem_id_t)sem)
+
 typedef long sem_id_t;
 
 struct ksem {
@@ -40,5 +42,6 @@ errno_t ksem_take(sem_id_t id, uint64_t timeout);
 errno_t ksem_give(sem_id_t id);
 errno_t ksem_irq_give(sem_id_t id);
 errno_t ksem_destroy(sem_id_t id);
+errno_t ksem_value_get(sem_id_t id, uint32_t *value);
 
 #endif

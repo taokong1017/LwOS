@@ -23,6 +23,22 @@
 #define ERRNO_MUTEX_TIMEOUT ERRNO_OS_ERROR(MOD_ID_MUTEX, 0x08)
 #define ERRNO_MUTEX_NO_MEMORY ERRNO_OS_FATAL(MOD_ID_MUTEX, 0x09)
 
+#define mutex_define(syntax, _name)                                            \
+	struct mutex mutex_##syntax = {                                            \
+		.id = (mutex_id_t)&mutex_##syntax,                                     \
+		.name = #_name,                                                        \
+		.owner = NULL,                                                         \
+		.lock_count = 0,                                                       \
+		.priority = 0,                                                         \
+		.wait_queue = {.wait_list = {.next = NULL, .prev = NULL}},             \
+	}
+
+#define mutex_id(syntax)                                                       \
+	({                                                                         \
+		extern struct mutex mutex_##syntax;                                    \
+		mutex_##syntax.id;                                                     \
+	})
+
 typedef long mutex_id_t;
 
 struct mutex {

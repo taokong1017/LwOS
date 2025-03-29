@@ -4,7 +4,11 @@ choice
 	prompt "Library String Option"
 	default CONFIG_LIBC_STRING
 	help
-		The C Standard Library provides a complete string interface.
+		The C Standard Library provides a complete string interface including
+		string manipulation, comparison, and memory operations. When enabled,
+		applications can use standard string functions like strcpy, strcmp, and
+		memcpy. The default 'y' setting is recommended for most systems as string
+		operations are fundamental to most applications.
 
 config CONFIG_LIBC_STRING
 	bool "Enable Library String"
@@ -14,25 +18,48 @@ config CONFIG_LIBC_STD
 	bool "Enable Library STD"
 	default y
 	help
-		The C Standard Library provides standard interface.
+		The C Standard Library provides standard interface including
+		file I/O, memory management, and basic utility functions. When enabled,
+		applications can use standard C library functions. The default 'y' setting
+		is recommended for most systems as it provides essential functionality.
 
 config CONFIG_LIBC_CRYPT
 	bool "Enable Library Crypt"
 	default n
 	help
 		It is primarily used for password hashing, which is a
-		fundamental security mechanism in the system.
+		fundamental security mechanism in the system. When enabled,
+		applications can use cryptographic functions for secure password
+		storage and verification. The default 'n' setting is recommended
+		for systems without security requirements to reduce library footprint.
 
 config CONFIG_LIBC_SCHED
 	bool "Enable Library Sched"
 	default y
 	help
-		The C Standard Library provides a complete scheduling interface.
+		The C Standard Library provides a complete scheduling interface including
+		thread creation, priority management, and scheduling policies. When enabled,
+		applications can use POSIX-compliant scheduling APIs. The default 'y' setting
+		is recommended for systems requiring real-time task scheduling. Disable this
+		only if your application does not require advanced scheduling features.
 
 config CONFIG_LIBC_THREAD
 	bool "Enable Library Thread"
 	default y
 	help
-		The C Standard Library provides a complete thread interface.
+		The C Standard Library provides a complete thread interface including
+		thread creation, synchronization primitives. When enabled, applications
+		can use POSIX-compliant threading APIs. The default 'y' setting is 
+		recommended for systems requiring multithreading support.
+
+config CONFIG_LIBC_SEM_VALUE_MAX
+	int "Maximum Semaphore Value"
+	default 32
+	range 1 64
+	help
+		Maximum value that a semaphore can hold in the system. This value
+		determines the upper limit for semaphore counts during operations
+		like sem_post(). The default value of 32 is suitable for most
+		embedded systems.
 
 endmenu
