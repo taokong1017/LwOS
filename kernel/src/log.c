@@ -1,4 +1,3 @@
-
 #include <log.h>
 #include <stdio.h>
 #include <spin_lock.h>

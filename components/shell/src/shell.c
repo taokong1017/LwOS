@@ -7,6 +7,7 @@
 #include <log.h>
 #include <task.h>
 #include <tick.h>
+#include <logo.h>
 
 #define TAB_SPACES "  "
 #define SHELL_TAG "SHELL"
@@ -20,8 +21,6 @@
 #define min(a, b) ((a) < (b) ? (a) : (b))
 #define in_rage(val, min, max) ((val) >= (min) && (val) <= (max))
 #define is_valid_assic_char(c) (in_rage(c, 0, ASCII_MAX_CHAR))
-
-extern void logo_show();
 
 static void shell_transport_notifier(enum shell_transport_event event,
 									 void *context) {

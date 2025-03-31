@@ -1,13 +1,10 @@
 .config
 .config.old
 *.o
-*.cmd
 *.d
 .vscode
 logo.c
 offsets.h
 lwos.lds
 *.elf
-menuconfig.h
-
-
+build

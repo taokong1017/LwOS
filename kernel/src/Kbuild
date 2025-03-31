@@ -1,7 +1,6 @@
 obj-y := \
 	printf.o \
 	init.o \
-	logo.o \
 	tick.o \
 	task.o \
 	task_sched.o \

@@ -332,20 +332,20 @@ task_id_t task_self_id() {
 	return task_id;
 }
 
-errno_t task_unpend_no_timeout(struct wait_queue *wq, struct task *task) {
+errno_t task_unpend_no_timeout(struct wait_queue **wq, struct task *task) {
 	struct task *pos = NULL, *next = NULL;
 
-	if (!wq || !task) {
+	if (!(*wq) || !task) {
 		return ERRNO_TASK_PTR_NULL;
 	}
 
-	list_for_each_entry_safe(pos, next, &wq->wait_list, task_node) {
+	list_for_each_entry_safe(pos, next, &(*wq)->wait_list, task_node) {
 		if (pos == task) {
 			list_del_init(&task->task_node);
 			break;
 		}
 	}
-	wq = NULL;
+	*wq = NULL;
 
 	return OK;
 }
@@ -358,7 +358,7 @@ static errno_t task_unpend_all_locked(struct wait_queue *wq) {
 	}
 
 	list_for_each_entry_safe(task, next, &wq->wait_list, task_node) {
-		task_unpend_no_timeout(task->pended_on, task);
+		task_unpend_no_timeout(&task->pended_on, task);
 		list_del_init(&task->task_node);
 		timeout_queue_del(&task->timeout, task->cpu_id);
 		task->is_timeout = false;
@@ -409,7 +409,7 @@ errno_t task_stop(task_id_t task_id) {
 
 	task_reset(task);
 	if (task->pended_on) {
-		task_unpend_no_timeout(task->pended_on, task);
+		task_unpend_no_timeout(&task->pended_on, task);
 	}
 	task_unpend_all_locked(&task->halt_queue);
 	task_unpend_all_locked(&task->join_queue);
@@ -501,7 +501,7 @@ errno_t task_suspend(task_id_t task_id) {
 
 	/* task is pending on the other task waiting for resource */
 	if (task->pended_on) {
-		task_unpend_no_timeout(task->pended_on, task);
+		task_unpend_no_timeout(&task->pended_on, task);
 	}
 
 	task_unpend_all_locked(&task->halt_queue);
@@ -638,7 +638,7 @@ errno_t task_mem_domain_add(task_id_t task_id, struct mem_domain *domain) {
 static void task_suspending_handle(struct task *task) {
 	sched_ready_queue_remove(task->cpu_id, task);
 	if (task->pended_on) {
-		task_unpend_no_timeout(task->pended_on, task);
+		task_unpend_no_timeout(&task->pended_on, task);
 	}
 	task_unpend_all_locked(&task->halt_queue);
 	task->status = TASK_STATUS_SUSPEND;
@@ -647,7 +647,7 @@ static void task_suspending_handle(struct task *task) {
 static void task_stoping_handle(struct task *task) {
 	task_reset(task);
 	if (task->pended_on) {
-		task_unpend_no_timeout(task->pended_on, task);
+		task_unpend_no_timeout(&task->pended_on, task);
 	}
 	task_unpend_all_locked(&task->halt_queue);
 	task_unpend_all_locked(&task->join_queue);
