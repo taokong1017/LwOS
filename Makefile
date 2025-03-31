@@ -32,8 +32,8 @@ gdb:
 	$(Q)$(QEMU_RUN) $(TARGET) -S -s
 
 menuconfig:
-	@test -f scripts/kconfig.py || (echo "Error: kconfig.py not found"; exit 1)
-	$(Q)$(PYTHON_CMD) scripts/kconfig.py $(CONFIG_FILE)
+	@test -f $(SRC_ROOT)/scripts/kconfig.py || (echo "Error: kconfig.py not found"; exit 1)
+	$(Q)$(PYTHON_CMD) $(SRC_ROOT)/scripts/kconfig.py $(CONFIG_FILE)
 	@echo "Configuration completed successfully"
 
 clean:
