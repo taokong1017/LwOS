@@ -15,5 +15,6 @@ analyze:
 	@which $(CPPCHECK) > /dev/null || \
 		(echo "Error: cppcheck not found. Please install cppcheck."; exit 1)
 	@echo "Running static analysis..."
+	@mkdir -p $(BUILD_ROOT)
 	@$(CPPCHECK) $(CPPCHECK_FLAGS) $(CHECK_DIR) 2> $(BUILD_ROOT)/analysis.log
-	@$(shell lizard $(CHECK_DIR) > $(BUILD_ROOT)/analysis.log)
+	@echo $$(lizard $(CHECK_DIR) > $(BUILD_ROOT)/analysis.log)
