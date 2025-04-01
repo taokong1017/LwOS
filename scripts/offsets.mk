@@ -9,6 +9,7 @@ OFFSET_SRC    := $(SRC_ROOT)/arch/arm64/src/offsets.c
 # Rule to generate config.h from config file
 $(OFFSET_HEADER): $(CONFIG_HEADER) $(OFFSET_SRC)
 	@mkdir -p $(@D)
+	@echo "  Gen     $(patsubst $(SRC_ROOT)/%,%,$@)"
 	$(Q)$(CC) $(CFLAGS) -MT $@ -MMD -MP -MF $(@D)/.$(basename $(@F)).d -c $(OFFSET_SRC) -o $(OFFSET_OBJ)
 	$(Q)$(PYTHON_CMD) $(SRC_ROOT)/scripts/gen_offset_header.py -i $(OFFSET_OBJ) -o $(OFFSET_HEADER)
 	$(Q)rm -rf $(OFFSET_OBJ) $(OFFSET_DEPEND)
