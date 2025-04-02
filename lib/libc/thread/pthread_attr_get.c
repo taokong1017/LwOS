@@ -38,3 +38,13 @@ int pthread_attr_getguardsize(const pthread_attr_t *attr, size_t *guardsize) {
 	*guardsize = attr->guardsize;
 	return 0;
 }
+
+int pthread_attr_getschedparam(const pthread_attr_t *attr,
+							   struct sched_param *param) {
+	if (!attr || !param) {
+		return EINVAL;
+	}
+
+	*param = attr->schedparam;
+	return 0;
+}
