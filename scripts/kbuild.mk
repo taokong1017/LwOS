@@ -94,3 +94,4 @@ $(TARGET): $(C_OBJS) $(S_OBJS)
 	$(Q)$(OBJDUMP) -d $(TARGET) > $(BUILD_ROOT)/$(PROJECT).sym
 	$(Q)$(READELF) -e $(TARGET) > $(BUILD_ROOT)/$(PROJECT).stat
 	@echo "Build completed: $(patsubst $(SRC_ROOT)/%,%,$@)"
+	$(Q)$(SIZE) $(TARGET)

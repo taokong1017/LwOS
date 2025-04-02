@@ -20,3 +20,12 @@ int pthread_attr_getstacksize(const pthread_attr_t *attr, size_t *stacksize) {
 	*stacksize = attr->stacksize;
 	return 0;
 }
+
+int pthread_attr_getdetachstate(const pthread_attr_t *attr, int *detachstate) {
+	if (!attr || !detachstate) {
+		return EINVAL;
+	}
+
+	*detachstate = attr->detachstate;
+	return 0;
+}
