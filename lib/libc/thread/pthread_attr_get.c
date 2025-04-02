@@ -29,3 +29,12 @@ int pthread_attr_getdetachstate(const pthread_attr_t *attr, int *detachstate) {
 	*detachstate = attr->detachstate;
 	return 0;
 }
+
+int pthread_attr_getguardsize(const pthread_attr_t *attr, size_t *guardsize) {
+	if (!attr || !guardsize) {
+		return EINVAL;
+	}
+
+	*guardsize = attr->guardsize;
+	return 0;
+}
