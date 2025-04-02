@@ -9,4 +9,6 @@ obj-$(CONFIG_LIBC_THREAD) := \
 	sem_trywait.o \
 	sem_unlink.o \
 	sem_wait.o \
+	pthread_attr_setstack.o \
+	pthread_attr_get.o
 	

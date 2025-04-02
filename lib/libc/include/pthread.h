@@ -8,6 +8,7 @@ extern "C" {
 #include <types.h>
 #include <sched.h>
 #include <mutex.h>
+#include <ksem.h>
 
 #define PTHREAD_BARRIER_SERIAL_THREAD (-1)
 
@@ -64,6 +65,8 @@ typedef struct pthread_attr pthread_attr_t;
 struct pthread_attr {
 	void *stackaddr;
 	int stacksize;
+	int stackaddr_set;
+	size_t guardsize;
 
 	int inheritsched;
 	int schedpolicy;
