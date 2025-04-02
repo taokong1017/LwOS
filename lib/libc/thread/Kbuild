@@ -10,5 +10,6 @@ obj-$(CONFIG_LIBC_THREAD) := \
 	sem_unlink.o \
 	sem_wait.o \
 	pthread_attr_setstack.o \
-	pthread_attr_get.o
+	pthread_attr_get.o \
+	pthread_attr_setstacksize.o
 	
