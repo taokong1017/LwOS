@@ -13,5 +13,6 @@ obj-$(CONFIG_LIBC_THREAD) := \
 	pthread_attr_get.o \
 	pthread_attr_setstacksize.o \
 	pthread_attr_setguardsize.o \
-	pthread_attr_setschedparam.o
+	pthread_attr_setschedparam.o \
+	pthread_attr_setschedpolicy.o
 	

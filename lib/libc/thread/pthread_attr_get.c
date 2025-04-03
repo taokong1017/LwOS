@@ -48,3 +48,12 @@ int pthread_attr_getschedparam(const pthread_attr_t *attr,
 	*param = attr->schedparam;
 	return 0;
 }
+
+int pthread_attr_getschedpolicy(const pthread_attr_t *attr, int *policy) {
+	if (!attr || !policy) {
+		return EINVAL;
+	}
+
+	*policy = attr->schedpolicy;
+	return 0;
+}
